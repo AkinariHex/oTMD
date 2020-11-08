@@ -1,0 +1,122 @@
+* {
+	padding: 0;
+	margin: 0;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+    height: 100%;
+    box-sizing: border-box;
+    background-color: white;
+    font-weight: 600;
+    overflow: hidden;
+}
+
+body {
+    margin: 10px;
+}
+
+form * {
+    margin: 10px 0;
+}
+
+h1 {
+    margin-top: 10px;
+	font-size: 1.8rem;
+}
+
+button {
+
+	padding: 10px 20px;
+
+	border: none;
+	outline: none;
+
+	color: white;
+
+	background: #009688;
+	box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
+    border-radius: 2px;
+    
+    font-size: 1em;
+
+	transition: all 0.2s linear;
+}
+
+button:hover {
+	background: linear-gradient(0deg, rgba(189, 189, 189, 0.3), rgba(189, 189, 189, 0.3)), #008d7f;
+	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.12), 0px 8px 8px rgba(0, 0, 0, 0.24);
+	border-radius: 2px;
+}
+
+input[type='text'],
+input[type='number'] {
+    width: 300px;
+
+	border: none;
+	outline: none;
+
+	border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------ */
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.visualizer {
+    background: linear-gradient(90deg, rgba(20,53,102,1.05) 0%, rgba(40,38,40,1.05) 50%, rgba(129,37,37,1.05) 100%),url(./assets/pattern.png) !important;
+    width: 400px;
+    height: 80px;
+    box-sizing: border-box;
+    flex-direction: row;
+    justify-content: space-around !important;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    text-align: center;
+}
+
+.team1 {
+    font-size: 12px;
+    display: grid;
+    order: 1;
+    flex-basis: 25%;
+}
+
+.team2 {
+    font-size: 12px;
+    display: grid;
+    order: 3;
+    flex-basis: 25%;
+}
+
+.score {
+    display: flex;
+    order: 2;
+}
+
+.teaminner1 {
+    display: table;
+}
+
+.teaminner2 {
+    display: table;
+}
+
+.countryimg {
+    height: 24px;
+    margin: 6px;
+}
+
+
+
+
+

@@ -1,0 +1,23 @@
+{
+	"name": "jsonwriter",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build": "pkg index.js",
+		"server": "nodemon index.js"
+	},
+	"keywords": [],
+	"author": "Relepega",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^0.21.0",
+		"cors": "^2.8.5",
+		"express": "^4.17.1",
+		"open": "^7.3.0",
+		"pkg": "^4.4.9"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.6"
+	}
+}
