@@ -35,6 +35,10 @@ app.get('/visualizer', cors(), (req, res) => {
 	res.sendFile(path.join(__dirname, 'visualizer.html'))
 })
 
+app.get('/countries', cors(), function (req, res) {
+	res.sendFile(path.join(__dirname, 'countries.js'))
+})
+
 app.post('/save', (req, res) => {
 	console.log(req.body)
 	fs.writeFileSync('./settings.json', JSON.stringify(req.body))
@@ -43,5 +47,5 @@ app.post('/save', (req, res) => {
 
 const server = app.listen(3000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
-	open(`http://localhost:${server.address().port}`)
+	// open(`http://localhost:${server.address().port}`)
 })
