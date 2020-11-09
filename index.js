@@ -27,8 +27,14 @@ app.get('/app.js', cors(), function (req, res) {
 })
 
 app.get('/settings', function (req, res) {
-	let data = JSON.parse(fs.readFileSync('./settings.json'))
-	res.json(data)
+	let data = null
+	try {
+		data = fs.readFileSync('./settings.json')
+	} catch (err) {
+		// Here you get the error when the file was not found,
+		// but you also get any other error
+	}
+	res.json(JSON.parse(data))
 })
 
 app.get('/visualizer', cors(), (req, res) => {
