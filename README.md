@@ -65,8 +65,7 @@ The current documentation is valid for the ``v1.0`` of o!TMD. Download the lates
  <img src="https://drive.google.com/uc?export=view&id=1BTEAz996uFtjzTXmIORPMMHJX6pOXOsV">
  <img src="https://drive.google.com/uc?export=view&id=1OQ4QJDhjjK7it-xvrUOFPnrxgbDVffa5">
  
- And you're done! Now you can display your match on your livestreams!<br>
- **I found a little bug, sometimes when you start the displayer it will not update on the first run of OBS. You can fix it opening the setting of the browser source and click the "Refresh cache of current page" the first time you open obs.**
+ And you're done! Now you can display your match on your livestreams!
  
  ### Close the diplayer
  
@@ -79,3 +78,5 @@ Feel free to contact us:
 **Akinari**: [Twitter](https://twitter.com/Akinari_osu) | Akinari#3171 on Discord
 
 **xRLPGx**: [Twitter](https://twitter.com/xRLPG) | RLPG#1608 on Discord
+
+Copyright © 2020 o!TMD Akinari
