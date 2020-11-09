@@ -1,14 +1,14 @@
 {
-	"name": "jsonwriter",
+	"name": "otmd",
 	"version": "1.0.0",
-	"description": "",
+	"description": "o!TMDisplayer",
 	"main": "index.js",
 	"scripts": {
 		"build": "pkg index.js",
 		"server": "nodemon index.js"
 	},
 	"keywords": [],
-	"author": "Relepega",
+	"author": "Akinari & RLPG",
 	"license": "ISC",
 	"dependencies": {
 		"axios": "^0.21.0",

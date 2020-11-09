@@ -88,7 +88,11 @@
 				reverse: reverse_el.checked,
 			}
 
-			postData('/save', data)
+			postData('/save', data);
+
+			let secondWindow = window.open('/visualizer');
+			secondWindow.location.reload(true);
+
 		})
 
 		getconf.addEventListener('click', (e) => {

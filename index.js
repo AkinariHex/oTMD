@@ -19,7 +19,7 @@ app.get('/style.css', function (req, res) {
 })
 
 app.get('/assets/pattern.png', function (req, res) {
-	res.sendFile(path.join(__dirname, 'assets', 'pattern.png'))
+	res.sendFile(path.join(__dirname, 'assets/pattern.png'))
 })
 
 app.get('/app.js', cors(), function (req, res) {

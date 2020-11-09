@@ -1,5 +1,1 @@
-node_modules
-index-linux
-index-macos
-index-win.exe
-package-lock.json
+server.exe
