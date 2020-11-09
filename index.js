@@ -31,8 +31,7 @@ app.get('/settings', function (req, res) {
 	try {
 		data = fs.readFileSync('./settings.json')
 	} catch (err) {
-		// Here you get the error when the file was not found,
-		// but you also get any other error
+		console.log("file 'settings.json' not found")
 	}
 	res.json(JSON.parse(data))
 })
