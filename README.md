@@ -11,7 +11,7 @@ osu! Tourney Match Displayer is a simple displayer made to be used as a browser 
 
 ### Bugs and Code Format
 
-The project is into his earlier stage and it's written not in the perfect way. We'll fix the problems and the code going on with the updates.
+The project is currently into its early stage and is not written perfectly. We'll fix the problems and the code going forward through updates.
 
 ### Contributors
 
@@ -36,11 +36,11 @@ Extract the content of the `.zip` file into a folder. Should you have the same f
  ### Display on OBS
  
  Open ``o!TMD.exe`` from your folder, it should open a console and a page into your browser to change the settings.
- At first run it will ask you to allow the ``.exe`` for the firewall, check only for private networks and accept.
+ At first run it will ask you to allow the ``.exe`` for the firewall, check only for private networks and allow access.
  
- <img src="https://drive.google.com/uc?export=view&id=1Bc7aaPMk1_o-Bo9pgmlp3gT90CzfRFtW">
+ <img src="https://drive.google.com/uc?export=view&id=1npQ2EXYADfIzxlzXMnVn03ZiY8px17U1">
  
- After accepting the firewall, open your browser and you'll find the settings page, the ``.exe`` should have opened this page by himself. **You can always access to this page using this URL "http://localhost:3000"**
+ After accepting the firewall, open your browser and you'll find the settings page, the ``.exe`` should have opened this page by itself. **You can always access this page using this URL "http://localhost:3000"**
 
 Change the fields:<br>
 
@@ -50,11 +50,11 @@ Change the fields:<br>
 -   `warmups`: put the number of warmups. In the most of cases it's 2.
 -   `score reverse`: check it only if the first team of the lobby has the colour red.<br>**For example let's see this lobby: `5WC: (Spain B) vs (South Korea A)`, Spain B should be the blue team as blue teams are always the first team for the api. If a referee make this error you can fix it checking the box of score reverse.**
 
-Click the `save new config file` button, it'll save your settings and automatically start to display your match opening a new tab with this URL "http://localhost:3000/visualizer".
+Click the `save new config file` button, it'll save your settings and automatically start to display your match by opening a new tab with this URL "http://localhost:3000/visualizer".
 
  <img src="https://drive.google.com/uc?export=view&id=1v6XiISX_8WFTw2kbSwTZ2290jaZ26AHf">
  
- Now you can close your browser and open OBS/SLOBS, the displayer will always work until you close the console.<br>**Do not close the console is you want to display it on OBS**
+ Now you can close your browser and open OBS/SLOBS, the displayer will always work until you close the console.<br>**Do not close the console is you want to display it on OBS**<br>
  The example I made was made with Streamlabs OBS but it's the same thing for OBS.
  
  On OBS add a new ``source > browser source``, name it and put these settings:
