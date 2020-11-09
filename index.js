@@ -47,5 +47,5 @@ app.post('/save', (req, res) => {
 
 const server = app.listen(3000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
-	// open(`http://localhost:${server.address().port}`)
+	open(`http://localhost:${server.address().port}`)
 })
