@@ -1,146 +1,90 @@
-import countries from './countries'
+import countries from './countries';
 
-const team1Element = document.querySelector('#team1')
-const team2Element = document.querySelector('#team2')
-const team1img = document.querySelector('.teaminner1')
-const team2img = document.querySelector('.teaminner2')
-const textzone = document.querySelector('#score')
+const MAIN_LOOP_INTERVAL = 5000;
+const MATCH_LOOP_INTERVAL = 20000;
 
-var oldmatchid = null
+const team1 = {
+	score: document.getElementById('team1'),
+	img: document.querySelector('.teaminner1')
+};
+const team2 = {
+	score: document.getElementById('team2'),
+	img: document.querySelector('.teaminner2')
+};
+const textzone = document.querySelector('#score');
 
-getjson()
-var jsoninterval = setInterval(function () {
-	getjson()
-}, 5000)
+let previousMatch = null;
+let matchInterval = null;
 
-function getjson() {
-	fetch('/settings')
-		.then((res) => res.json())
-		.then((settingsdata) => {
-			let { apikey, matchid, warmups, reverse, bestof } = settingsdata
+async function main() {
+	const { apiKey, matchId, warmups, reverse, bestOf } = await fetch('/settings').then(res => res.json());
+	if (apiKey === undefined ||
+		matchId === undefined ||
+		warmups === undefined ||
+		reverse === undefined ||
+		bestOf === undefined)
+		throw new Error('All fields must be present');
+	if (previousMatch !== matchId) {
+		if (matchInterval)
+			clearInterval(matchInterval);
+		previousMatch = matchId;
+		await updateTeams(apiKey, matchId);
+		await matchDataLoop(apiKey, matchId, warmups, reverse, bestOf);
+	}	
+	setTimeout(main, MAIN_LOOP_INTERVAL);
+}
+main();
 
-			if (oldmatchid != matchid) {
-				oldmatchid = matchid
-				if (apikey && matchid && warmups && reverse && bestof) {
-					matchdata(apikey, matchid, warmups, osuinterval, reverse, bestof)
-					var osuinterval = setInterval(function () {
-						matchdata(apikey, matchid, warmups, osuinterval, reverse, bestof)
-					}, 20000)
-				}
-			}
-		})
+const matchNameRegex = /\(([^()]+)\)/g;
+async function updateTeams(apiKey, matchId) {
+	const { match } = await fetch(`https://osu.ppy.sh/api/get_match?k=${apiKey}&mp=${matchId}`)
+		.then(res => res.json());
+	const [team1Name, team2Name] = [...match.name.matchAll(matchNameRegex)].map(([_, name]) => name);
+	let team1Img = '<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />';
+	let team2Img = '<img class="countryimg" src="https://osu.ppy.sh/images/flags/A2.png"> <br />';
+	countries.forEach(({ country, id }) => {
+		if (team1Name.includes(country))
+			team1Img = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${id}.png"> <br />`;
+		if (team2Name.includes(country))
+			team2Img = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${id}.png"> <br />`;
+	});
+	team1.img.innerHTML = `${team1Img} ${team1Name}`;
+	team2.img.innerHTML = `${team2Img} ${team2Name}`;
 }
 
-function matchdata(api, mpid, warmups, interval, reverse, bestof) {
-	var team1score = 0
-	var team2score = 0
-	var team1 = 0
-	var team2 = 0
-	fetch(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
-		.then((res) => res.json())
-		.then((data) => {
-			console.log(data.data)
-			for (var i = warmups; i < data.data.games.length; i++) {
-				for (var x = 0; x < data.data.games[i].scores.length; x++) {
-					var gameended = data.data.games[i].end_time == null
-					if (gameended == false) {
-						if (data.data.games[i].scores[x].team == '1') {
-							team1score += parseInt(data.data.games[i].scores[x].score)
-						} else if (data.data.games[i].scores[x].team == '2') {
-							team2score += parseInt(data.data.games[i].scores[x].score)
-						}
-					} else {
-						return
-					}
-				}
-				if (team1score - team2score == 0) {
-					return
-				} else if (team1score - team2score > 0) {
-					team1++
-					team1score = 0
-					team2score = 0
-				} else {
-					team2++
-					team1score = 0
-					team2score = 0
-				}
-			}
-			var patt = /\((.*?)\)/g
-			var teamnames = data.data.match.name.match(patt)
-			console.log(`${teamnames[0]} ${team1} - ${team2} ${teamnames[1]}`)
+async function matchDataLoop(apiKey, matchId, warmups, reverse, bestOf) {
+	matchInterval = setInterval(() => matchData(apiKey, matchId, warmups, reverse, bestOf), MATCH_LOOP_INTERVAL);
+	await matchData(apiKey, matchId, warmups, reverse, bestOf);
+}
 
-			var team1name = teamnames[0].replace(/([()])/g, '')
-			var team2name = teamnames[1].replace(/([()])/g, '')
-			var team1pos = null
-			var team2pos = null
-			var team1imgstring = ''
-			var team2imgstring = ''
-
-			// CHECK FOR COUNTRIES FLAGS
-			for (var z = 0; z < countries.length; z++) {
-				if (team1name.includes(countries[z].country)) {
-					team1pos = z
-					team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${countries[team1pos].id}.png"> <br />`
-				}
-				if (team2name.includes(countries[z].country)) {
-					team2pos = z
-					team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${countries[team2pos].id}.png"> <br />`
-				}
-			}
-
-			// CHECK IF FOUND THE FLAG AND REPLACE THE BLANK IMAGE WITH A BLANK FLAG
-			if (team1imgstring == '') {
-				team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />`
-			}
-			if (team2imgstring == '') {
-				team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A2.png"> <br />`
-			}
-
-			team1img.innerHTML = `${team1imgstring} ${team1name}`
-			team2img.innerHTML = `${team2imgstring} ${team2name}`
-
-			if (reverse == 'true' || reverse == true) {
-				team1Element.textContent = team2
-				team2Element.textContent = team1
-				if (team1 == bestof / 2 + 0.5 || team2 == bestof / 2 + 0.5) {
-					clearInterval(interval)
-					team1img.innerHTML = ''
-					team2img.innerHTML = ''
-					if (team1 == bestof / 2 + 0.5) {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`
-					} else {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`
-					}
-				} else {
-					team1Element.textContent = team2
-					team2Element.textContent = team1
-				}
-			} else {
-				team1Element.textContent = team1
-				team2Element.textContent = team2
-				if (team1 == bestof / 2 + 0.5 || team2 == bestof / 2 + 0.5) {
-					clearInterval(interval)
-					team1img.innerHTML = ''
-					team2img.innerHTML = ''
-					if (team1 == bestof / 2 + 0.5) {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`
-					} else {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`
-					}
-				} else {
-					team1Element.textContent = team1
-					team2Element.textContent = team2
-				}
-			}
-
-			team1 = 0
-			team2 = 0
-
-			console.log('fine')
-		})
-		.catch((err) => {
-			clearInterval(interval)
-			console.error('Wrong API Key', err)
-			textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, CHECK IF APIKEY, MATCHID, WARMUPS, REVERSE AND BESTOF ARE CORRECT</span>'
-		})
+async function matchData(apiKey, matchId, warmups, reverse, bestOf) {
+	const { match, games } = await fetch(`https://osu.ppy.sh/api/get_match?k=${apiKey}&mp=${matchId}`)
+		.then(res => res.json());
+	const finished = !!match.end_time;
+	// ? We might not want reduce here as it can impact the performance
+	const [team1Score, team2Score] = games.slice(warmups).reduce((acc, { scores }) => {
+		const [a, b] = scores.reduce((acc, { team, score }) => {
+			acc[parseInt(team) - 1] += BigInt(score);
+			return acc;
+		}, [0n, 0n]);
+		if (a > b)
+			acc[0] += 1;
+		else if (b > a)
+			acc[1] += 1;
+		return acc;
+	}, [0, 0]);
+	team1.score.innerText = team1Score;
+	team2.score.innerText = team2Score;
+	const maxScore = (bestOf + 1) / 2;
+	if ((team1Score === maxScore || team2Score === maxScore || finished) && matchInterval) {
+		if (team1Score > team2Score)
+			textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1.img.innerHTML} wins!</span>`;
+		else
+			textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2.img.innerHTML} wins!</span>`;
+		team1.img.style.display = 'none';
+		team2.img.style.display = 'none';
+		console.log('Cleared matchInterval');
+		clearInterval(matchInterval);
+		matchInterval = null;
+	}
 }
