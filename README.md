@@ -81,4 +81,7 @@ Feel free to contact us:
 
 **Relepega (aka RLPG)**: [Twitter](https://twitter.com/xRLPG) | RLPG#1608 on Discord
 
-Copyright © 2020 o!TMD Akinari
+
+## License
+
+Check the license [here](https://github.com/AkinariHex/oTMD/blob/main/LICENSE)
