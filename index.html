@@ -47,15 +47,14 @@
 		const reverse_el = document.querySelector('#reverse')
 
 		const loadConfig = async () => {
-			let res = await fetch('/settings')
-			res = await res.json()
+			const res = await fetch('/settings').then(res => res.json());
 
-			const { apikey, matchid, warmups, bestof, reverse } = res
+			const { apiKey, matchId, warmups, bestOf, reverse } = res;
 
-			api.value = apikey
-			match.value = matchid
+			api.value = apiKey
+			match.value = matchId
 			warmups_el.value = warmups
-			best_of.value = bestof
+			best_of.value = bestOf
 			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
 		}
 

@@ -3,6 +3,7 @@ const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
+const WebSocket = require('ws');
 
 const app = express()
 
@@ -46,7 +47,12 @@ app.get('/countries', cors(), function (req, res) {
 
 app.post('/save', (req, res) => {
 	console.log(req.body)
-	fs.writeFileSync('./settings.json', JSON.stringify(req.body))
+	let data = JSON.stringify(req.body);
+	wss.clients.forEach(ws => {
+		if (ws.readyState === WebSocket.OPEN)
+			ws.send(data);
+	});
+	fs.writeFileSync('./settings.json', data)
 	res.sendStatus(200)
 })
 
@@ -54,3 +60,9 @@ const server = app.listen(3000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
 	open(`http://localhost:${server.address().port}`)
 })
+
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', ws => {
+	ws.send(fs.readFileSync('./settings.json').toString())
+});
