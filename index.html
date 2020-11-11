@@ -34,6 +34,7 @@
 			<br />
 			<button id="save">save new config file</button>
 		</form>
+		<div id="display-error" style="display: none"></div>
 	</body>
 
 	<script type="module">
@@ -45,6 +46,8 @@
 		const warmups_el = document.querySelector('#warmups')
 		const best_of = document.querySelector('#bestof')
 		const reverse_el = document.querySelector('#reverse')
+
+		const error_div = document.querySelector('#display-error')
 
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
@@ -80,19 +83,25 @@
 		save.addEventListener('click', (e) => {
 			e.preventDefault()
 
-			const data = {
-				apikey: api.value,
-				matchid: match.value,
-				warmups: warmups_el.value,
-				bestof: best_of.value,
-				reverse: reverse_el.checked,
+			if (api.value && match.value && warmups.value) {
+				if (error_div.style.display == 'block') error_div.style.display = 'none'
+				const data = {
+					apikey: api.value,
+					matchid: match.value,
+					warmups: warmups_el.value,
+					bestof: best_of.value,
+					reverse: reverse_el.checked,
+				}
+
+				postData('/save', data)
+
+				let secondWindow = window.open('/visualizer')
+				secondWindow.location.reload(true)
+			} else {
+				console.error('Please fill all the fields before saving')
+				if (error_div.style.display == 'none') error_div.style.display = 'block'
+				error_div.textContent = 'Please fill all the fields before saving'
 			}
-
-			postData('/save', data);
-
-			let secondWindow = window.open('/visualizer');
-			secondWindow.location.reload(true);
-
 		})
 
 		getconf.addEventListener('click', (e) => {
