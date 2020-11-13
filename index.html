@@ -50,15 +50,14 @@
 		const error_div = document.querySelector('#display-error')
 
 		const loadConfig = async () => {
-			let res = await fetch('/settings')
-			res = await res.json()
+			const res = await fetch('/settings').then(res => res.json());
 
-			const { apikey, matchid, warmups, bestof, reverse } = res
+			const { apiKey, matchId, warmups, bestOf, reverse } = res;
 
-			api.value = apikey
-			match.value = matchid
+			api.value = apiKey
+			match.value = matchId
 			warmups_el.value = warmups
-			best_of.value = bestof
+			best_of.value = bestOf
 			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
 		}
 
@@ -86,10 +85,10 @@
 			if (api.value && match.value && warmups.value) {
 				if (error_div.style.display == 'block') error_div.style.display = 'none'
 				const data = {
-					apikey: api.value,
-					matchid: match.value,
+					apiKey: api.value,
+					matchId: match.value,
 					warmups: warmups_el.value,
-					bestof: best_of.value,
+					bestOf: best_of.value,
 					reverse: reverse_el.checked,
 				}
 
