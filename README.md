@@ -18,7 +18,7 @@ The project is currently into its early stage and is not written perfectly. We'l
 <table>
   <tr>
     <td align="center"><a href="https://github.com/AkinariHex"><img src="https://avatars.githubusercontent.com/u/28952344?v=3" width="100px;" alt=""/><br /><sub><b>Akinari</b>         </sub></a></td>
-    <td align="center"><a href="https://github.com/xRLPGx"><img src="https://avatars.githubusercontent.com/u/33182302?v=3" width="100px;" alt=""/><br /><sub><b>xRLPGx</b>         </sub></a></td>
+    <td align="center"><a href="https://github.com/Relepega"><img src="https://avatars.githubusercontent.com/u/33182302?v=3" width="100px;" alt=""/><br /><sub><b>xRLPGx</b>         </sub></a></td>
  </tr>
 </table>
 
@@ -80,7 +80,6 @@ Feel free to contact us:
 **Akinari**: [Twitter](https://twitter.com/Akinari_osu) | Akinari#3171 on Discord
 
 **Relepega (aka RLPG)**: [Twitter](https://twitter.com/xRLPG) | RLPG#1608 on Discord
-
 
 ## License
 
