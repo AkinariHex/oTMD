@@ -3,7 +3,6 @@ const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
-const WebSocket = require('ws');
 
 const app = express()
 
@@ -15,44 +14,38 @@ app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, 'index.html'))
 })
 
-app.get('/style.css', (req, res) => {
+app.get('/style.css', function (req, res) {
 	res.sendFile(path.join(__dirname, 'style.css'))
 })
 
-app.get('/assets/pattern.png', (req, res) => {
-	res.sendFile(path.join(__dirname, 'assets/pattern.png'))
+app.get('/assets/countries', function (req, res) {
+	res.sendFile(path.join(__dirname, 'assets/countries.js'))
 })
 
-app.get('/app.js', cors(), (req, res) => {
+app.get('/app.js', cors(), function (req, res) {
 	res.sendFile(path.join(__dirname, 'app.js'))
 })
 
-app.get('/settings', (req, res) => {
-	let data = null
-	try {
-		data = fs.readFileSync('./settings.json')
-	} catch (err) {
-		console.log("file 'settings.json' not found")
-	}
-	res.json(JSON.parse(data))
+app.get('/assets/countries', function (req, res) {
+	res.sendFile(path.join(__dirname, 'assets/countries.js'))
+})
+
+app.get('/assets/tourneys', function (req, res) {
+	res.sendFile(path.join(__dirname, 'assets/tourneys.js'))
+})
+
+app.get('/settings', function (req, res) {
+	let data = JSON.parse(fs.readFileSync('./settings.json'))
+	res.json(data)
 })
 
 app.get('/visualizer', cors(), (req, res) => {
 	res.sendFile(path.join(__dirname, 'visualizer.html'))
 })
 
-app.get('/countries', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'countries.js'))
-})
-
 app.post('/save', (req, res) => {
 	console.log(req.body)
-	let data = JSON.stringify(req.body);
-	wss.clients.forEach(ws => {
-		if (ws.readyState === WebSocket.OPEN)
-			ws.send(data);
-	});
-	fs.writeFileSync('./settings.json', data)
+	fs.writeFileSync('./settings.json', JSON.stringify(req.body))
 	res.sendStatus(200)
 })
 
@@ -60,9 +53,3 @@ const server = app.listen(3000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
 	open(`http://localhost:${server.address().port}`)
 })
-
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', ws => {
-	ws.send(fs.readFileSync('./settings.json').toString())
-});

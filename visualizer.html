@@ -9,16 +9,27 @@
 	<body>
 		<div class="container">
 			<div class="visualizer">
-				<div class="team1">
-					<div class="teaminner1"></div>
+				<div class="v_header">
+					<span class="tourney_info_top">Round of 16</span>
 				</div>
-				<div id="score" class="score"><span id="team1">0</span> - <span id="team2">0</span></div>
-				<div class="team2">
-					<div class="teaminner2"></div>
+				<div class="v_content">
+					<div class="team1">
+						<div class="teaminner1"></div>
+					</div>
+					<div id="score" class="score"><span class="paddingfix"><span id="team1">0</span> - <span id="team2">0</span></span></div>
+					<div class="team2">
+						<div class="teaminner2"></div>
+					</div>
 				</div>
+				<div class="v_footer">
+					<span class="tourney_info_down">osu! World Cup 2020</span>
+				</div> 
 			</div>
-		</div>
+        </div>
+        
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 		<script src="/app.js" type="module"></script>
 	</body>
 </html>
+

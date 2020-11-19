@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="settings" lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,34 +7,51 @@
 		<link rel="stylesheet" href="./style.css" />
 	</head>
 	<body>
-		<h1>OTMD Settings</h1>
-		<form>
-			<label for="api-key">api key: </label>
-			<input type="text" name="api-key" id="api-key" />
-			<br />
-			<label for="match-id">match ID: </label>
-			<input type="text" name="match-id" id="match-id" />
-			<br />
-			<label for="bestof">best of: </label>
-			<select id="bestof" name="bestof">
-				<option value="5">BO5</option>
-				<option value="7">BO7</option>
-				<option value="9">BO9</option>
-				<option value="11">BO11</option>
-				<option value="13">BO13</option>
-			</select>
-			<br />
-			<label for="warmups">warmups: </label>
-			<input type="number" name="warmups" id="warmups" />
-			<br />
-			<input type="checkbox" name="reverse" id="reverse" />
-			<label for="reverse">score reverse</label>
-			<br />
-			<button id="get">read older config</button>
-			<br />
-			<button id="save">save new config file</button>
-		</form>
-		<div id="display-error" style="display: none"></div>
+		<div class="formcontainer">
+			<div class="formbox">
+				<h1>OTMD Settings</h1>
+				<form>
+					<label for="api-key">apikey: </label>
+					<input type="text" name="api-key" id="api-key" placeholder="apikey"/>
+					<br />
+					<label for="match-id">matchID: </label>
+					<input type="text" name="match-id" id="match-id" placeholder="matchID"/>
+					<br />
+					<label for="stage">Stage: </label>
+					<select id="stage" name="stage">
+						<option value="Friendly">Friendly</option>
+						<option value="Round of 64">RO64</option>
+						<option value="Round of 32">RO32</option>
+						<option value="Round of 16">RO16</option>
+						<option value="Quarterfinals">Quarterfinals</option>
+						<option value="Semifinals">Semifinals</option>
+						<option value="Finals">Finals</option>
+						<option value="Grand Finals">Grand Finals</option>
+					</select>
+					<br />
+					<label for="bestof">Best of: </label>
+					<select id="bestof" name="bestof">
+						<option value="5">BO5</option>
+						<option value="7">BO7</option>
+						<option value="9">BO9</option>
+						<option value="11">BO11</option>
+						<option value="13">BO13</option>
+						<option value="15">BO15</option>
+						<option value="17">BO17</option>
+					</select>
+					<br />
+					<label for="warmups">warmups: </label>
+					<input type="number" name="warmups" id="warmups" />
+					<br />
+					<input type="checkbox" name="reverse" id="reverse" />
+					<label for="reverse">score reverse</label>
+					<br />
+					<button id="get">Load old settings</button>
+					<br />
+					<button id="save">Save Settings</button>
+				</form>
+			</div>
+		</div>
 	</body>
 
 	<script type="module">
@@ -43,21 +60,22 @@
 
 		const api = document.querySelector('#api-key')
 		const match = document.querySelector('#match-id')
+		const stage_tourney = document.querySelector('#stage')
 		const warmups_el = document.querySelector('#warmups')
 		const best_of = document.querySelector('#bestof')
 		const reverse_el = document.querySelector('#reverse')
 
-		const error_div = document.querySelector('#display-error')
-
 		const loadConfig = async () => {
-			const res = await fetch('/settings').then(res => res.json());
+			let res = await fetch('/settings')
+			res = await res.json()
 
-			const { apiKey, matchId, warmups, bestOf, reverse } = res;
+			const { apikey, matchid, stage, warmups, bestof, reverse } = res
 
-			api.value = apiKey
-			match.value = matchId
+			api.value = apikey
+			match.value = matchid
+			stage_tourney.value = stage
 			warmups_el.value = warmups
-			best_of.value = bestOf
+			best_of.value = bestof
 			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
 		}
 
@@ -82,25 +100,20 @@
 		save.addEventListener('click', (e) => {
 			e.preventDefault()
 
-			if (api.value && match.value && warmups.value) {
-				if (error_div.style.display == 'block') error_div.style.display = 'none'
-				const data = {
-					apiKey: api.value,
-					matchId: match.value,
-					warmups: warmups_el.value,
-					bestOf: best_of.value,
-					reverse: reverse_el.checked,
-				}
-
-				postData('/save', data)
-
-				let secondWindow = window.open('/visualizer')
-				secondWindow.location.reload(true)
-			} else {
-				console.error('Please fill all the fields before saving')
-				if (error_div.style.display == 'none') error_div.style.display = 'block'
-				error_div.textContent = 'Please fill all the fields before saving'
+			const data = {
+				apikey: api.value,
+				matchid: match.value,
+				stage: stage_tourney.value,
+				warmups: warmups_el.value,
+				bestof: best_of.value,
+				reverse: reverse_el.checked,
 			}
+
+			postData('/save', data);
+
+			let secondWindow = window.open('/visualizer');
+			secondWindow.location.reload(true);
+
 		})
 
 		getconf.addEventListener('click', (e) => {
