@@ -25,7 +25,7 @@ The project is currently into its early stage and is not written perfectly. We'l
 
 ## How to use o!TMD
 
-The current documentation is valid for the `v1.1` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
+The current documentation is valid for the `v1.2` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
 **CURRENTLY WORKS ONLY WITH LOBBIES WITH TEAMVS**
 
 ### Installation
@@ -50,11 +50,13 @@ Change the fields:<br>
 -   `Stage`: select the current stage of the tournament. | **Friendly is meant to be used if you want to display a match that isn't of a tournament**
 -   `Best of`: select the BO of the match.
 -   `warmups`: put the number of warmups. In the most of cases it's 2.
+-   `Match Type`: select the type of the match between **1vs1** and **TeamVS**
+-   `UserID`: put your userid | **Your userid will be used only if you want to display a 1vs1 match. You can find your userid at the end of your profile link https&#58;://osu.ppy.sh/users/`4001304`**
 -   `score reverse`: check it only if the first team of the lobby has the colour red.<br>**For example let's see this lobby: `5WC: (Spain B) vs (South Korea A)`, Spain B should be the blue team as blue teams are always the first team for the api. If a referee make this error you can fix it checking the box of score reverse.**
 
-Click the `save new config file` button, it'll save your settings and automatically start to display your match by opening a new tab with this URL "http://localhost:3000/visualizer".
+Click the `Save Settings` button, it'll save your settings and automatically start to display your match by opening a new tab with this URL "http://localhost:3000/visualizer".
 
- <img src="https://drive.google.com/uc?export=view&id=1ovEBGoSM_C_IxngXPjH2DXk7ARWZ8r9v">
+ <img src="https://drive.google.com/uc?export=view&id=1EPVHAoTQVYeWT7EMA4w_uNs1K3PJa6Oq">
  
  Now you can close your browser and open OBS/SLOBS, the displayer will always work until you close the console.<br>**Do not close the console is you want to display it on OBS**<br>
  The example I made was made with Streamlabs OBS but it's the same thing for OBS.
@@ -74,6 +76,11 @@ Click the `save new config file` button, it'll save your settings and automatica
  ### Close the diplayer
  
  Close the console and you're done!
+
+## Join the community
+
+Join the official discord server to be always updated about new updates. You can also talk with other player and talk with the developers about any problem/suggestion/question you want!
+https://discord.gg/gf7rWj942q
  
 ## Contacts
 
