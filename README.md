@@ -26,7 +26,6 @@ The project is currently into its early stage and is not written perfectly. We'l
 ## How to use o!TMD
 
 The current documentation is valid for the `v1.2` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
-**CURRENTLY WORKS ONLY WITH LOBBIES WITH TEAMVS**
 
 ### Installation
 
