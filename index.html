@@ -43,18 +43,30 @@
 					<label for="warmups">warmups: </label>
 					<input type="number" name="warmups" id="warmups" />
 					<br />
+					<label for="matchtype">Match Type: </label>
+					<select id="matchtype" name="matchtype">
+						<option value="h1v1">1vs1</option>
+						<option value="teamvs">TeamVS</option>
+					</select>
+					<br />
+					<div class="selectmatchtype_userid" id="divuserid">	
+						<label for="userid">UserID: </label>
+						<input type="text" name="userid" id="userid" />
+						<br />
+					</div>
 					<input type="checkbox" name="reverse" id="reverse" />
 					<label for="reverse">score reverse</label>
 					<br />
 					<button id="get">Load old settings</button>
-					<br />
 					<button id="save">Save Settings</button>
 				</form>
 			</div>
 		</div>
 	</body>
+	
 
 	<script type="module">
+
 		const save = document.querySelector('#save')
 		const getconf = document.querySelector('#get')
 
@@ -65,17 +77,22 @@
 		const best_of = document.querySelector('#bestof')
 		const reverse_el = document.querySelector('#reverse')
 
+		const match_type = document.querySelector('#matchtype')
+		const user_id = document.querySelector('#userid')
+
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
 			res = await res.json()
 
-			const { apikey, matchid, stage, warmups, bestof, reverse } = res
+			const { apikey, matchid, stage, warmups, bestof, matchtype, userid, reverse } = res
 
 			api.value = apikey
 			match.value = matchid
 			stage_tourney.value = stage
 			warmups_el.value = warmups
 			best_of.value = bestof
+			match_type.value = matchtype
+			user_id.value = userid
 			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
 		}
 
@@ -106,6 +123,8 @@
 				stage: stage_tourney.value,
 				warmups: warmups_el.value,
 				bestof: best_of.value,
+				matchtype: match_type.value,
+				userid: user_id.value,
 				reverse: reverse_el.checked,
 			}
 
@@ -123,5 +142,6 @@
 
 		console.clear()
 		loadConfig()
+
 	</script>
 </html>

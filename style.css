@@ -107,6 +107,17 @@ input[type='number'] {
 	width: 100%;
 }
 
+.selectmatchtype {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-evenly;
+}
+
+#divuserid {
+    display: block;
+}
+
+
 /* -------------------------------------------------------------------------------------------------------------- */
 
 .v_header {
@@ -205,4 +216,10 @@ input[type='number'] {
 .countryimg {
 	height: 24px;
 	margin: 6px;
+}
+
+.playerimg {
+	height: 40px;
+    margin: 6px, 6px, 1px, 6px;
+    border-radius: 50%;
 }
