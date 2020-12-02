@@ -16,20 +16,29 @@
 					<div class="team1">
 						<div class="teaminner1"></div>
 					</div>
-					<div id="score" class="score"><span class="paddingfix"><span id="team1">0</span> - <span id="team2">0</span></span></div>
+					<div id="score" class="score">
+						<span class="paddingfix"><span id="team1">0</span> - <span id="team2">0</span></span>
+					</div>
 					<div class="team2">
 						<div class="teaminner2"></div>
 					</div>
 				</div>
 				<div class="v_footer">
 					<span class="tourney_info_down"></span>
-				</div> 
+				</div>
 			</div>
-        </div>
-        
-        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		</div>
 
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="/app.js" type="module"></script>
+		<script>
+			// const event = new EventSource('http://localhost:3000/events')
+
+			// event.onmessage = (event) => {
+			// 	const parsedData = JSON.parse(event.data)
+			// 	console.log(parsedData)
+			// 	msgs.textContent = JSON.stringify(parsedData)
+			// }
+		</script>
 	</body>
 </html>
-

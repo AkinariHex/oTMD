@@ -3,40 +3,43 @@ const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
+const bodyParser = require('body-parser')
 
 const app = express()
 
-// app.use(express.static('public'))
+// const eventEmitter = require('.eventEmitter')
+
 app.use(express.json())
 app.use(cors())
 
 app.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname, 'index.html'))
+	res.sendFile(path.join(__dirname, 'frontend/index.html'))
 })
 
 app.get('/style.css', function (req, res) {
-	res.sendFile(path.join(__dirname, 'style.css'))
+	res.sendFile(path.join(__dirname, 'frontend/style.css'))
 })
 
 app.get('/assets/countries', function (req, res) {
-	res.sendFile(path.join(__dirname, 'assets/countries.js'))
+	res.sendFile(path.join(__dirname, 'frontend/assets/countries.js'))
 })
 
 app.get('/app.js', cors(), function (req, res) {
-	res.sendFile(path.join(__dirname, 'app.js'))
-})
-
-app.get('/assets/countries', function (req, res) {
-	res.sendFile(path.join(__dirname, 'assets/countries.js'))
+	res.sendFile(path.join(__dirname, 'frontend/app.js'))
 })
 
 app.get('/settings', function (req, res) {
-	let data = JSON.parse(fs.readFileSync('./settings.json'))
-	res.json(data)
+	try {
+		let data = JSON.parse(fs.readFileSync('./settings.json'))
+		res.json(data)
+	} catch (error) {
+		console.log('file settings.json not found, sending default settings')
+		res.json(null)
+	}
 })
 
 app.get('/visualizer', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'visualizer.html'))
+	res.sendFile(path.join(__dirname, 'frontend/visualizer.html'))
 })
 
 app.post('/save', (req, res) => {
@@ -45,7 +48,12 @@ app.post('/save', (req, res) => {
 	res.sendStatus(200)
 })
 
-const server = app.listen(3000, () => {
+// app.use(bodyParser.json())
+// app.use(bodyParser.urlencoded({ extended: false }))
+
+// app.get('/getMatchData', eventEmitter)
+
+const server = app.listen(7000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
-	open(`http://localhost:${server.address().port}`)
+	// open(`http://localhost:${server.address().port}`)
 })
