@@ -3,11 +3,8 @@ const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
-const bodyParser = require('body-parser')
 
 const app = express()
-
-// const eventEmitter = require('.eventEmitter')
 
 app.use(express.json())
 app.use(cors())
@@ -48,12 +45,7 @@ app.post('/save', (req, res) => {
 	res.sendStatus(200)
 })
 
-// app.use(bodyParser.json())
-// app.use(bodyParser.urlencoded({ extended: false }))
-
-// app.get('/getMatchData', eventEmitter)
-
-const server = app.listen(7000, () => {
+const server = app.listen(3000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
-	// open(`http://localhost:${server.address().port}`)
+	open(`http://localhost:${server.address().port}`)
 })
