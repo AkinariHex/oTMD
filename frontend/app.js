@@ -8,45 +8,72 @@ const tourneyfootertext = document.querySelector('.tourney_info_down')
 
 import countriesjs from './assets/countries'
 
-var oldmatchid = ''
+let oldmatchid = ''
 
-getjson()
+let osuapi = null
+let matchid = null
+let stage = null
+let warmups = null
+let reverse = null
+let bestof = null
+let matchtype = null
+let userid = null
+
+// is it even needed anymore?
 setInterval(function () {
 	getjson()
 }, 5000)
 
+const events = new EventSource('http://localhost:3000/events')
+
+events.onmessage = (event) => {
+	const parsedData = JSON.parse(event.data)
+	// console.log(osuapi, matchid, stage, warmups, reverse, bestof, matchtype, userid)
+
+	team1Element.innerHTML = null
+	team2Element.innerHTML = null
+	team1img.innerHTML = null
+	team2img.innerHTML = null
+	textzone.innerHTML = null
+	tourneyheadertext.innerHTML = null
+	tourneyfootertext.innerHTML = null
+
+	// TODO: use destructuring
+	osuapi = parsedData.apikey
+	matchid = parsedData.matchid
+	stage = parsedData.stage
+	warmups = parsedData.warmups
+	reverse = parsedData.reverse
+	bestof = parsedData.bestof
+	matchtype = parsedData.matchtype
+	userid = parsedData.userid
+	reverse = parsedData.reverse
+
+	// console.log(osuapi, matchid, stage, warmups, reverse, bestof, matchtype, userid)
+	getjson()
+	// reload()
+}
+
 function getjson() {
-	axios.get('/settings').then((settingsdata) => {
-		var osuapi = settingsdata.data.apikey
-		var matchid = settingsdata.data.matchid
-		var stage = settingsdata.data.stage
-		var warmups = settingsdata.data.warmups
-		var reverse = settingsdata.data.reverse
-		var bestof = settingsdata.data.bestof
-		var matchtype = settingsdata.data.matchtype
-		var userid = settingsdata.data.userid
+	if (oldmatchid == matchid) return
+	oldmatchid = matchid
+	axios.get('https://raw.githubusercontent.com/AkinariHex/oTMD/main/assets/tourneys.json').then((tourneydata) => {
+		var tourneyd = tourneydata.data
 
-		if (oldmatchid != matchid) {
-			oldmatchid = matchid
-			axios.get('https://raw.githubusercontent.com/AkinariHex/oTMD/main/assets/tourneys.json').then((tourneydata) => {
-				var tourneyd = tourneydata.data
-
-				if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
-					if (userid != 'null' && matchtype == 'h1v1') {
-						matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneyd, stage, userid)
-						var osuinterval = setInterval(function () {
-							matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneyd, stage, userid)
-						}, 15000)
-					} else if (matchtype == 'teamvs') {
-						matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneyd, stage)
-						var osuinterval = setInterval(function () {
-							matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneyd, stage)
-						}, 15000)
-					} else {
-						textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, USERID not found!</span>'
-					}
-				}
-			})
+		if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
+			if (userid != 'null' && matchtype == 'h1v1') {
+				matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneyd, stage, userid)
+				var osuinterval = setInterval(function () {
+					matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneyd, stage, userid)
+				}, 15000)
+			} else if (matchtype == 'teamvs') {
+				matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneyd, stage)
+				var osuinterval = setInterval(function () {
+					matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneyd, stage)
+				}, 15000)
+			} else {
+				textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, USERID not found!</span>'
+			}
 		}
 	})
 }
@@ -290,7 +317,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 		.catch((err) => {
 			clearInterval(interval)
 			console.log(err)
-			console.log('API errata')
+			console.log('Wrong API key')
 			tourneyheadertext.textContent = ''
 			tourneyfootertext.textContent = ''
 			textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, CHECK IF APIKEY, MATCHID, WARMUPS, REVERSE AND BESTOF ARE CORRECT</span>'
