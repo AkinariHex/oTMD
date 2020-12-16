@@ -1,4 +1,4 @@
-<img src="https://drive.google.com/uc?export=view&id=1UbuyzqezxvD1OzbuTuxYJ_u8qXvDJflM">
+<img src="https://akinariosu.s-ul.eu/2zvhZbVV">
 
 # o!TMD Project
 
@@ -25,7 +25,7 @@ The project is currently into its early stage and is not written perfectly. We'l
 
 ## How to use o!TMD
 
-The current documentation is valid for the `v1.2` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
+The current documentation is valid for the `v1.3` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
 
 ### Installation
 
@@ -51,7 +51,8 @@ Change the fields:<br>
 -   `warmups`: put the number of warmups. In the most of cases it's 2.
 -   `Match Type`: select the type of the match between **1vs1** and **TeamVS**
 -   `UserID`: put your userid | **Your userid will be used only if you want to display a 1vs1 match. You can find your userid at the end of your profile link https&#58;//osu.ppy.sh/users/`4001304`**
--   `score reverse`: check it only if the first team of the lobby has the colour red.<br>**For example let's see this lobby: `5WC: (Spain B) vs (South Korea A)`, Spain B should be the blue team as blue teams are always the first team for the api. If a referee make this error you can fix it checking the box of score reverse.**
+-   `score reverse`: check it only if the first team of the lobby has the colour red.<br>**For example let's see this lobby: `5WC: (Indonesia A) vs (Italy A)`, Indonesia A should be the blue team as blue teams are always the first team for the api. If a referee make this, you can fix it checking the box of score reverse.**
+<img src="https://akinariosu.s-ul.eu/LU90Cq05">
 
 Click the `Save Settings` button, it'll save your settings and automatically start to display your match by opening a new tab with this URL "http://localhost:3000/visualizer".
 
@@ -79,7 +80,8 @@ Click the `Save Settings` button, it'll save your settings and automatically sta
 ## Join the community
 
 Join the official discord server to be always updated about new updates. You can also talk with other player and talk with the developers about any problem/suggestion/question you want!
-https://discord.gg/gf7rWj942q
+
+[![OTMD Discord Server](https://discord.com/api/guilds/775868748158337064/widget.png?style=banner3)](https://discord.gg/gf7rWj942q)
  
 ## Contacts
 
