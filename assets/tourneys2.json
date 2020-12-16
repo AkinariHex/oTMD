@@ -1,0 +1,39 @@
+{
+    "5WC": {
+        "name": "5 Digits World Cup",
+        "modifiers": {
+            "HD": "1.00",
+            "HR": "1.00",
+            "EZ": "1.00",
+            "FL": "1.00"
+        }
+    },
+    "OWC": {
+        "name": "osu! World Cup",
+        "modifiers": {
+            "HD": "1.00",
+            "HR": "1.00",
+            "EZ": "1.00",
+            "FL": "1.00"
+        }
+    },
+    "TAR": {
+        "name": "The All Rounder",
+        "modifiers": {
+            "HD": "1.00",
+            "HR": "1.00",
+            "EZ": "1.00",
+            "FL": "1.00"
+        }
+    },
+    "PT2": {
+        "name": "Paper's Tournament 2",
+        "modifiers": {
+            "HD": "1.00",
+            "HR": "1.00",
+            "EZ": "1.75",
+            "FL": "1.00"
+        }
+    }
+    
+}
