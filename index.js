@@ -26,10 +26,6 @@ app.get('/app.js', cors(), function (req, res) {
 	res.sendFile(path.join(__dirname, 'app.js'))
 })
 
-app.get('/assets/countries', function (req, res) {
-	res.sendFile(path.join(__dirname, 'assets/countries.js'))
-})
-
 app.get('/settings', function (req, res) {
 	let data = JSON.parse(fs.readFileSync('./settings.json'))
 	res.json(data)
