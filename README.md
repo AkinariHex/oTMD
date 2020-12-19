@@ -18,7 +18,7 @@ The project is currently into its early stage and is not written perfectly. We'l
 <table>
   <tr>
     <td align="center"><a href="https://github.com/AkinariHex"><img src="https://avatars.githubusercontent.com/u/28952344?v=3" width="100px;" alt=""/><br /><sub><b>Akinari</b>         </sub></a></td>
-    <td align="center"><a href="https://github.com/xRLPGx"><img src="https://avatars.githubusercontent.com/u/33182302?v=3" width="100px;" alt=""/><br /><sub><b>xRLPGx</b>         </sub></a></td>
+    <td align="center"><a href="https://github.com/Relepega"><img src="https://avatars.githubusercontent.com/u/33182302?v=3" width="100px;" alt=""/><br /><sub><b>Relepega</b>         </sub></a></td>
       <td align="center"><a href="https://github.com/nrabulinski"><img src="https://avatars.githubusercontent.com/u/24574288?v=3" width="100px;" alt=""/><br /><sub><b>nrabulinski</b></sub></a></td>
  </tr>
 </table>
@@ -52,7 +52,7 @@ Change the fields:<br>
 -   `Match Type`: select the type of the match between **1vs1** and **TeamVS**
 -   `UserID`: put your userid | **Your userid will be used only if you want to display a 1vs1 match. You can find your userid at the end of your profile link https&#58;//osu.ppy.sh/users/`4001304`**
 -   `score reverse`: check it only if the first team of the lobby has the colour red.<br>**For example let's see this lobby: `5WC: (Indonesia A) vs (Italy A)`, Indonesia A should be the blue team as blue teams are always the first team for the api. If a referee make this, you can fix it checking the box of score reverse.**
-<img src="https://akinariosu.s-ul.eu/LU90Cq05">
+    <img src="https://akinariosu.s-ul.eu/LU90Cq05">
 
 Click the `Save Settings` button, it'll save your settings and automatically start to display your match by opening a new tab with this URL "http://localhost:3000/visualizer".
 
@@ -82,7 +82,7 @@ Click the `Save Settings` button, it'll save your settings and automatically sta
 Join the official discord server to be always updated about new updates. You can also talk with other player and talk with the developers about any problem/suggestion/question you want!
 
 [![OTMD Discord Server](https://discord.com/api/guilds/775868748158337064/widget.png?style=banner3)](https://discord.gg/gf7rWj942q)
- 
+
 ## Contacts
 
 Feel free to contact us:
@@ -90,7 +90,6 @@ Feel free to contact us:
 **Akinari**: [Twitter](https://twitter.com/Akinari_osu) | Akinari#3171 on Discord
 
 **Relepega (aka RLPG)**: [Twitter](https://twitter.com/xRLPG) | RLPG#1608 on Discord
-
 
 ## License
 
