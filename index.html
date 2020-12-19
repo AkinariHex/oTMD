@@ -12,61 +12,74 @@
 				<h1>OTMD Settings</h1>
 				<form>
 					<label for="api-key">apikey: </label>
-					<input type="text" name="api-key" id="api-key" placeholder="apikey"/>
+					<input type="text" name="api-key" id="api-key" placeholder="apikey" />
 					<br />
+
 					<label for="match-id">matchID: </label>
-					<input type="text" name="match-id" id="match-id" placeholder="matchID"/>
+					<input type="text" name="match-id" id="match-id" placeholder="matchID" />
 					<br />
-					<label for="stage">Stage: </label>
-					<select id="stage" name="stage">
-						<option value="Friendly">Friendly</option>
-						<option value="Round of 64">RO64</option>
-						<option value="Round of 32">RO32</option>
-						<option value="Round of 16">RO16</option>
-						<option value="Quarterfinals">Quarterfinals</option>
-						<option value="Semifinals">Semifinals</option>
-						<option value="Finals">Finals</option>
-						<option value="Grand Finals">Grand Finals</option>
-					</select>
-					<br />
-					<label for="bestof">Best of: </label>
-					<select id="bestof" name="bestof">
-						<option value="5">BO5</option>
-						<option value="7">BO7</option>
-						<option value="9">BO9</option>
-						<option value="11">BO11</option>
-						<option value="13">BO13</option>
-						<option value="15">BO15</option>
-						<option value="17">BO17</option>
-					</select>
-					<br />
-					<label for="warmups">warmups: </label>
-					<input type="number" name="warmups" id="warmups" />
-					<br />
-					<label for="matchtype">Match Type: </label>
-					<select id="matchtype" name="matchtype">
-						<option value="h1v1">1vs1</option>
-						<option value="teamvs">TeamVS</option>
-					</select>
-					<br />
-					<div class="selectmatchtype_userid" id="divuserid">	
+
+					<div id="matchtype">
+						<label>Match Type: </label>
+						<div id="input-wrapper">
+							<input type="radio" id="matchtype-1v1" name="matchtype" value="1v1" />
+							<label for="matchtype-1v1">1vs1</label><br />
+						</div>
+						<div id="input-wrapper">
+							<input type="radio" id="matchtype-teamvs" name="matchtype" value="teamvs" checked />
+							<label for="matchtype-teamvs">teamvs</label>
+						</div>
+					</div>
+
+					<div id="tournament">
+						<label for="stage">Stage: </label>
+						<select id="stage" name="stage">
+							<option value="Friendly">Friendly</option>
+							<option value="Round of 64">RO64</option>
+							<option value="Round of 32">RO32</option>
+							<option value="Round of 16">RO16</option>
+							<option value="Quarterfinals">Quarterfinals</option>
+							<option value="Semifinals">Semifinals</option>
+							<option value="Finals">Finals</option>
+							<option value="Grand Finals">Grand Finals</option>
+						</select>
+						<br />
+
+						<label for="bestof">Best of: </label>
+						<select id="bestof" name="bestof">
+							<option value="5">BO5</option>
+							<option value="7">BO7</option>
+							<option value="9">BO9</option>
+							<option value="11">BO11</option>
+							<option value="13">BO13</option>
+							<option value="15">BO15</option>
+							<option value="17">BO17</option>
+						</select>
+						<br />
+
+						<label for="warmups">warmups: </label>
+						<input type="number" name="warmups" id="warmups" />
+						<br />
+					</div>
+
+					<div class="selectmatchtype_userid" id="divuserid">
 						<label for="userid">UserID: </label>
 						<input type="text" name="userid" id="userid" />
 						<br />
 					</div>
+
 					<input type="checkbox" name="reverse" id="reverse" />
 					<label for="reverse">score reverse</label>
 					<br />
+
 					<button id="get">Load old settings</button>
 					<button id="save">Save Settings</button>
 				</form>
 			</div>
 		</div>
 	</body>
-	
 
 	<script type="module">
-
 		const save = document.querySelector('#save')
 		const getconf = document.querySelector('#get')
 
@@ -79,6 +92,12 @@
 
 		const match_type = document.querySelector('#matchtype')
 		const user_id = document.querySelector('#userid')
+
+		const matchtype_1v1 = document.querySelector('#matchtype-1v1')
+		const matchtype_teamvs = document.querySelector('#matchtype-teamvs')
+
+		const tournament = document.querySelector('#tournament')
+		const pvp = document.querySelector('#divuserid')
 
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
@@ -96,7 +115,7 @@
 			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
 		}
 
-		async function postData(url = '', data = {}) {
+		const postData = async (url = '', data = {}) => {
 			// Default options are marked with *
 			const response = await fetch(url, {
 				method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -114,6 +133,24 @@
 			return response // parses JSON response into native JavaScript objects
 		}
 
+		const switchMatchType = () => {
+			if (matchtype_1v1.checked) {
+				tournament.classList.add('invisible')
+				pvp.classList.remove('invisible')
+			} else if (matchtype_teamvs.checked) {
+				tournament.classList.remove('invisible')
+				pvp.classList.add('invisible')
+			}
+		}
+
+		const init = async () => {
+			loadConfig()
+			switchMatchType()
+		}
+
+		matchtype_1v1.addEventListener('click', switchMatchType)
+		matchtype_teamvs.addEventListener('click', switchMatchType)
+
 		save.addEventListener('click', (e) => {
 			e.preventDefault()
 
@@ -128,11 +165,10 @@
 				reverse: reverse_el.checked,
 			}
 
-			postData('/save', data);
+			postData('/save', data)
 
-			let secondWindow = window.open('/visualizer');
-			secondWindow.location.reload(true);
-
+			let secondWindow = window.open('/visualizer')
+			secondWindow.location.reload(true)
 		})
 
 		getconf.addEventListener('click', (e) => {
@@ -141,7 +177,6 @@
 		})
 
 		console.clear()
-		loadConfig()
-
+		init()
 	</script>
 </html>
