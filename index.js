@@ -3,45 +3,12 @@ const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
-const bodyParser = require('body-parser')
 
+const socket = require('socket.io')
 const app = express()
 
 app.use(express.json())
 app.use(cors())
-
-let clients = []
-// Middleware for GET /events endpoint
-function eventsHandler(req, res, next) {
-	const headers = {
-		'Content-Type': 'text/event-stream',
-		Connection: 'keep-alive',
-		'Cache-Control': 'no-cache',
-	}
-	res.writeHead(200, headers)
-
-	const data = readSettingsJson()
-	const resource = `data: ${JSON.stringify(data)}\n\n`
-	res.write(resource)
-
-	const clientId = Date.now()
-	const newClient = {
-		id: clientId,
-		res,
-	}
-	clients.push(newClient)
-
-	req.on('close', () => {
-		// console.log(`${clientId} Connection closed`)
-		clients = clients.filter((c) => c.id !== clientId)
-		sendEventsToAll()
-	})
-}
-// Iterate clients list and use write res object method to send new nest
-function sendEventsToAll() {
-	let data = readSettingsJson()
-	clients.forEach((c) => c.res.write(`data: ${JSON.stringify(data)}\n\n`))
-}
 
 function readSettingsJson() {
 	try {
@@ -69,6 +36,10 @@ app.get('/app.js', cors(), (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/app.js'))
 })
 
+// app.get('/socket.io/socket.io.js', cors(), (req, res) => {
+// 	res.sendFile(path.join(__dirname, '/socket.io/socket.io.js'))
+// })
+
 app.get('/settings', (req, res) => {
 	res.json(readSettingsJson())
 })
@@ -77,19 +48,23 @@ app.get('/visualizer', cors(), (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/visualizer.html'))
 })
 
-app.post('/save', (req, res) => {
-	console.log(req.body)
-	fs.writeFileSync('./settings.json', JSON.stringify(req.body))
-	sendEventsToAll()
-	res.sendStatus(200)
-})
-
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
-
-app.get('/events', eventsHandler)
-
 const server = app.listen(3000, () => {
 	console.log(`Running on http://localhost:${server.address().port}`)
 	open(`http://localhost:${server.address().port}`)
+})
+
+const io = socket(server)
+
+io.on('connection', (socket) => {
+	// socket.on('event', async () => {
+	// emit to sender
+	// socket.emit('event', data)
+	// emit to all
+	// io.emit('event', data)
+	// })
+
+	socket.on('save', (data) => {
+		fs.writeFileSync('./settings.json', JSON.stringify(data))
+		io.emit('new_settings', data)
+	})
 })

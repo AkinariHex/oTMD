@@ -1,3 +1,5 @@
+import countriesjs from './assets/countries'
+
 const team1Element = document.querySelector('#team1')
 const team2Element = document.querySelector('#team2')
 const team1img = document.querySelector('.teaminner1')
@@ -6,9 +8,7 @@ const textzone = document.querySelector('#score')
 const tourneyheadertext = document.querySelector('.tourney_info_top')
 const tourneyfootertext = document.querySelector('.tourney_info_down')
 
-import countriesjs from './assets/countries'
-
-let oldmatchid = ''
+const socket = io()
 
 let osuapi = null
 let matchid = null
@@ -19,24 +19,35 @@ let bestof = null
 let matchtype = null
 let userid = null
 
-// is it even needed anymore?
-setInterval(function () {
-	getjson()
-}, 5000)
+// invoke once on page opening
+function init() {
+	fetch('/settings')
+		.then((res) => res.json())
+		.then((data) => {
+			osuapi = data.apikey
+			matchid = data.matchid
+			stage = data.stage
+			warmups = data.warmups
+			reverse = data.reverse
+			bestof = data.bestof
+			matchtype = data.matchtype
+			userid = data.userid
+			reverse = data.reverse
+		})
+}
 
-const events = new EventSource('http://localhost:3000/events')
+init()
 
-events.onmessage = (event) => {
-	const parsedData = JSON.parse(event.data)
+let osuinterval = setInterval(function () {
+	checkData()
+}, 15000)
+
+socket.on('new_settings', (parsedData = data) => {
+	// const parsedData = JSON.parse(data)
 	// console.log(osuapi, matchid, stage, warmups, reverse, bestof, matchtype, userid)
+	// console.log(parsedData)
 
-	team1Element.innerHTML = null
-	team2Element.innerHTML = null
-	team1img.innerHTML = null
-	team2img.innerHTML = null
 	textzone.innerHTML = null
-	tourneyheadertext.innerHTML = null
-	tourneyfootertext.innerHTML = null
 
 	// TODO: use destructuring
 	osuapi = parsedData.apikey
@@ -50,32 +61,24 @@ events.onmessage = (event) => {
 	reverse = parsedData.reverse
 
 	// console.log(osuapi, matchid, stage, warmups, reverse, bestof, matchtype, userid)
-	getjson()
+	checkData()
 	// reload()
-}
+})
 
-function getjson() {
-	if (oldmatchid == matchid) return
-	oldmatchid = matchid
-	axios.get('https://raw.githubusercontent.com/AkinariHex/oTMD/main/assets/tourneys.json').then((tourneydata) => {
-		var tourneyd = tourneydata.data
-
-		if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
-			if (userid != 'null' && matchtype == 'h1v1') {
-				matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneyd, stage, userid)
-				var osuinterval = setInterval(function () {
-					matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneyd, stage, userid)
-				}, 15000)
-			} else if (matchtype == 'teamvs') {
-				matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneyd, stage)
-				var osuinterval = setInterval(function () {
-					matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneyd, stage)
-				}, 15000)
-			} else {
-				textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, USERID not found!</span>'
+function checkData() {
+	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/assets/tourneys.json')
+		.then((res) => res.json())
+		.then((tourneydata) => {
+			if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
+				if (userid != 'null' && matchtype == 'h1v1') {
+					matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneydata, stage, userid)
+				} else if (matchtype == 'teamvs') {
+					matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneydata, stage)
+				} else {
+					textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, USERID not found!</span>'
+				}
 			}
-		}
-	})
+		})
 }
 
 function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tournament, stage) {
@@ -83,17 +86,19 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 	var team2score = 0
 	var team1 = 0
 	var team2 = 0
-	axios
-		.get(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
+
+	fetch(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
+		.then((res) => res.json())
 		.then((data) => {
-			for (var i = warmups; i < data.data.games.length; i++) {
-				for (var x = 0; x < data.data.games[i].scores.length; x++) {
-					var gameended = data.data.games[i].end_time == null
+			// console.log(data)
+			for (var i = warmups; i < data.games.length; i++) {
+				for (var x = 0; x < data.games[i].scores.length; x++) {
+					var gameended = data.games[i].end_time == null
 					if (gameended == false) {
-						if (data.data.games[i].scores[x].team == '1') {
-							team1score += parseInt(data.data.games[i].scores[x].score)
-						} else if (data.data.games[i].scores[x].team == '2') {
-							team2score += parseInt(data.data.games[i].scores[x].score)
+						if (data.games[i].scores[x].team == '1') {
+							team1score += parseInt(data.games[i].scores[x].score)
+						} else if (data.games[i].scores[x].team == '2') {
+							team2score += parseInt(data.games[i].scores[x].score)
 						}
 					}
 				}
@@ -111,13 +116,13 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 				}
 			}
 			var patt = /\((.*?)\)/g
-			var teamnames = data.data.match.name.match(patt)
+			var teamnames = data.match.name.match(patt)
 
 			var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, '')}</span>`
 			var team2name = `<span class="team_name">${teamnames[1].replace(/([()])/g, '')}</span>`
 
-			var tournamentindex = data.data.match.name.indexOf(':')
-			var tournamentid = data.data.match.name.substring(0, tournamentindex)
+			var tournamentindex = data.match.name.indexOf(':')
+			var tournamentid = data.match.name.substring(0, tournamentindex)
 
 			var tournament_info_name = ''
 
@@ -199,8 +204,7 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 		})
 		.catch((err) => {
 			clearInterval(interval)
-			console.log(err)
-			console.log('API errata')
+			console.error('Wrong setting(s)', err)
 			tourneyheadertext.textContent = ''
 			tourneyfootertext.textContent = ''
 			textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, CHECK IF APIKEY, MATCHID, WARMUPS, REVERSE AND BESTOF ARE CORRECT</span>'
@@ -216,21 +220,21 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 
 	var playerslot = ['0', '1']
 
-	axios
-		.get(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
+	fetch(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
+		.then((res) => res.json())
 		.then((data) => {
 			axios
 				.get(`https://osu.ppy.sh/api/get_user?k=${api}&u=${userid}`)
 				.then((dataplayer) => {
-					for (var i = warmups; i < data.data.games.length; i++) {
-						for (var x = 0; x < data.data.games[i].scores.length; x++) {
-							var gameended = data.data.games[i].end_time == null
+					for (var i = warmups; i < data.games.length; i++) {
+						for (var x = 0; x < data.games[i].scores.length; x++) {
+							var gameended = data.games[i].end_time == null
 							if (gameended == false) {
-								if (data.data.games[i].scores[x].user_id == dataplayer.data[0].user_id) {
-									team1score += parseInt(data.data.games[i].scores[x].score)
-								} else if (data.data.games[i].scores[x].user_id != userid && playerslot.includes(data.data.games[i].scores[x].slot)) {
-									team2score += parseInt(data.data.games[i].scores[x].score)
-									team2id = data.data.games[i].scores[x].user_id
+								if (data.games[i].scores[x].user_id == dataplayer.data[0].user_id) {
+									team1score += parseInt(data.games[i].scores[x].score)
+								} else if (data.games[i].scores[x].user_id != userid && playerslot.includes(data.games[i].scores[x].slot)) {
+									team2score += parseInt(data.games[i].scores[x].score)
+									team2id = data.games[i].scores[x].user_id
 								}
 							}
 						}
@@ -248,7 +252,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 						}
 					}
 					var patt = /\((.*?)\)/g
-					var teamnames = data.data.match.name.match(patt)
+					var teamnames = data.match.name.match(patt)
 
 					if (teamnames[0].replace(/([()])/g, '') == dataplayer.data[0].username) {
 						var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, '')}</span>`
@@ -258,8 +262,8 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 						var team2name = `<span class="team_name">${teamnames[0].replace(/([()])/g, '')}</span>`
 					}
 
-					var tournamentindex = data.data.match.name.indexOf(':')
-					var tournamentid = data.data.match.name.substring(0, tournamentindex)
+					var tournamentindex = data.match.name.indexOf(':')
+					var tournamentid = data.match.name.substring(0, tournamentindex)
 
 					var tournament_info_name = ''
 
@@ -307,8 +311,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 				})
 				.catch((err) => {
 					clearInterval(interval)
-					console.log(err)
-					console.log('UserID errato')
+					console.error('Wrong UserID', err)
 					tourneyheadertext.textContent = ''
 					tourneyfootertext.textContent = ''
 					textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, USERID ERROR</span>'
@@ -316,8 +319,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 		})
 		.catch((err) => {
 			clearInterval(interval)
-			console.log(err)
-			console.log('Wrong API key')
+			console.error('Wrong setting(s)', err)
 			tourneyheadertext.textContent = ''
 			tourneyfootertext.textContent = ''
 			textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, CHECK IF APIKEY, MATCHID, WARMUPS, REVERSE AND BESTOF ARE CORRECT</span>'
