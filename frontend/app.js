@@ -20,6 +20,7 @@ let matchtype = null
 let userid = null
 
 // invoke once on page opening
+// maybe could use a (() => {...})() there ?
 function init() {
 	fetch('/settings')
 		.then((res) => res.json())
@@ -33,6 +34,8 @@ function init() {
 			matchtype = data.matchtype
 			userid = data.userid
 			reverse = data.reverse
+
+			checkData()
 		})
 }
 
