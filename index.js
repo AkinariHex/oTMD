@@ -36,8 +36,8 @@ app.get('/app.js', cors(), (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/app.js'))
 })
 
-app.get('/socket.io/socket.io.js', (req, res) => {
-	res.sendFile(path.join(__dirname, '/frontend/assets/socket.io.min.js'))
+app.get('/socketio', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/socket.io.min.js'))
 })
 
 app.get('/settings', (req, res) => {
@@ -65,6 +65,6 @@ io.on('connection', (socket) => {
 
 	socket.on('save', (data) => {
 		fs.writeFileSync('./settings.json', JSON.stringify(data))
-		io.emit('new_settings', data)
+		io.emit('new_settings' /* data */)
 	})
 })

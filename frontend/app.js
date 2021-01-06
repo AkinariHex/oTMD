@@ -1,6 +1,4 @@
 import countriesjs from './assets/countries'
-//<script src="/socket.io/socket.io.js"></script>
-// import io from '/socket.io/client-dist/socket.io.min.js'
 
 const team1Element = document.querySelector('#team1')
 const team2Element = document.querySelector('#team2')
@@ -22,11 +20,12 @@ let matchtype = null
 let userid = null
 
 // invoke once on page opening
-// maybe could use a (() => {...})() there ?
 function init() {
 	fetch('/settings')
 		.then((res) => res.json())
 		.then((data) => {
+			console.log('first loading', data)
+
 			osuapi = data.apikey
 			matchid = data.matchid
 			stage = data.stage
@@ -47,27 +46,29 @@ let osuinterval = setInterval(function () {
 	checkData()
 }, 15000)
 
-socket.on('new_settings', (parsedData = data) => {
+socket.on('new_settings', (/* parsedData = data */) => {
 	// const parsedData = JSON.parse(data)
 	// console.log(osuapi, matchid, stage, warmups, reverse, bestof, matchtype, userid)
-	// console.log(parsedData)
+	// console.log('new data', parsedData)
 
-	textzone.innerHTML = null
+	// textzone.innerHTML = null
 
 	// TODO: use destructuring
-	osuapi = parsedData.apikey
-	matchid = parsedData.matchid
-	stage = parsedData.stage
-	warmups = parsedData.warmups
-	reverse = parsedData.reverse
-	bestof = parsedData.bestof
-	matchtype = parsedData.matchtype
-	userid = parsedData.userid
-	reverse = parsedData.reverse
+	// osuapi = parsedData.apikey
+	// matchid = parsedData.matchid
+	// stage = parsedData.stage
+	// warmups = parsedData.warmups
+	// reverse = parsedData.reverse
+	// bestof = parsedData.bestof
+	// matchtype = parsedData.matchtype
+	// userid = parsedData.userid
+	// reverse = parsedData.reverse
 
 	// console.log(osuapi, matchid, stage, warmups, reverse, bestof, matchtype, userid)
-	checkData()
-	// reload()
+	// checkData()
+
+	// just gave in :)
+	location.reload()
 })
 
 function checkData() {
