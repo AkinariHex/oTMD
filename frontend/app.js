@@ -1,4 +1,6 @@
 import countriesjs from './assets/countries'
+//<script src="/socket.io/socket.io.js"></script>
+// import io from '/socket.io/client-dist/socket.io.min.js'
 
 const team1Element = document.querySelector('#team1')
 const team2Element = document.querySelector('#team2')

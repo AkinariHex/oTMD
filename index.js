@@ -36,9 +36,9 @@ app.get('/app.js', cors(), (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/app.js'))
 })
 
-// app.get('/socket.io/socket.io.js', cors(), (req, res) => {
-// 	res.sendFile(path.join(__dirname, '/socket.io/socket.io.js'))
-// })
+app.get('/socket.io/socket.io.js', (req, res) => {
+	res.sendFile(path.join(__dirname, '/frontend/assets/socket.io.min.js'))
+})
 
 app.get('/settings', (req, res) => {
 	res.json(readSettingsJson())
