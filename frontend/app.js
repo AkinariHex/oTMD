@@ -164,7 +164,7 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 
 			team1img.innerHTML = `${team1imgstring} ${team1name}`
 			team2img.innerHTML = `${team2imgstring} ${team2name}`
-			tourneyheadertext.textContent = stage
+			tourneyheadertext.textContent = stage + " <br> " + bestof
 			tourneyfootertext.textContent = tournament_info_name
 
 			if (reverse == 'true' || reverse == true) {
@@ -291,7 +291,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 
 					team1img.innerHTML = `${team1imgstring} ${team1name}`
 					team2img.innerHTML = `${team2imgstring} ${team2name}`
-					tourneyheadertext.textContent = stage
+					tourneyheadertext.textContent = stage + " <br> " + bestof
 					tourneyfootertext.textContent = tournament_info_name
 
 					team1Element.textContent = team1

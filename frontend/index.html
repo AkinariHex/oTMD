@@ -22,13 +22,19 @@
 					<div id="matchtype">
 						<label>Match Type: </label>
 						<div id="input-wrapper">
-							<input type="radio" id="matchtype-1v1" name="matchtype" value="1v1" />
+							<input type="radio" id="matchtype-1v1" name="matchtype" value="h1v1" />
 							<label for="matchtype-1v1">1vs1</label><br />
 						</div>
 						<div id="input-wrapper">
 							<input type="radio" id="matchtype-teamvs" name="matchtype" value="teamvs" checked />
 							<label for="matchtype-teamvs">teamvs</label>
 						</div>
+					</div>
+					
+					<div class="selectmatchtype_userid" id="divuserid">
+						<label for="userid">UserID: </label>
+						<input type="text" name="userid" id="userid" />
+						<br />
 					</div>
 
 					<div id="tournament">
@@ -62,15 +68,11 @@
 						<br />
 					</div>
 
-					<div class="selectmatchtype_userid" id="divuserid">
-						<label for="userid">UserID: </label>
-						<input type="text" name="userid" id="userid" />
+					<div id="divscorereverse">
+						<input type="checkbox" name="reverse" id="reverse" />
+						<label for="reverse">score reverse</label>
 						<br />
-					</div>
-
-					<input type="checkbox" name="reverse" id="reverse" />
-					<label for="reverse">score reverse</label>
-					<br />
+					</div>		
 
 					<button id="get">Load old settings</button>
 					<button id="save">Save Settings</button>
@@ -97,8 +99,8 @@
 		const matchtype_1v1 = document.querySelector('#matchtype-1v1')
 		const matchtype_teamvs = document.querySelector('#matchtype-teamvs')
 
-		const tournament = document.querySelector('#tournament')
 		const pvp = document.querySelector('#divuserid')
+		const divreverse = document.querySelector('#divscorereverse')
 
 		const socket = io()
 
@@ -120,10 +122,10 @@
 
 		const switchMatchType = () => {
 			if (matchtype_1v1.checked) {
-				tournament.classList.add('invisible')
+				divreverse.classList.add('invisible')
 				pvp.classList.remove('invisible')
 			} else if (matchtype_teamvs.checked) {
-				tournament.classList.remove('invisible')
+				divreverse.classList.remove('invisible')
 				pvp.classList.add('invisible')
 			}
 		}
