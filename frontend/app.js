@@ -1,4 +1,5 @@
 import countriesjs from './assets/countries'
+import * as scoremodification from './assets/scoremodification'
 
 const team1Element = document.querySelector('#team1')
 const team2Element = document.querySelector('#team2')
@@ -96,117 +97,135 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 	fetch(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
 		.then((res) => res.json())
 		.then((data) => {
-			// console.log(data)
-			for (var i = warmups; i < data.games.length; i++) {
-				for (var x = 0; x < data.games[i].scores.length; x++) {
-					var gameended = data.games[i].end_time == null
-					if (gameended == false) {
-						if (data.games[i].scores[x].team == '1') {
-							team1score += parseInt(data.games[i].scores[x].score)
-						} else if (data.games[i].scores[x].team == '2') {
-							team2score += parseInt(data.games[i].scores[x].score)
-						}
-					}
-				}
-				if (team1score - team2score == 0) {
-					team1 = team1
-					team2 = team2
-				} else if (team1score - team2score > 0) {
-					team1++
-					team1score = 0
-					team2score = 0
-				} else {
-					team2++
-					team1score = 0
-					team2score = 0
-				}
-			}
-			var patt = /\((.*?)\)/g
-			var teamnames = data.match.name.match(patt)
-
-			var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, '')}</span>`
-			var team2name = `<span class="team_name">${teamnames[1].replace(/([()])/g, '')}</span>`
-
-			var tournamentindex = data.match.name.indexOf(':')
-			var tournamentid = data.match.name.substring(0, tournamentindex)
-
-			var tournament_info_name = ''
-
+			//Tournament Info
+			var tournamentindex = data.match.name.indexOf(':');
+			var tournamentid = data.match.name.substring(0, tournamentindex);
+		
+			var tournament_info_name = '';
+			var tournament_modifiers = {"HD": "1.00","HR": "1.00","EZ": "1.00","FL": "1.00"};
+		
 			// CHECK FOR TOURNAMENT
-			if (tournament[tournamentid]) {
-				tournament_info_name = tournament[tournamentid]
+			if(tournament[tournamentid]){
+			  tournament_info_name = tournament[tournamentid].name;
+			  tournament_modifiers = tournament[tournamentid].modifiers;
 			}
-
-			var team1pos = null
-			var team2pos = null
-			var team1imgstring = ''
-			var team2imgstring = ''
-
+		
+			//Score system
+			for(var i=warmups; i<data.games.length; i++){
+				for(var x=0; x<data.games[i].scores.length; x++){
+				  var gameended = data.games[i].end_time==null;
+				  if(gameended == false ){
+					if(data.games[i].scores[x].team == '1'){
+					  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
+						team1score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+					  }
+					  else {
+						team1score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+					  }
+					} else if(data.games[i].scores[x].team == '2'){
+					  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
+						team2score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+					  }
+					  else {
+						team2score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+					  }
+					}
+				  }
+				}
+		
+			  if(team1score - team2score == 0){
+				team1 = team1;
+				team2 = team2;
+			  } else if(team1score - team2score > 0){
+				  team1++;
+				  team1score = 0;
+				  team2score = 0;
+			  } else {
+				  team2++;
+				  team1score = 0;
+				  team2score = 0;
+			  }
+			}
+			var patt = /\((.*?)\)/g;
+			var teamnames = data.match.name.match(patt);
+			
+			var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, "")}</span>`;
+			var team2name = `<span class="team_name">${teamnames[1].replace(/([()])/g, "")}</span>`;
+		
+			var team1pos = null;
+			var team2pos = null;
+			var team1imgstring = '';
+			var team2imgstring = '';
+		
 			// CHECK FOR COUNTRIES FLAGS
-			for (var z = 0; z < country.length; z++) {
-				if (team1name.includes(country[z].country)) {
-					team1pos = z
-					team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team1pos].id}.png"> <br />`
+			for(var z=0; z<country.length; z++){
+			  if(team1name.includes(country[z].country)){
+				  team1pos = z;
+				  team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team1pos].id}.png"> <br />`;
 				}
-				if (team2name.includes(country[z].country)) {
-					team2pos = z
-					team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team2pos].id}.png"> <br />`
-				}
+			  if(team2name.includes(country[z].country)){
+				  team2pos = z;
+				  team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team2pos].id}.png"> <br />`;
+			  }
 			}
-
+		
 			// CHECK IF FOUND THE FLAG AND REPLACE THE BLANK IMAGE WITH A BLANK FLAG
-			if (team1imgstring == '') {
-				team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />`
+			if(team1imgstring == ''){
+			  team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />`;
 			}
-			if (team2imgstring == '') {
-				team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A2.png"> <br />`
+			if(team2imgstring == ''){
+			  team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A2.png"> <br />`;
 			}
-
-			team1img.innerHTML = `${team1imgstring} ${team1name}`
-			team2img.innerHTML = `${team2imgstring} ${team2name}`
-			tourneyheadertext.textContent = stage + " <br> " + bestof
-			tourneyfootertext.textContent = tournament_info_name
-
-			if (reverse == 'true' || reverse == true) {
-				team1Element.textContent = team2
-				team2Element.textContent = team1
-				if (team1 == bestof / 2 + 0.5 || team2 == bestof / 2 + 0.5) {
-					clearInterval(interval)
-					team1img.innerHTML = ''
-					team2img.innerHTML = ''
-					tourneyheadertext.textContent = ''
-					tourneyfootertext.textContent = ''
-					if (team1 == bestof / 2 + 0.5) {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`
-					} else {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`
-					}
+		
+			team1img.innerHTML = `${team1imgstring} ${team1name}`;
+			team2img.innerHTML = `${team2imgstring} ${team2name}`;
+			tourneyheadertext.textContent = stage;
+			tourneyfootertext.textContent = tournament_info_name;
+		
+		
+		
+			if(reverse == 'true' || reverse == true){
+			  team1Element.textContent = team2;
+			  team2Element.textContent = team1;
+			  if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+				clearInterval(interval);
+				team1img.innerHTML = '';
+				team2img.innerHTML = '';
+				tourneyheadertext.textContent = '';
+				tourneyfootertext.textContent = '';        
+				if(team1 == (bestof/2)+0.5){
+				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
 				} else {
-					team1Element.textContent = team2
-					team2Element.textContent = team1
+				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
 				}
+			  } else {
+				team1Element.textContent = team2;
+				team2Element.textContent = team1;
+			  }
 			} else {
-				team1Element.textContent = team1
-				team2Element.textContent = team2
-				if (team1 == bestof / 2 + 0.5 || team2 == bestof / 2 + 0.5) {
-					clearInterval(interval)
-					team1img.innerHTML = ''
-					team2img.innerHTML = ''
-					tourneyheadertext.textContent = ''
-					tourneyfootertext.textContent = ''
-					if (team1 == bestof / 2 + 0.5) {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`
-					} else {
-						textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`
-					}
+			  team1Element.textContent = team1;
+			  team2Element.textContent = team2;
+			  if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+				clearInterval(interval);
+				team1img.innerHTML = '';
+				team2img.innerHTML = '';
+				tourneyheadertext.textContent = '';
+				tourneyfootertext.textContent = '';  
+				if(team1 == (bestof/2)+0.5){
+				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
 				} else {
-					team1Element.textContent = team1
-					team2Element.textContent = team2
+				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
 				}
+			  } else {
+				team1Element.textContent = team1;
+				team2Element.textContent = team2;
+			  }
 			}
-
-			team1 = 0
-			team2 = 0
+		
+			
+		
+			team1 = 0;
+			team2 = 0;
 		})
 		.catch((err) => {
 			clearInterval(interval)
@@ -232,88 +251,112 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 			axios
 				.get(`https://osu.ppy.sh/api/get_user?k=${api}&u=${userid}`)
 				.then((dataplayer) => {
-					for (var i = warmups; i < data.games.length; i++) {
-						for (var x = 0; x < data.games[i].scores.length; x++) {
-							var gameended = data.games[i].end_time == null
-							if (gameended == false) {
-								if (data.games[i].scores[x].user_id == dataplayer.data[0].user_id) {
-									team1score += parseInt(data.games[i].scores[x].score)
-								} else if (data.games[i].scores[x].user_id != userid && playerslot.includes(data.games[i].scores[x].slot)) {
-									team2score += parseInt(data.games[i].scores[x].score)
-									team2id = data.games[i].scores[x].user_id
-								}
-							}
-						}
-						if (team1score - team2score == 0) {
-							team1 = team1
-							team2 = team2
-						} else if (team1score - team2score > 0) {
-							team1++
-							team1score = 0
-							team2score = 0
-						} else {
-							team2++
-							team1score = 0
-							team2score = 0
-						}
-					}
-					var patt = /\((.*?)\)/g
-					var teamnames = data.match.name.match(patt)
+					//Tournament Info
+					var tournamentindex = data.match.name.indexOf(':');
+					var tournamentid = data.match.name.substring(0, tournamentindex);
 
-					if (teamnames[0].replace(/([()])/g, '') == dataplayer.data[0].username) {
-						var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, '')}</span>`
-						var team2name = `<span class="team_name">${teamnames[1].replace(/([()])/g, '')}</span>`
-					} else {
-						var team1name = `<span class="team_name">${teamnames[1].replace(/([()])/g, '')}</span>`
-						var team2name = `<span class="team_name">${teamnames[0].replace(/([()])/g, '')}</span>`
-					}
-
-					var tournamentindex = data.match.name.indexOf(':')
-					var tournamentid = data.match.name.substring(0, tournamentindex)
-
-					var tournament_info_name = ''
+					var tournament_info_name = '';
+					var tournament_modifiers = {"HD": "1.00","HR": "1.00","EZ": "1.00","FL": "1.00"};
 
 					// CHECK FOR TOURNAMENT
-					if (tournament[tournamentid]) {
-						tournament_info_name = tournament[tournamentid]
+					if(tournament[tournamentid]){
+					tournament_info_name = tournament[tournamentid].name;
+					tournament_modifiers = tournament[tournamentid].modifiers;
 					}
 
-					var team1imgstring = ''
-					var team2imgstring = ''
-
-					// Player Image
-					if (team1imgstring == '') {
-						team1imgstring = `<img class="playerimg" src="http://s.ppy.sh/a/${dataplayer.data[0].user_id}"> <br />`
-					}
-					if (team2imgstring == '') {
-						team2imgstring = `<img class="playerimg" src="http://s.ppy.sh/a/${team2id}"> <br />`
-					}
-
-					team1img.innerHTML = `${team1imgstring} ${team1name}`
-					team2img.innerHTML = `${team2imgstring} ${team2name}`
-					tourneyheadertext.textContent = stage + " <br> " + bestof
-					tourneyfootertext.textContent = tournament_info_name
-
-					team1Element.textContent = team1
-					team2Element.textContent = team2
-					if (team1 == bestof / 2 + 0.5 || team2 == bestof / 2 + 0.5) {
-						clearInterval(interval)
-						team1img.innerHTML = ''
-						team2img.innerHTML = ''
-						tourneyheadertext.textContent = ''
-						tourneyfootertext.textContent = ''
-						if (team1 == bestof / 2 + 0.5) {
-							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`
-						} else {
-							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`
+					//Score system
+					for(var i=warmups; i<data.games.length; i++){
+						for(var x=0; x<data.games[i].scores.length; x++){
+						  var gameended = data.games[i].end_time==null;
+						  if(gameended == false ){
+							if(data.games[i].scores[x].user_id == dataplayer.data[0].user_id){
+							  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
+								team1score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+							  }
+							  else {
+								team1score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+							  }
+							} else if(data.games[i].scores[x].user_id != userid && playerslot.includes(data.games[i].scores[x].slot)){
+							  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
+								team2score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+								team2id = data.games[i].scores[x].user_id;
+							  }
+							  else {
+								team2score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+								team2id = data.games[i].scores[x].user_id;
+							  }
+							}
+						  } 
 						}
-					} else {
-						team1Element.textContent = team1
-						team2Element.textContent = team2
+					  if(team1score - team2score == 0){
+						team1 = team1;
+						team2 = team2;
+					  } else if(team1score - team2score > 0){
+						  team1++;
+						  team1score = 0;
+						  team2score = 0;
+					  } else {
+						  team2++;
+						  team1score = 0;
+						  team2score = 0;
+					  }
 					}
+					var patt = /\((.*?)\)/g;
+					var teamnames = data.match.name.match(patt);
 
-					team1 = 0
-					team2 = 0
+					if(teamnames[0].replace(/([()])/g, "") == dataplayer.data[0].username){
+						var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, "")}</span>`;
+						var team2name = `<span class="team_name">${teamnames[1].replace(/([()])/g, "")}</span>`;
+					  } else {
+						var team1name = `<span class="team_name">${teamnames[1].replace(/([()])/g, "")}</span>`;
+						var team2name = `<span class="team_name">${teamnames[0].replace(/([()])/g, "")}</span>`;
+					  }
+				  
+				  
+					  var team1imgstring = '';
+					  var team2imgstring = '';
+				  
+				  
+					  // Player Image
+					  if(team1imgstring == ''){
+						team1imgstring = `<img class="playerimg" src="http://s.ppy.sh/a/${dataplayer.data[0].user_id}"> <br />`;
+					  }
+					  if(team2imgstring == ''){
+						team2imgstring = `<img class="playerimg" src="http://s.ppy.sh/a/${team2id}"> <br />`;
+					  }
+				  
+					  team1img.innerHTML = `${team1imgstring} ${team1name}`;
+					  team2img.innerHTML = `${team2imgstring} ${team2name}`;
+					  tourneyheadertext.textContent = stage;
+					  tourneyfootertext.textContent = tournament_info_name;
+				  
+				  
+				  
+					
+						team1Element.textContent = team1;
+						team2Element.textContent = team2;
+						if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+						  clearInterval(interval);
+						  team1img.innerHTML = '';
+						  team2img.innerHTML = '';
+						  tourneyheadertext.textContent = '';
+						  tourneyfootertext.textContent = '';  
+						  if(team1 == (bestof/2)+0.5){
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+						  } else {
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+						  }
+						} else {
+						  team1Element.textContent = team1;
+						  team2Element.textContent = team2;
+						}
+					  
+				  
+					  
+				  
+					  team1 = 0;
+					  team2 = 0;
+				  
 				})
 				.catch((err) => {
 					clearInterval(interval)
@@ -331,3 +374,4 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 			textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, CHECK IF APIKEY, MATCHID, WARMUPS, REVERSE AND BESTOF ARE CORRECT</span>'
 		})
 }
+

@@ -3,6 +3,7 @@ const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
+const fetch = require('node-fetch')
 
 const socket = require('socket.io')
 const app = express()
@@ -30,6 +31,10 @@ app.get('/style.css', (req, res) => {
 
 app.get('/assets/countries', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/assets/countries.js'))
+})
+
+app.get('/assets/scoremodification', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/scoremodification.js'))
 })
 
 app.get('/app.js', cors(), (req, res) => {
@@ -95,6 +100,30 @@ const server = app.listen(3000, () => {
 	open(`http://localhost:${server.address().port}`)
 })
 
+// Check for an update
+fs.readdir('./', async (err, data) => {
+    currentVer = '';
+	if(err){
+		return console.log(err);
+	} 
+
+	if(data.includes(`version.txt`)){
+		currentVer = fs.readFileSync('./version.txt');
+	} else {
+		currentVer = 'old';
+	}
+
+	fetch('secret') //ask for it
+		.then((res) => res.json())
+		.then((versiondata) => {	
+		newVer = versiondata[0].tag_name;
+			if(currentVer != newVer && currentVer < newVer){
+				console.warn("You're using an older version of the displayer!\nCurrent version: " + currentVer + " / Latest version: " + newVer + "\nYou can still using this version but it's recommended to update to the latest version!\nOpen 'updater.exe' to update the displayer!")
+			}
+		})
+})
+
+// init socket server
 const io = socket(server)
 
 io.on('connection', (socket) => {
