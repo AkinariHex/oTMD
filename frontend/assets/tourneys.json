@@ -1,5 +1,472 @@
 {
-    "5WC": "5 Digits World Cup",
-    "OWC": "osu! World Cup",
-    "OMF3": "Old Map Fantasy 3"
+    "5WC": {
+        "name": "5 Digits World Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1126718",
+        "date": {
+            "start": "09/10/2020",
+            "end": "21/12/2020"
+        }
+    },
+    "OWC": {
+        "name": "osu! World Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "https://osu.ppy.sh/community/tournaments/26",
+        "date": {
+            "start": "24/10/2020",
+            "end": "06/12/2020"
+        }
+    },
+    "TAR": {
+        "name": "The All Rounder",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1163177",
+        "date": {
+            "start": "27/11/2020",
+            "end": "17/01/2021"
+        }
+    },
+    "PT2": {
+        "name": "Paper's Tournament 2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1175820",
+        "date": {
+            "start": "28/11/2020",
+            "end": "17/01/2021"
+        }
+    },
+    "OMF3": {
+        "name": "Old Map Fantasy 3",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1152703",
+        "date": {
+            "start": "31/10/2020",
+            "end": "10/01/2021"
+        }
+    },
+    "OCLW21": {
+        "name": "osu! Collegiate League: Winter 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.50"
+            },
+            "FL": {
+                "type": "*",
+                "value": "2.00"
+            }
+        },
+        "forumID": "1214024",
+        "date": {
+            "start": "30/01/2021",
+            "end": "21/03/2021"
+        }
+    },
+    "DWT2": {
+        "name": "Dolphin's Winter Tournament 2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1187105",
+        "date": {
+            "start": "09/01/2021",
+            "end": "20/02/2021"
+        }
+    },
+    "FOT": {
+        "name": "Fox Open Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1196836",
+        "date": {
+            "start": "09/01/2021",
+            "end": ""
+        }
+    },
+    "L42": {
+        "name": "Lobby 42: EMRTT2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1195407",
+        "date": {
+            "start": "08/01/2021",
+            "end": ""
+        }
+    },
+    "ONZOT": {
+        "name": "osu! New Zealand Open Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1195336",
+        "date": {
+            "start": "09/01/2021",
+            "end": "12/02/2021"
+        }
+    },
+    "ONZ5T": {
+        "name": "osu! New Zealand 5-digit Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1195336",
+        "date": {
+            "start": "09/01/2021",
+            "end": "12/02/2021"
+        }
+    },
+    "o!SEAT 4": {
+        "name": "South East Asia Tournament 4",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1177376",
+        "date": {
+            "start": "05/12/2020",
+            "end": "31/01/2021"
+        }
+    },
+    "WDT": {
+        "name": "Winter Decision Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1178319",
+        "date": {
+            "start": "18/12/2020",
+            "end": "14/02/2021"
+        }
+    },
+    "OBPPWT": {
+        "name": "Osu Big PP Winter Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1187842",
+        "date": {
+            "start": "23/01/2021",
+            "end": "28/02/2021"
+        }
+    },
+    "CWT": {
+        "name": "Chaotix's Winter Trios",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1164443",
+        "date": {
+            "start": "01/01/2021",
+            "end": "14/02/2021"
+        }
+    },
+    "OJT": {
+        "name": "osu! Japan Tournament 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "winnersBracketADV": 2
+        },
+        "forumID": "1214412",
+        "date": {
+            "start": "23/01/2021",
+            "end": "07/03/2021"
+        }
+    },
+    "OBTT": {
+        "name": "osu! Belgium Team Tournament 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1216018",
+        "date": {
+            "start": "05/02/2021",
+            "end": "14/03/2021"
+        }
+    },
+    "": {
+        "name": "",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "",
+        "date": {
+            "start": "",
+            "end": ""
+        }
+    }
+    
 }

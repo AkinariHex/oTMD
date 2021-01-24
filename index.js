@@ -10,6 +10,7 @@ const app = express()
 
 app.use(express.json())
 app.use(cors())
+app.use('/teamsimg', express.static('teams'));
 
 function readSettingsJson() {
 	try {
@@ -48,6 +49,23 @@ app.get('/socketio', (req, res) => {
 app.get('/settings', (req, res) => {
 	res.json(readSettingsJson())
 })
+
+app.get('/teams', (req, res) => {
+	fs.readdir('./teams', async (err, data) => {	
+		if(err){
+			res.json(['nodata']);
+			return
+		}
+
+		if(data == ''){
+			res.json(['nodata']);
+		} else {
+			res.json(data)
+		}
+
+	})
+})
+
 
 // Default visualizer
 
@@ -113,7 +131,7 @@ fs.readdir('./', async (err, data) => {
 		currentVer = 'old';
 	}
 
-	fetch('secret') //ask for it
+	fetch('https://api.github.com/repos/AkinariHex/oTMD/releases') //ask for it
 		.then((res) => res.json())
 		.then((versiondata) => {	
 		newVer = versiondata[0].tag_name;

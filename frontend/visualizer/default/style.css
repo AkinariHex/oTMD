@@ -226,6 +226,11 @@ input[type='number'] {
 	margin: 6px;
 }
 
+.teamimg {
+    height: 35px;
+	margin: 6px;
+}
+
 .playerimg {
 	height: 40px;
     margin: 6px, 6px, 1px, 6px;

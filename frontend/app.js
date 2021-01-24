@@ -97,18 +97,25 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 	fetch(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
 		.then((res) => res.json())
 		.then((data) => {
-			//Tournament Info
+
+			// Tournament Info
 			var tournamentindex = data.match.name.indexOf(':');
 			var tournamentid = data.match.name.substring(0, tournamentindex);
 		
 			var tournament_info_name = '';
-			var tournament_modifiers = {"HD": "1.00","HR": "1.00","EZ": "1.00","FL": "1.00"};
+			var tournament_modifiers = {"HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
 		
 			// CHECK FOR TOURNAMENT
 			if(tournament[tournamentid]){
 			  tournament_info_name = tournament[tournamentid].name;
 			  tournament_modifiers = tournament[tournamentid].modifiers;
 			}
+
+			
+			// Check for ADV in grandfinals
+			if(scoremodification.winnersBracketADV(stage, tournament_modifiers) != null){
+				team1 += scoremodification.winnersBracketADV(stage, tournament_modifiers)
+			}			
 		
 			//Score system
 			for(var i=warmups; i<data.games.length; i++){
@@ -148,6 +155,10 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 			}
 			var patt = /\((.*?)\)/g;
 			var teamnames = data.match.name.match(patt);
+
+			var team1nameNoSpan = teamnames[0].replace(/([()])/g, "");
+			var team2nameNoSpan = teamnames[1].replace(/([()])/g, "");
+
 			
 			var team1name = `<span class="team_name">${teamnames[0].replace(/([()])/g, "")}</span>`;
 			var team2name = `<span class="team_name">${teamnames[1].replace(/([()])/g, "")}</span>`;
@@ -156,76 +167,95 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 			var team2pos = null;
 			var team1imgstring = '';
 			var team2imgstring = '';
+
 		
-			// CHECK FOR COUNTRIES FLAGS
-			for(var z=0; z<country.length; z++){
-			  if(team1name.includes(country[z].country)){
-				  team1pos = z;
-				  team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team1pos].id}.png"> <br />`;
-				}
-			  if(team2name.includes(country[z].country)){
-				  team2pos = z;
-				  team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team2pos].id}.png"> <br />`;
-			  }
-			}
-		
-			// CHECK IF FOUND THE FLAG AND REPLACE THE BLANK IMAGE WITH A BLANK FLAG
+			
+			var team1nospace = team1nameNoSpan.replace(/\s/g,'');
+    		var team2nospace = team2nameNoSpan.replace(/\s/g,'');
+			fetch(`/teams`)
+				.then((res) => res.json())
+				.then((data) => {
+					// CHECK FOR COUNTRIES FLAGS
+					for(var z=0; z<country.length; z++){
+						if(team1name.includes(country[z].country)){
+							team1pos = z;
+							team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team1pos].id}.png"> <br />`;
+						}
+						if(team2name.includes(country[z].country)){
+							team2pos = z;
+							team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team2pos].id}.png"> <br />`;
+						}
+					}
+					// CHECK FOR TEAMS IMAGE
+					data.forEach(image => {
+						console.log(image.includes(team1nospace.toLowerCase()));
+						if(image.includes(team1nospace.toLowerCase())){
+							team1imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
+						}
+						if(image.includes(team2nospace.toLowerCase())){
+							team2imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
+						}
+					});
+					// CHECK IF FOUND THE FLAG AND REPLACE THE BLANK IMAGE WITH A BLANK FLAG
 			if(team1imgstring == ''){
-			  team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />`;
-			}
-			if(team2imgstring == ''){
-			  team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A2.png"> <br />`;
-			}
-		
-			team1img.innerHTML = `${team1imgstring} ${team1name}`;
-			team2img.innerHTML = `${team2imgstring} ${team2name}`;
-			tourneyheadertext.textContent = stage;
-			tourneyfootertext.textContent = tournament_info_name;
-		
-		
-		
-			if(reverse == 'true' || reverse == true){
-			  team1Element.textContent = team2;
-			  team2Element.textContent = team1;
-			  if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
-				clearInterval(interval);
-				team1img.innerHTML = '';
-				team2img.innerHTML = '';
-				tourneyheadertext.textContent = '';
-				tourneyfootertext.textContent = '';        
-				if(team1 == (bestof/2)+0.5){
-				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
-				} else {
-				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
-				}
-			  } else {
+				team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />`;
+			  }
+			  if(team2imgstring == ''){
+				team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A2.png"> <br />`;
+			  }
+		  
+			  team1img.innerHTML = `${team1imgstring} ${team1name}`;
+			  team2img.innerHTML = `${team2imgstring} ${team2name}`;
+			  tourneyheadertext.innerHTML = stage + "<br />BO" + bestof;
+			  tourneyfootertext.textContent = tournament_info_name;
+		  
+		  
+		  
+			  if(reverse == 'true' || reverse == true){
 				team1Element.textContent = team2;
 				team2Element.textContent = team1;
-			  }
-			} else {
-			  team1Element.textContent = team1;
-			  team2Element.textContent = team2;
-			  if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
-				clearInterval(interval);
-				team1img.innerHTML = '';
-				team2img.innerHTML = '';
-				tourneyheadertext.textContent = '';
-				tourneyfootertext.textContent = '';  
-				if(team1 == (bestof/2)+0.5){
-				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+				if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+				  clearInterval(interval);
+				  team1img.innerHTML = '';
+				  team2img.innerHTML = '';
+				  tourneyheadertext.textContent = '';
+				  tourneyfootertext.textContent = '';        
+				  if(team1 == (bestof/2)+0.5){
+					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+				  } else {
+					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+				  }
 				} else {
-				  textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+				  team1Element.textContent = team2;
+				  team2Element.textContent = team1;
 				}
 			  } else {
 				team1Element.textContent = team1;
 				team2Element.textContent = team2;
+				if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+				  clearInterval(interval);
+				  team1img.innerHTML = '';
+				  team2img.innerHTML = '';
+				  tourneyheadertext.textContent = '';
+				  tourneyfootertext.textContent = '';  
+				  if(team1 == (bestof/2)+0.5){
+					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+				  } else {
+					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+				  }
+				} else {
+				  team1Element.textContent = team1;
+				  team2Element.textContent = team2;
+				}
 			  }
-			}
-		
+		  
+			  
+		  
+			  team1 = 0;
+			  team2 = 0;
+
+			})
 			
-		
-			team1 = 0;
-			team2 = 0;
 		})
 		.catch((err) => {
 			clearInterval(interval)

@@ -53,15 +53,36 @@ function modsModifiers(mods, score, modifier){
   
   
 	let scoremod = score;
+
   
 	if(modarr.includes('EZ') == true){
-	  scoremod = score * parseFloat(modifier.EZ);
+		if(modifier.EZ.type == '*'){
+			scoremod = score * parseFloat(modifier.EZ.value);
+		} else if (modifier.EZ.type == '/'){
+			scoremod = score / parseFloat(modifier.EZ.value);
+		}
+		//scoremod = score * parseFloat(modifier.EZ);
 	}
 	if(modarr.includes('FL') == true){
-	  scoremod = score * parseFloat(modifier.EZ);
+		if(modifier.FL.type == '*'){
+			scoremod = score * parseFloat(modifier.FL.value);
+		} else if (modifier.FL.type == '/'){
+			scoremod = score / parseFloat(modifier.FL.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
 	}
   
 	return scoremod;
 }
 
-export { modsModifiers };
+function winnersBracketADV(stage, valueADV){
+	var points = 0;
+	if(stage == 'Grand Finals'){
+		if(valueADV.winnersBracketADV){
+			points = valueADV.winnersBracketADV;
+		}
+	}
+	return points;
+}
+
+export { modsModifiers, winnersBracketADV };
