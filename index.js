@@ -131,7 +131,7 @@ fs.readdir('./', async (err, data) => {
 		currentVer = 'old';
 	}
 
-	fetch('https://api.github.com/repos/AkinariHex/oTMD/releases') //ask for it
+	fetch('secret') //ask for it
 		.then((res) => res.json())
 		.then((versiondata) => {	
 		newVer = versiondata[0].tag_name;
