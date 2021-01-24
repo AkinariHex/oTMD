@@ -73,7 +73,7 @@ socket.on('new_settings', (/* parsedData = data */) => {
 })
 
 function checkData() {
-	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/assets/tourneys.json')
+	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/frontend/assets/tourneys.json')
 		.then((res) => res.json())
 		.then((tourneydata) => {
 			if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
