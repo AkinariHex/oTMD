@@ -1,21 +1,24 @@
 {
 	"name": "otmd",
-	"version": "1.0.0",
+	"version": "1.4.0",
 	"description": "o!TMDisplayer",
 	"main": "index.js",
 	"scripts": {
 		"build": "pkg index.js",
-		"server": "nodemon index.js"
+		"server:dev": "nodemon index.js",
+		"server": "node index.js"
 	},
 	"keywords": [],
 	"author": "Akinari & RLPG",
 	"license": "ISC",
 	"dependencies": {
-		"axios": "^0.21.0",
 		"cors": "^2.8.5",
 		"express": "^4.17.1",
+		"node-fetch": "^2.6.1",
 		"open": "^7.3.0",
-		"pkg": "^4.4.9"
+		"pkg": "^4.4.9",
+		"socket.io": "^3.0.4",
+		"ws": "^7.4.0"
 	},
 	"devDependencies": {
 		"nodemon": "^2.0.6"

@@ -10,7 +10,7 @@
 		<div class="formcontainer">
 			<div class="formbox">
 				<h1>OTMD Settings</h1>
-				<form>
+				<div id="form">
 					<label for="api-key">apikey: </label>
 					<input type="text" name="api-key" id="api-key" placeholder="apikey" />
 					<br />
@@ -22,7 +22,7 @@
 					<div id="matchtype">
 						<label>Match Type: </label>
 						<div id="input-wrapper">
-							<input type="radio" id="matchtype-1v1" name="matchtype" value="1v1" />
+							<input type="radio" id="matchtype-1v1" name="matchtype" value="h1v1" />
 							<label for="matchtype-1v1">1vs1</label><br />
 						</div>
 						<div id="input-wrapper">
@@ -30,11 +30,18 @@
 							<label for="matchtype-teamvs">teamvs</label>
 						</div>
 					</div>
+					
+					<div class="selectmatchtype_userid" id="divuserid">
+						<label for="userid">UserID: </label>
+						<input type="text" name="userid" id="userid" />
+						<br />
+					</div>
 
 					<div id="tournament">
 						<label for="stage">Stage: </label>
 						<select id="stage" name="stage">
 							<option value="Friendly">Friendly</option>
+							<option value="Group Stage">Group Stage</option>
 							<option value="Round of 64">RO64</option>
 							<option value="Round of 32">RO32</option>
 							<option value="Round of 16">RO16</option>
@@ -62,23 +69,20 @@
 						<br />
 					</div>
 
-					<div class="selectmatchtype_userid" id="divuserid">
-						<label for="userid">UserID: </label>
-						<input type="text" name="userid" id="userid" />
+					<div id="divscorereverse">
+						<input type="checkbox" name="reverse" id="reverse" />
+						<label for="reverse">score reverse</label>
 						<br />
-					</div>
-
-					<input type="checkbox" name="reverse" id="reverse" />
-					<label for="reverse">score reverse</label>
-					<br />
+					</div>		
 
 					<button id="get">Load old settings</button>
 					<button id="save">Save Settings</button>
-				</form>
+				</div>
 			</div>
 		</div>
 	</body>
 
+	<script src="/socketio"></script>
 	<script type="module">
 		const save = document.querySelector('#save')
 		const getconf = document.querySelector('#get')
@@ -96,8 +100,10 @@
 		const matchtype_1v1 = document.querySelector('#matchtype-1v1')
 		const matchtype_teamvs = document.querySelector('#matchtype-teamvs')
 
-		const tournament = document.querySelector('#tournament')
 		const pvp = document.querySelector('#divuserid')
+		const divreverse = document.querySelector('#divscorereverse')
+
+		const socket = io()
 
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
@@ -115,30 +121,12 @@
 			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
 		}
 
-		const postData = async (url = '', data = {}) => {
-			// Default options are marked with *
-			const response = await fetch(url, {
-				method: 'POST', // *GET, POST, PUT, DELETE, etc.
-				// mode: 'cors', // no-cors, *cors, same-origin
-				// cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-				// credentials: 'same-origin', // include, *same-origin, omit
-				headers: {
-					'Content-Type': 'application/json',
-					// 'Content-Type': 'application/x-www-form-urlencoded',
-				},
-				// redirect: 'follow', // manual, *follow, error
-				// referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-				body: JSON.stringify(data), // body data type must match "Content-Type" header
-			})
-			return response // parses JSON response into native JavaScript objects
-		}
-
 		const switchMatchType = () => {
 			if (matchtype_1v1.checked) {
-				tournament.classList.add('invisible')
+				divreverse.classList.add('invisible')
 				pvp.classList.remove('invisible')
 			} else if (matchtype_teamvs.checked) {
-				tournament.classList.remove('invisible')
+				divreverse.classList.remove('invisible')
 				pvp.classList.add('invisible')
 			}
 		}
@@ -165,7 +153,7 @@
 				reverse: reverse_el.checked,
 			}
 
-			postData('/save', data)
+			socket.emit('save', data)
 
 			let secondWindow = window.open('/visualizer')
 			secondWindow.location.reload(true)
