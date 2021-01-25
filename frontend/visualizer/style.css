@@ -1,3 +1,8 @@
+:root {
+	--visualizer-border-radius : '0px 0px 0px 0px';
+}
+
+
 * {
 	padding: 0;
 	margin: 0;
@@ -164,12 +169,12 @@ input[type='number'] {
 
 
 .visualizer {
-	background: linear-gradient(90deg, rgba(20, 53, 102, 1.05) 0%, rgba(40, 38, 40, 1.05) 50%, rgba(129, 37, 37, 1.05) 100%) !important;
+	background: linear-gradient(90deg, rgba(20, 53, 102, 1) 0%, rgba(36,41,52,1) 30%, rgba(40,38,40,1) 50%, rgba(58,38,39,1) 70%, rgba(129, 37, 37, 15) 100%) !important;
 	/*background-image: repeating-radial-gradient( circle at 0 , transparent 0, #00000029 20px ), linear-gradient(90deg, rgba(20, 53, 102, 1.05) 0%, rgba(40, 38, 40, 1.05) 50%, rgba(129, 37, 37, 1.05) 100%) !important;*/
     /*background: repeating-linear-gradient( -50deg, #00000014, #00000014 1px, #e5e5f700 20px, #e5e5f700 15px ), linear-gradient(90deg, rgba(20, 53, 102, 1.05) 0%, rgba(40, 38, 40, 1.05) 50%, rgba(129, 37, 37, 1.05) 100%) !important;*/
     width: 400px;
 	height: 130px;
-    border-radius: 0px 0px 0px 0px;
+    border-radius: var(--visualizer-border-radius);
 	box-sizing: border-box;
 	flex-direction: column;
 	justify-content: space-around !important;

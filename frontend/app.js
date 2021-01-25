@@ -1,6 +1,7 @@
 import countriesjs from './assets/countries'
 import * as scoremodification from './assets/scoremodification'
 
+const visualizer = document.querySelector('.visualizer');
 const team1Element = document.querySelector('#team1')
 const team2Element = document.querySelector('#team2')
 const team1img = document.querySelector('.teaminner1')
@@ -19,6 +20,7 @@ let reverse = null
 let bestof = null
 let matchtype = null
 let userid = null
+let visualizerborder = null
 
 // invoke once on page opening
 function init() {
@@ -36,6 +38,7 @@ function init() {
 			matchtype = data.matchtype
 			userid = data.userid
 			reverse = data.reverse
+			visualizerborder = data.visualizerstyle
 
 			checkData()
 		})
@@ -76,6 +79,7 @@ function checkData() {
 	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/frontend/assets/tourneys.json')
 		.then((res) => res.json())
 		.then((tourneydata) => {
+			visualizer.style.setProperty('--visualizer-border-radius', visualizerborder);
 			if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
 				if (userid != 'null' && matchtype == 'h1v1') {
 					matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneydata, stage, userid)

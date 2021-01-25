@@ -1,9 +1,11 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
 const fetch = require('node-fetch')
+const fsWin = require('fswin');
 
 const socket = require('socket.io')
 const app = express()
@@ -26,8 +28,16 @@ app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/index.html'))
 })
 
-app.get('/style.css', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/style.css'))
+app.get('/assets/style.css', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/style.css'))
+})
+
+app.get('/assets/semantic.min.css', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/semantic.min.css'))
+})
+
+app.get('/assets/semantic.min.js', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/semantic.min.js'))
 })
 
 app.get('/assets/countries', (req, res) => {
@@ -70,46 +80,14 @@ app.get('/teams', (req, res) => {
 // Default visualizer
 
 app.get('/visualizer', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/default/visualizer.html'))
-})
-
-app.get('/visualizer/default', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/default/visualizer.html'))
+	res.sendFile(path.join(__dirname, 'frontend/visualizer/visualizer.html'))
 })
 
 app.get('/visualizer/style.css', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/default/style.css'))
+	res.sendFile(path.join(__dirname, 'frontend/visualizer/style.css'))
 })
 
-// Rounded visualizer
 
-app.get('/visualizer/rounded', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/rounded/visualizer.html'))
-})
-
-app.get('/visualizer/rounded/style.css', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/rounded/style.css'))
-})
-
-// Top corners rounded visualizer
-
-app.get('/visualizer/top-rounded', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/top-rounded/visualizer.html'))
-})
-
-app.get('/visualizer/top-rounded/style.css', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/top-rounded/style.css'))
-})
-
-// Bottom corners rounded visualizer
-
-app.get('/visualizer/bottom-rounded', cors(), (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/bottom-rounded/visualizer.html'))
-})
-
-app.get('/visualizer/bottom-rounded/style.css', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/visualizer/bottom-rounded/style.css'))
-})
 
 // -----------------------------------------------------------------------------
 
@@ -131,10 +109,13 @@ fs.readdir('./', async (err, data) => {
 		currentVer = 'old';
 	}
 
-	fetch('secret') //ask for it
+	fetch(process.env.RELEASE_LINK) //ask for it
 		.then((res) => res.json())
-		.then((versiondata) => {	
+		.then((versiondata) => {
 		newVer = versiondata[0].tag_name;
+		app.get('/version', (req, res) => {
+			res.json({"oldVer": currentVer.toString(), "newVer": newVer});
+		})
 			if(currentVer != newVer && currentVer < newVer){
 				console.warn("You're using an older version of the displayer!\nCurrent version: " + currentVer + " / Latest version: " + newVer + "\nYou can still using this version but it's recommended to update to the latest version!\nOpen 'updater.exe' to update the displayer!")
 			}
@@ -154,6 +135,15 @@ io.on('connection', (socket) => {
 
 	socket.on('save', (data) => {
 		fs.writeFileSync('./settings.json', JSON.stringify(data))
+		var attributes = {
+			IS_ARCHIVED: false, //true means yes
+			IS_HIDDEN: true, //false means no
+			IS_OFFLINE: false,
+			IS_READ_ONLY: false,
+			IS_SYSTEM: false,
+			IS_TEMPORARY: false
+		};
+		fsWin.setAttributesSync('./settings.json', attributes) ? 'done' : 'can not set';
 		io.emit('new_settings' /* data */)
 	})
 })

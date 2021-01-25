@@ -13,7 +13,9 @@
 	"license": "ISC",
 	"dependencies": {
 		"cors": "^2.8.5",
+		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
+		"fswin": "^3.21.107",
 		"node-fetch": "^2.6.1",
 		"open": "^7.3.0",
 		"pkg": "^4.4.9",

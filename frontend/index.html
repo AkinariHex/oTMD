@@ -3,168 +3,358 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>OTMD Settings</title>
-		<link rel="stylesheet" href="./style.css" />
+		<title>OTMD Dashboard</title>
+		<link rel="stylesheet" type="text/css" href="/assets/semantic.min.css">
+		<script
+		src="https://code.jquery.com/jquery-3.1.1.min.js"
+		integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+		crossorigin="anonymous"></script>
+		<script src="/assets/semantic.min.js"></script>
+		<link rel="stylesheet" href="/assets/style.css" />
 	</head>
 	<body>
-		<div class="formcontainer">
-			<div class="formbox">
-				<h1>OTMD Settings</h1>
-				<div id="form">
-					<label for="api-key">apikey: </label>
-					<input type="text" name="api-key" id="api-key" placeholder="apikey" />
-					<br />
+		<div class="header">
+			<div class="ui top attached tabular menu">
+				<a class="item active" data-tab="match">Match</a>
+				<a class="item" data-tab="settings">Settings</a>
+			  </div>
+			<div class="ui equal width form">
+			  <div class="ui bottom attached tab segment active" data-tab="match">
 
-					<label for="match-id">matchID: </label>
-					<input type="text" name="match-id" id="match-id" placeholder="matchID" />
-					<br />
-
-					<div id="matchtype">
-						<label>Match Type: </label>
-						<div id="input-wrapper">
-							<input type="radio" id="matchtype-1v1" name="matchtype" value="h1v1" />
-							<label for="matchtype-1v1">1vs1</label><br />
-						</div>
-						<div id="input-wrapper">
-							<input type="radio" id="matchtype-teamvs" name="matchtype" value="teamvs" checked />
-							<label for="matchtype-teamvs">teamvs</label>
-						</div>
+				<div id="updatemessage" name="updatemessage" class="updatemessage">
+					<div class="ui warning message">
+						<div class="header">Old Version</div>
+						<p>You're using an older version of the displayer, please be sure to update to the latest version to avoid bugs and malfunctions!
+							You can update to the latest by:</p>
+						<ul class="list">
+						  <li>Closing the displayer and run <b>update.exe</b></li>
+						  <li>Download the latest version <a href="https://github.com/AkinariHex/oTMD/releases/latest">here</a></li>
+						</ul>
 					</div>
-					
-					<div class="selectmatchtype_userid" id="divuserid">
-						<label for="userid">UserID: </label>
-						<input type="text" name="userid" id="userid" />
-						<br />
-					</div>
-
-					<div id="tournament">
-						<label for="stage">Stage: </label>
-						<select id="stage" name="stage">
-							<option value="Friendly">Friendly</option>
-							<option value="Group Stage">Group Stage</option>
-							<option value="Round of 64">RO64</option>
-							<option value="Round of 32">RO32</option>
-							<option value="Round of 16">RO16</option>
-							<option value="Quarterfinals">Quarterfinals</option>
-							<option value="Semifinals">Semifinals</option>
-							<option value="Finals">Finals</option>
-							<option value="Grand Finals">Grand Finals</option>
-						</select>
-						<br />
-
-						<label for="bestof">Best of: </label>
-						<select id="bestof" name="bestof">
-							<option value="5">BO5</option>
-							<option value="7">BO7</option>
-							<option value="9">BO9</option>
-							<option value="11">BO11</option>
-							<option value="13">BO13</option>
-							<option value="15">BO15</option>
-							<option value="17">BO17</option>
-						</select>
-						<br />
-
-						<label for="warmups">warmups: </label>
-						<input type="number" name="warmups" id="warmups" />
-						<br />
-					</div>
-
-					<div id="divscorereverse">
-						<input type="checkbox" name="reverse" id="reverse" />
-						<label for="reverse">score reverse</label>
-						<br />
-					</div>		
-
-					<button id="get">Load old settings</button>
-					<button id="save">Save Settings</button>
 				</div>
+					
+					<div class="fields">
+					  <div class="required field">
+						<label>APIkey</label>
+						<input type="text" name="apikey" id="apikey" placeholder="APIkey"/>
+					  </div>
+					  <div class="field">
+						<label>UserID</label>
+						<input type="text" name="userid" id="userid" placeholder="UserID"/>
+					  </div>
+					</div>
+					<h4 class="ui dividing header"></h4>
+					<div class="fields">
+					  <div class="required field">
+						<label>MatchID</label>
+						<input type="text" name="matchid" id="matchid" placeholder="MatchID" />
+					  </div>
+					  <div class="required field">
+						<label>Match Type</label>
+						<div class="ui selection dropdown">
+							<input type="hidden" name="matchtype">
+							<i class="dropdown icon"></i>
+							<div class="default text">Match Type</div>
+							<div class="menu">
+							  <div class="item" data-value="h1v1" data-text="1vs1">
+								1vs1
+							  </div>
+							  <div class="item" data-value="teamvs" data-text="TeamVS">
+								TeamVS
+							  </div>
+							</div>
+						  </div>
+					  </div>
+					</div>
+					<div class="fields">
+						<div class="required field">
+							<label>Stage</label>
+							<div class="ui selection dropdown">
+								<input type="hidden" name="stage">
+								<i class="dropdown icon"></i>
+								<div class="default text">Stage</div>
+								<div class="menu">
+								  <div class="item" data-value="Friendly" data-text="Friendly">
+									Friendly
+								  </div>
+								  <div class="item" data-value="Round of 64" data-text="RO64">
+									RO64
+								  </div>
+								  <div class="item" data-value="Round of 32" data-text="RO32">
+									RO32
+								  </div>
+								  <div class="item" data-value="Round of 16" data-text="RO16">
+									RO16
+								  </div>
+								  <div class="item" data-value="Quarterfinals" data-text="Quarterfinals">
+									Quarterfinals
+								  </div>
+								  <div class="item" data-value="Semifinals" data-text="Semifinals">
+									Semifinals
+								  </div>
+								  <div class="item" data-value="Finals" data-text="Finals">
+									Finals
+								  </div>
+								  <div class="item" data-value="Grand Finals" data-text="Grand Finals">
+									Grand Finals
+								  </div>
+								</div>
+							  </div>
+						  </div>
+						  <div class="required field">
+							<label>Best of</label>
+							<div class="ui selection dropdown">
+								<input type="hidden" name="bestof">
+								<i class="dropdown icon"></i>
+								<div class="default text">Best of</div>
+								<div class="menu">
+								  <div class="item" data-value="5" data-text="BO5">
+									BO5
+								  </div>
+								  <div class="item" data-value="7" data-text="BO7">
+									BO7
+								  </div>
+								  <div class="item" data-value="9" data-text="BO9">
+									BO9
+								  </div>
+								  <div class="item" data-value="11" data-text="BO11">
+									BO11
+								  </div>
+								  <div class="item" data-value="13" data-text="BO13">
+									BO13
+								  </div>
+								  <div class="item" data-value="15" data-text="BO15">
+									BO15
+								  </div>
+								  <div class="item" data-value="17" data-text="BO17">
+									BO17
+								  </div>
+								</div>
+							  </div>
+						  </div>
+					</div>
+					<div class="fields">
+						<div class="field">
+							<label>Warmups</label>
+							<input type="number" name="warmups" id="warmups" data-value="0" placeholder="Warmups"/>
+						  </div>
+						<div class="field">
+							<label>Score Reverse</label>
+							<div class="ui selection dropdown">
+								<input type="hidden" name="reverse">
+								<i class="dropdown icon"></i>
+								<div class="default text">Score Reverse</div>
+								<div class="menu">
+								  <div class="item" data-value="false" data-text="False">
+									false
+								  </div>
+								  <div class="item" data-value="true" data-text="True">
+									true
+								  </div>
+								</div>
+							  </div>
+						  </div>
+					</div>
+				
+			  </div>
+			  <div class="ui bottom attached tab segment" data-tab="settings">
+
+				<div id="updatemessage1" name="updatemessage1" class="updatemessage">
+					<div class="ui warning message">
+						<div class="header">Old Version</div>
+						<p>You're using an older version of the displayer, please be sure to update to the latest version to avoid bugs and malfunctions!
+							You can update to the latest by:</p>
+						<ul class="list">
+						  <li>Closing the displayer and run <b>update.exe</b></li>
+						  <li>Download the latest version <a href="https://github.com/AkinariHex/oTMD/releases/latest">here</a></li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="fields">
+					<div class="required field">
+					  <label>APIkey</label>
+					  <input type="text" name="apikey1" id="apikey1" placeholder="APIkey"/>
+					</div>
+					<div class="required field">
+					  <label>UserID</label>
+					  <input type="text" name="userid1" id="userid1" placeholder="UserID"/>
+					</div>
+				</div>
+				<h4 class="ui dividing header"></h4>
+				<div class="fields">
+					<div class="required field">
+						<label>Visualizer Style</label>
+						<div class="ui selection dropdown">
+							<input type="hidden" name="visualizerstyle">
+							<i class="dropdown icon"></i>
+							<div class="default text">Style</div>
+							<div class="menu">
+							  <div class="item" data-value="0px 0px 0px 0px" data-text="Default">
+								Default
+							  </div>
+							  <div class="item" data-value="15px 15px 15px 15px" data-text="Rounded">
+								Rounded
+							  </div>
+							  <div class="item" data-value="15px 15px 0px 0px" data-text="Top-Rounded">
+								Top-Rounded
+							  </div>
+							  <div class="item" data-value="0px 0px 15px 15px" data-text="Bottom-Rounded">
+								Bottom-Rounded
+							  </div>
+							</div>
+						  </div>
+					</div>
+					<div class="field">
+						<label>Width</label>
+						<input placeholder="400" readonly="" type="text">
+					</div>
+					<div class="field">
+						<label>Height</label>
+						<input placeholder="130" readonly="" type="text">
+					</div>
+				</div>
+			  </div>
+			  <button class="ui submit button" name="save" id="save" type="submit">Save</button>
+			  <button class="ui button" name="loadold" id="loadold" type="button">Load old settings</button>
 			</div>
 		</div>
 	</body>
 
+	<script>
+		fetch('/version')
+		.then((res) => res.json())
+		.then((versiondata) => {
+			const { oldVer, newVer } = versiondata
+
+			console.log(oldVer < newVer)
+
+			if(oldVer != newVer && oldVer < newVer){
+				document.querySelector('#updatemessage').style.display = 'block';
+				document.querySelector('.ui.form .warning.message').style.display = 'block';
+				document.querySelector('#updatemessage1').style.display = 'block';
+			} else {
+				document.querySelector('#updatemessage').style.display = 'none';
+				document.querySelector('.ui.form .warning.message').style.display = 'none';
+				document.querySelector('#updatemessage1').style.display = 'none';
+			}
+		})
+
+	</script>
+
+	<script>
+		$('.menu .item').tab();
+		$('.ui.selection.dropdown').dropdown();
+		$('.ui.equal.width.form').form('set values', {
+			matchtype     	: 'teamvs',
+			warmups 		: '0',
+			reverse 		: 'false',
+			visualizerstyle : '0px 0px 0px 0px'
+		});
+	</script>
 	<script src="/socketio"></script>
 	<script type="module">
-		const save = document.querySelector('#save')
-		const getconf = document.querySelector('#get')
-
-		const api = document.querySelector('#api-key')
-		const match = document.querySelector('#match-id')
-		const stage_tourney = document.querySelector('#stage')
-		const warmups_el = document.querySelector('#warmups')
-		const best_of = document.querySelector('#bestof')
-		const reverse_el = document.querySelector('#reverse')
-
-		const match_type = document.querySelector('#matchtype')
-		const user_id = document.querySelector('#userid')
-
-		const matchtype_1v1 = document.querySelector('#matchtype-1v1')
-		const matchtype_teamvs = document.querySelector('#matchtype-teamvs')
-
-		const pvp = document.querySelector('#divuserid')
-		const divreverse = document.querySelector('#divscorereverse')
-
 		const socket = io()
-
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
 			res = await res.json()
 
-			const { apikey, matchid, stage, warmups, bestof, matchtype, userid, reverse } = res
+			const { apikey, matchid, stage, warmups, bestof, matchtype, userid, reverse, visualizerstyle } = res
 
-			api.value = apikey
-			match.value = matchid
-			stage_tourney.value = stage
-			warmups_el.value = warmups
-			best_of.value = bestof
-			match_type.value = matchtype
-			user_id.value = userid
-			reverse ? (reverse_el.checked = reverse) : (reverse_el.checked = false)
-		}
-
-		const switchMatchType = () => {
-			if (matchtype_1v1.checked) {
-				divreverse.classList.add('invisible')
-				pvp.classList.remove('invisible')
-			} else if (matchtype_teamvs.checked) {
-				divreverse.classList.remove('invisible')
-				pvp.classList.add('invisible')
-			}
-		}
-
-		const init = async () => {
-			loadConfig()
-			switchMatchType()
-		}
-
-		matchtype_1v1.addEventListener('click', switchMatchType)
-		matchtype_teamvs.addEventListener('click', switchMatchType)
-
-		save.addEventListener('click', (e) => {
-			e.preventDefault()
-
-			const data = {
-				apikey: api.value,
-				matchid: match.value,
-				stage: stage_tourney.value,
-				warmups: warmups_el.value,
-				bestof: best_of.value,
-				matchtype: match_type.value,
-				userid: user_id.value,
-				reverse: reverse_el.checked,
+			if(res != null){
+				$('.ui.equal.width.form').form('set values', {
+					apikey: apikey,
+					apikey1: apikey,
+					userid: userid,
+					userid1: userid,
+					matchid: matchid,
+					matchtype: matchtype,
+					stage: stage,
+					bestof: bestof,
+					warmups: warmups,
+					reverse: reverse,
+					visualizerstyle: visualizerstyle
+				});
 			}
 
-			socket.emit('save', data)
+		}
 
-			let secondWindow = window.open('/visualizer')
-			secondWindow.location.reload(true)
+
+
+		// save settings
+		$('#save').click(e => {
+			e.preventDefault();
+			$('.ui.equal.width.form').form({
+				fields: {
+					apikey: 'empty',
+					apikey1: 'empty',
+					userid: 'empty',
+					userid1: 'empty',
+					matchid: 'empty',
+					matchtype: 'empty',
+					stage: 'empty',
+					bestof: 'empty',
+					warmups: 'empty',
+					reverse: 'empty',
+					visualizerstyle: 'empty'
+				}
+			});
+			
+			$('.ui.equal.width.form').form('submit');
+
+			if($('.ui.equal.width.form').form('is valid') == true){	
+				var $form = $('.ui.equal.width.form');
+				var allFields = $form.form('get values');
+
+				if(allFields.apikey == allFields.apikey1 && allFields.userid == allFields.userid1){
+				const data = {
+					apikey: allFields.apikey,
+					matchid: allFields.matchid,
+					stage: allFields.stage,
+					warmups: allFields.warmups,
+					bestof: allFields.bestof,
+					matchtype: allFields.matchtype,
+					userid: allFields.userid,
+					reverse: allFields.reverse,
+					visualizerstyle: allFields.visualizerstyle
+				}
+
+				socket.emit('save', data)
+
+				let secondWindow = window.open('/visualizer')
+				secondWindow.location.reload(true)
+				}
+
+			}
+
 		})
 
-		getconf.addEventListener('click', (e) => {
-			e.preventDefault()
+		// load settings button
+		$('#loadold').click(e => {
+			e.preventDefault();
 			loadConfig()
 		})
 
-		console.clear()
-		init()
+
+		// same value for the two tabs
+		$('#apikey').change(e => {
+			let value = $('#apikey').val();
+			$('#apikey1').val(value);
+		})
+		$('#userid').change(e => {
+			let value = $('#userid').val();
+			$('#userid1').val(value);
+		})
+		$('#apikey1').change(e => {
+			let value = $('#apikey1').val();
+			$('#apikey').val(value);
+		})
+		$('#userid1').change(e => {
+			let value = $('#userid1').val();
+			$('#userid').val(value);
+		})
+
+		//console.clear()
+		loadConfig()
 	</script>
 </html>
