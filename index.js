@@ -1,11 +1,9 @@
-require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const fs = require('fs')
 const open = require('open')
 const path = require('path')
 const fetch = require('node-fetch')
-const fsWin = require('fswin');
 
 const socket = require('socket.io')
 const app = express()
@@ -109,7 +107,7 @@ fs.readdir('./', async (err, data) => {
 		currentVer = 'old';
 	}
 
-	fetch(process.env.RELEASE_LINK) //ask for it
+	fetch('secret') //ask for it
 		.then((res) => res.json())
 		.then((versiondata) => {
 		newVer = versiondata[0].tag_name;
@@ -135,15 +133,6 @@ io.on('connection', (socket) => {
 
 	socket.on('save', (data) => {
 		fs.writeFileSync('./settings.json', JSON.stringify(data))
-		var attributes = {
-			IS_ARCHIVED: false, //true means yes
-			IS_HIDDEN: true, //false means no
-			IS_OFFLINE: false,
-			IS_READ_ONLY: false,
-			IS_SYSTEM: false,
-			IS_TEMPORARY: false
-		};
-		fsWin.setAttributesSync('./settings.json', attributes) ? 'done' : 'can not set';
 		io.emit('new_settings' /* data */)
 	})
 })
