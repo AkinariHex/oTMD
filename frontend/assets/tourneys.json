@@ -442,6 +442,136 @@
             "end": "14/03/2021"
         }
     },
+    "SSF": {
+        "name": "Suicune's Spring Festival",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.25"
+            }
+        },
+        "forumID": "1231323",
+        "date": {
+            "start": "13/03/2021",
+            "end": "25/04/2021"
+        }
+    },
+    "SLED": {
+        "name": "Server's Lame E-Dating Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1230112",
+        "date": {
+            "start": "19/02/2021",
+            "end": "11/04/2021"
+        }
+    },
+    "CC2": {
+        "name": "Couch Cup 2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1223454",
+        "date": {
+            "start": "26/02/2021",
+            "end": ""
+        }
+    },
+    "NVC": {
+        "name": "Nocy's Voli-tile Clash",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1228449",
+        "date": {
+            "start": "06/03/2021",
+            "end": "11/04/2021"
+        }
+    },
+    "FHT2": {
+        "name": "Fooooooood's Hangry Tournament 2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.50"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1222132",
+        "date": {
+            "start": "20/02/2021",
+            "end": "07/04/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
