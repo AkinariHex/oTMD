@@ -8,6 +8,10 @@ osu! Tourney Match Displayer is a simple displayer made to be used as a browser 
     -   [Installation](https://github.com/AkinariHex/oTMD#installation)
     -   [Display on OBS](https://github.com/AkinariHex/oTMD#display-on-obs)
     -   [Close the displayer](https://github.com/AkinariHex/oTMD#close-the-displayer)
+-   <b>[Displayer styles](https://github.com/AkinariHex/oTMD#displayer-styles)</b>
+-   <b>[Join the community](https://github.com/AkinariHex/oTMD#join-the-community)</b>
+-   <b>[Contacts](https://github.com/AkinariHex/oTMD#contacts)</b>
+-   <b>[License](https://github.com/AkinariHex/oTMD#license)</b>
 
 ### Bugs and Code Format
 
