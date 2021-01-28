@@ -572,6 +572,58 @@
             "end": "07/04/2021"
         }
     },
+    "MC2021": {
+        "name": "Maple Cup 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1235185",
+        "date": {
+            "start": "06/03/2021",
+            "end": "18/04/2021"
+        }
+    },
+    "OMS2": {
+        "name": "osu! Mercenary Shop 2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.50"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1223604",
+        "date": {
+            "start": "20/02/2021",
+            "end": "28/03/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
