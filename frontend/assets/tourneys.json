@@ -624,6 +624,84 @@
             "end": "28/03/2021"
         }
     },
+    "BDC2": {
+        "name": "Brazilian Draft Cup 2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1244401",
+        "date": {
+            "start": "27/02/2021",
+            "end": "11/04/2021"
+        }
+    },
+    "BKB": {
+        "name": "BracketKay's Bracket: Spring 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.85"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1246920",
+        "date": {
+            "start": "19/03/2021",
+            "end": "02/05/2021"
+        }
+    },
+    "ASM": {
+        "name": "osu! ALLSTARS 2 Showmatch",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "/",
+        "date": {
+            "start": "28/02/2021",
+            "end": "28/02/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
