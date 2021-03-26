@@ -110,6 +110,7 @@ input[type='number'] {
 	justify-content: center;
 	height: 100%;
 	width: 100%;
+    background-color: green;
 }
 
 .selectmatchtype {
@@ -240,4 +241,75 @@ input[type='number'] {
 	height: 40px;
     margin: 6px, 6px, 1px, 6px;
     border-radius: 50%;
+}
+
+/*-----------------------------Qualifiers-----------------------------------*/
+
+
+.team_Q_propic {
+    width: 60px;
+    height: 60px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 50%;
+
+}
+
+.QualifiersData_Scores {
+    height: 60px;
+    overflow: hidden;
+    vertical-align: bottom;
+    display: flex;
+    flex-direction: column-reverse;
+    font-size: 14px;
+    align-items: center;
+    padding-bottom: 2px;
+    position: relative;
+}
+
+.QualifiersData_Scores table tr td img {
+    height: 15px;
+    vertical-align: middle;
+    bottom: 1px;
+    position: relative;
+}
+
+.QualifiersData_Scores:after {
+    height: 1.4px;
+    display: inline-block;
+    width: 100%;
+    background: white;
+    border-right: 1px white;
+    content: '';
+    position: absolute;
+    top: 61px;
+}
+
+.teamInformationQualifiers {
+    width: 60px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    left: 8px;
+    position: relative;
+}
+
+.mapsInfo {
+    position: relative;
+    left: 15px;
+}
+
+.numberMaps {
+    line-height: 12px;
+}
+
+#numberMaps_maps {
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.mapsLeft {
+    font-size: 15px;
+    margin-top: 5px;
 }

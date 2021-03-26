@@ -13,15 +13,6 @@
 					<span class="tourney_info_top"></span>
 				</div>
 				<div class="v_content">
-					<div class="team1">
-						<div class="teaminner1"></div>
-					</div>
-					<div id="score" class="score">
-						<span class="paddingfix"><span id="team1">0</span> - <span id="team2">0</span></span>
-					</div>
-					<div class="team2">
-						<div class="teaminner2"></div>
-					</div>
 				</div>
 				<div class="v_footer">
 					<span class="tourney_info_down"></span>
@@ -29,6 +20,48 @@
 			</div>
 		</div>
 
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script>
+			fetch('/settings')
+				.then((res) => res.json())
+				.then((data) => {
+
+					if(data.stage == 'Qualifiers'){
+						document.querySelector('.v_content').innerHTML = `
+						<div class="teamInformationQualifiers">
+						<div class="team_Q_propic"></div>
+						<div class="team_Q_name"></div>
+					</div>
+					<div class="mapsInfo">
+						<div class="numberMaps">
+							<span id="numberMaps_number"></span> <br> <span id="numberMaps_maps">Maps</span>
+						</div>
+						<div class="mapsLeft">
+						</div>
+					</div>
+					<div id="QualifiersData" class="QualifiersData">
+						<div class="QualifiersData_Scores">
+							<table id="QualifiersData_Scores_Table">
+							</table>
+						</div>
+						<div class="QualifiersData_Total">
+							000.000
+						</div>
+					</div>`
+					} else {
+						document.querySelector('.v_content').innerHTML = `
+						<div class="team1">
+							<div class="teaminner1"></div>
+						</div>
+						<div id="score" class="score">
+							<span class="paddingfix"><span id="team1">0</span> - <span id="team2">0</span></span>
+						</div>
+						<div class="team2">
+							<div class="teaminner2"></div>
+						</div>`
+					}
+				})
+		</script>
 		<script src="/socketio"></script>
 		<script src="/app.js" type="module"></script>
 	</body>

@@ -13,164 +13,204 @@
 		<link rel="stylesheet" href="/assets/style.css" />
 	</head>
 	<body>
-		<div class="header">
-			<div class="ui top attached tabular menu">
-				<a class="item active" data-tab="match">Match</a>
-				<a class="item" data-tab="settings">Settings</a>
-			  </div>
-			<div class="ui equal width form">
-			  <div class="ui bottom attached tab segment active" data-tab="match">
 
-				<div id="updatemessage" name="updatemessage" class="updatemessage">
-					<div class="ui warning message">
-						<div class="header">Old Version</div>
-						<p>You're using an older version of the displayer, please be sure to update to the latest version to avoid bugs and malfunctions!
-							You can update to the latest by:</p>
-						<ul class="list">
-						  <li>Closing the displayer and run <b>update.exe</b></li>
-						  <li>Download the latest version <a href="https://github.com/AkinariHex/oTMD/releases/latest">here</a></li>
-						</ul>
-					</div>
+		<div class="headerappbar">
+			<div class="ui secondary  menu">
+				<a class="item" id="applicationName">
+					osu! Tourney Match Displayer
+				  </a>
+				<div class="right menu" id="applicationButtons">
+					<button class="ui icon button headerappbarbutton" id="minimizebutton">
+						<svg viewBox="-12 -12 48 48" width="22" height="22" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M0 12v1h23v-1h-23z"/></svg>
+					</button>
+					<button class="ui icon button headerappbarbutton" id="maximizebutton">
+						<svg viewBox="-12 -12 48 48" width="22" height="22" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M24 23h-24v-22h24v22zm-23-16v15h22v-15h-22zm22-1v-4h-22v4h22z"/></svg>
+					</button>
+					<button class="ui icon button headerappbarbutton closewinbutton" id="closewinbutton">
+						<svg viewBox="-12 -12 48 48" width="22" height="22" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 11.293l10.293-10.293.707.707-10.293 10.293 10.293 10.293-.707.707-10.293-10.293-10.293 10.293-.707-.707 10.293-10.293-10.293-10.293.707-.707 10.293 10.293z"/></svg>
+					</button>
 				</div>
-					
-					<div class="fields">
-					  <div class="required field">
-						<label>APIkey</label>
-						<input type="text" name="apikey" id="apikey" placeholder="APIkey"/>
-					  </div>
-					  <div class="field">
-						<label>UserID</label>
-						<input type="text" name="userid" id="userid" placeholder="UserID"/>
-					  </div>
+			  </div>
+		</div>
+
+		<div class="loadingapp">
+			<div class="ui inverted segment">
+				<div class="ui active large inverted loader"></div>
+				<br>
+				<br>
+				<br>
+				<br>
+			</div>
+		</div>
+
+		<div class="leftverticalmenu">  
+			<div class="ui secondary vertical pointing menu" >
+				<a class="item active" id="match_button" data-tab="match">
+					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 72 72">
+						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzUlEQVRYhcWYy29NURTGfz2DhkvaiQ4ojdtWZx7xSnTgGSYGEhrpkAFKGuofqPgPUCFhwLBeA4+RR7QGJIR6japUqhhUbkLSkk7Iar7dbNvtvef03nt8yck+e+fs9X1nn7XWXvtU5XI5YqIKWA9sU7sMWABkgAngG/AOeAo8UPs7ju04IozkINAJNMVVDLwHzgIXJHLWInYDp4HFwfhH4BXwFfgO1AILgZXA0uDZUaALuJFUxBzgHLA/MHYe6AU+FBDeCLQDHcASb/wycBj4FUeEvdVNYJP69qYnJGCyAHmIapGelE1DP7BLNmcUYd//DrBF/RdAGzCcgDxEFrgOrNZ4H7DT95MomNDjCejTapQiAM03Ow/V3yyHnYa/Enuk2PAc2FjMqxPCVvkRsEbT2pyzOhFzFeP1wA9gVRlWIB/s07wEaoDPQIu9qPschyTA0F0hAchut+7rlX+mVsIy4ZBC6xPQnDAKksKiZkjha6HeHCkFN8pQ0jCcDSbFg3hbI+0FDr0VFpCPZ4eJWKfOcAV9IYTPtSGShxrepCTA4a3alkjbMQqZNDEqrrpISYQwn6cAx5eJvKxYm7IIxzeVrKwiwktWacHxjUVK14blKYtwfIMm4pk6WV1pwOd6YiLue6TtKYnwee6Ge8eIquhK7x3mAg1KWE2RyvIePdCg2rCS6BCP4Yzxu3rCcsXg/64nLFcc0709cNVLYuVCRnZrZK/L5Si/xrRS65Lu1wK3gfllEmB2bsku4nGl5D+FbqfKcsNW3ZcatlnZcSVDv3imEYqY0LnACbEyfQA4Kq9OgmrNG/DKfXfu+KuALnQCs+pnnzc2orErRZzW3nwvcMSLAnQCs7Gf4YRiZ1Ery0/l2VdMxGvgi6LJnG0RsCLP57MoOA5cm4kkzql8HnCghFP5RWC80INJ/0+0AtvVWozXef8nxpRrHgP31Bb/PwH8AVLgv5UFJt+gAAAAAElFTkSuQmCC"/>
+						<image id="VS" x="19" y="24" width="36" height="25" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAANCAYAAACkTj4ZAAABNElEQVQokaWTwU0CYRCFPwhXo0wJtIDxbrKWACXYApQAdoBnb1sCJl49sPHgVbeEt8YKzOBb82dDoolzWeafmffevAlIupP0Kemaf8QYOAfOgKshjKSppNVf4CfAM3ALVMB2UN8Dc0kt0AAbYObf+fYYEU0P9OKh2UDNLkE8dMihomde9CXgw8jJu5suk8HrJHsH3HhwZ9Ct88ozU+B1YuDGj1X6YpCMtYEr521E1EBdKMraW6+oV1CbKcG2EbF2feb1plbZeNX7iMicUYG6LyyqI2I58CwPshp42dmOdlQ0yoyti92pM0vq/cnvoicdFz2NGZYliKSFpIOkjVV1EZGG9z4dFfZmExF5nVORjclenjxJU31GevXt0W9hJT3YD6BBjhv8CWjg0QWQ/8uPiHg6PgJfUbuL8u6zyQQAAAAASUVORK5CYII="/>
+					  </svg>					  
+					<span class="item_text">
+						Match
+					</span>
+				</a>
+				<a class="item" id="displayer_settings_button" data-tab="displayer-settings">
+					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 72 72">
+						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzklEQVRYhcWYy29NURjFfz2DG0raiQ6oNm5bnXkEITrwDBMDCY10yADVNNQ/UPEfoELCgGG9Bh4jgl4DQkK9RlWPVDGo3IRESSfka9Zutu323nPae481OXfve8631tl7f99e+1Tl83liogpYC2wB1gEtwAKgGhgHvgLDwGPgHvAE+B0ndhwRRnIA6Aaa4yoG3gKngXMSOWMRu4CTwOKg/wPwAvgCfANqgYXACmBJcO8o0ANcSypiDnAG2BcEOwv0A++KCG8COoBOoMHrvwgcAn7FEWFvdR3YqLa96TEJmChCHiIj0uOKacgBOxVzWhE2/7eAzWo/A9qB9wnIQ2SBq8Aq9Q8AO/x1EgUP9HkCBjQasxGAnrc499XepAU7BX8kdkux4SmwodSqTggb5QfAaj3W7harEzEXeAPUA9+BlWUYgUKwqXkO1ACfgFZ7UTcdByXA0FshAShur37Xq/5MjoRVwmGl1kdVwiRZkBQZVdYGpXpLpFLcpEBJ03AmmBAP4m2LtBc49FdYQCGe7W4k0HxVai2E8LnWR1qhhlcpCXB4rWtrpO0YpUyaGBVXXaQaQVjPU4DjqzYRP9WoTVmE45ssVuaI8IpVWnB8Y5HKtWFZyiIc31AkL4jqejYlAT7XIxNx1/uzIyURPs/tcO8YAZamsHfYEmhUwWqOZMv7dEOjvGEl0Skewynjd37CDMfQ//YT5qCO6LfdcFnCyolqxa1RzB7n3HyPaVbrgn6vAW4C88skwuLcUFzE46zkP0a3W7YcbfG5MqRtVnG2qp0TzxRCEeM6FzghZtMHgcNa1UmQ0XODnt13546/DHSxE5i5n71e34j6LpVYtPbme4AuLwvQCazL26tKinAwW36iwL5iIl4Cn5VNttgWAcsLTJ9lwVHgynQkcU7l84D9sziVnwd+FLsx6feJNmCbrpbjdd73iTHVmofAHV1Lf58A/gBRNb+VvfBaAwAAAABJRU5ErkJggg=="/>
+						<image id="Ellipse_1_copy" data-name="Ellipse 1 copy" x="11" y="11" width="51" height="51" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbCAYAAACN1PRVAAACa0lEQVRIibXWW6iNaRgH8N9e26GRhAvHkEMomjIXXEkNkjAlYlIulKJcGWJKDIlhFMoNN+4QpQi5UMK1O9Q45tBMTrM3k0Pbjq0nz1fLstbC3mv/b77ve9/3ef7f8z7HppaWFl9BX/yC6ZiCkShhHY6kaC804209VaU6e4OwD09T6WpMw1AMxtI8NwD38B8OpFxV1LJsCQ6mogIduI1beI7d+BuTcL3s3AuswdFKpZVkTdiTV1TgLvbjRFpZDcuxFWPK9v7C7/mTVcl+xbF8f48/Uqi9znUXCL9tTJnmXNuC7cWBSp+9zD+J5wLs+EaiwLtUHHL/59o2LKplWWBiOvvZN5JUwzycTgtfpM4nhWWT8wpL6fSuEAXOpVWB/thcWNYP/2Q+/Zbh3gj8gJsYkfnXNyyZm0SB1w0ikgRr05eX8KEHZuZmBMapBpIFTiJurk36aFJu3KmTR11BWyFbKkvER91AFJiF+9gZZH1ysasRWAsrMAqrguxNHurXTWRD8tleShMDo7uJbEQ+HwbZjfyYUK89dBKhb1yKXg2yy/kRFX9hg8kWp97AlSA7W+a3wQ0k6pkVKfAKZyKpWzEHP+FQA8nWY2y+H47qVK3qD8tS09oFop9xPnvc86KTVPazqRmdUU1mdJIoCvDxJOrIESFa1hfNc1je9UBcyLbe8zvJmso69e4cJz5tVJlBdmFD2dqdshmkWpUZlaNehPifeJxr4a+LnymvMV0ty7FsYNlaMV39m6S9MT79UWBvxbD0ucl1htRIg01YmX74GiJ9otuf6QxZgaiZ8zEbP2J4kkfEPsC1SNgkqR3B+AhRpZbRzaZaagAAAABJRU5ErkJggg=="/>
+					  </svg>
+					<span class="item_text">
+						Displayer Settings
+					</span>
+				</a>
+				<a class="item" id="app_settings_button" data-tab="app-settings">
+					<svg width="25" height="25" style="fill: #aaa; margin-left: 1px" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 8.666c-1.838 0-3.333 1.496-3.333 3.334s1.495 3.333 3.333 3.333 3.333-1.495 3.333-3.333-1.495-3.334-3.333-3.334m0 7.667c-2.39 0-4.333-1.943-4.333-4.333s1.943-4.334 4.333-4.334 4.333 1.944 4.333 4.334c0 2.39-1.943 4.333-4.333 4.333m-1.193 6.667h2.386c.379-1.104.668-2.451 2.107-3.05 1.496-.617 2.666.196 3.635.672l1.686-1.688c-.508-1.047-1.266-2.199-.669-3.641.567-1.369 1.739-1.663 3.048-2.099v-2.388c-1.235-.421-2.471-.708-3.047-2.098-.572-1.38.057-2.395.669-3.643l-1.687-1.686c-1.117.547-2.221 1.257-3.642.668-1.374-.571-1.656-1.734-2.1-3.047h-2.386c-.424 1.231-.704 2.468-2.099 3.046-.365.153-.718.226-1.077.226-.843 0-1.539-.392-2.566-.893l-1.687 1.686c.574 1.175 1.251 2.237.669 3.643-.571 1.375-1.734 1.654-3.047 2.098v2.388c1.226.418 2.468.705 3.047 2.098.581 1.403-.075 2.432-.669 3.643l1.687 1.687c1.45-.725 2.355-1.204 3.642-.669 1.378.572 1.655 1.738 2.1 3.047m3.094 1h-3.803c-.681-1.918-.785-2.713-1.773-3.123-1.005-.419-1.731.132-3.466.952l-2.689-2.689c.873-1.837 1.367-2.465.953-3.465-.412-.991-1.192-1.087-3.123-1.773v-3.804c1.906-.678 2.712-.782 3.123-1.773.411-.991-.071-1.613-.953-3.466l2.689-2.688c1.741.828 2.466 1.365 3.465.953.992-.412 1.082-1.185 1.775-3.124h3.802c.682 1.918.788 2.714 1.774 3.123 1.001.416 1.709-.119 3.467-.952l2.687 2.688c-.878 1.847-1.361 2.477-.952 3.465.411.992 1.192 1.087 3.123 1.774v3.805c-1.906.677-2.713.782-3.124 1.773-.403.975.044 1.561.954 3.464l-2.688 2.689c-1.728-.82-2.467-1.37-3.456-.955-.988.41-1.08 1.146-1.785 3.126"/></svg>
+					<span class="item_text">
+						App Settings
+					</span>
+				</a>
+			</div>
+			<div class="appInfo">
+				<div class="appVersion"></div>
+				<div class="copyright">© 2021 Akinari</div>
+			</div>
+		</div>
+
+		<div class="ui equal width form">
+			
+			<div class="leftmaintab ui active vertical tab segment" id="match_tab" data-tab="match">
+				<div class="fields">
+					<div class="required field">
+					  <label>APIkey</label>
+					  <input type="text" name="apikey" id="apikey" placeholder="APIkey"/>
 					</div>
-					<h4 class="ui dividing header"></h4>
-					<div class="fields">
-					  <div class="required field">
-						<label>MatchID</label>
-						<input type="text" name="matchid" id="matchid" placeholder="MatchID" />
-					  </div>
-					  <div class="required field">
-						<label>Match Type</label>
-						<div class="ui selection dropdown">
-							<input type="hidden" name="matchtype">
-							<i class="dropdown icon"></i>
-							<div class="default text">Match Type</div>
-							<div class="menu">
-							  <div class="item" data-value="h1v1" data-text="1vs1">
-								1vs1
-							  </div>
-							  <div class="item" data-value="teamvs" data-text="TeamVS">
-								TeamVS
-							  </div>
+					<div class="field">
+					  <label>UserID</label>
+					  <input type="text" name="userid" id="userid" placeholder="UserID"/>
+					</div>
+				  </div>
+				  <h4 class="ui dividing header"></h4>
+				  <div class="fields">
+					<div class="required field">
+					  <label>MatchID</label>
+					  <input type="text" name="matchid" id="matchid" placeholder="MatchID" />
+					</div>
+					<div class="required field">
+					  <label>Match Type</label>
+					  <div class="ui selection dropdown">
+						  <input type="hidden" name="matchtype" id="matchtype">
+						  <i class="dropdown icon"></i>
+						  <div class="default text">Match Type</div>
+						  <div class="menu">
+							<div class="item" data-value="h1v1" data-text="1vs1">
+							  1vs1
+							</div>
+							<div class="item" data-value="teamvs" data-text="TeamVS">
+							  TeamVS
 							</div>
 						  </div>
-					  </div>
+						</div>
 					</div>
-					<div class="fields">
-						<div class="required field">
-							<label>Stage</label>
-							<div class="ui selection dropdown">
-								<input type="hidden" name="stage">
-								<i class="dropdown icon"></i>
-								<div class="default text">Stage</div>
-								<div class="menu">
-								  <div class="item" data-value="Friendly" data-text="Friendly">
-									Friendly
-								  </div>
-								  <div class="item" data-value="Round of 64" data-text="RO64">
-									RO64
-								  </div>
-								  <div class="item" data-value="Round of 32" data-text="RO32">
-									RO32
-								  </div>
-								  <div class="item" data-value="Round of 16" data-text="RO16">
-									RO16
-								  </div>
-								  <div class="item" data-value="Quarterfinals" data-text="Quarterfinals">
-									Quarterfinals
-								  </div>
-								  <div class="item" data-value="Semifinals" data-text="Semifinals">
-									Semifinals
-								  </div>
-								  <div class="item" data-value="Finals" data-text="Finals">
-									Finals
-								  </div>
-								  <div class="item" data-value="Grand Finals" data-text="Grand Finals">
-									Grand Finals
-								  </div>
+				  </div>
+				  <div class="fields">
+					  <div class="required field">
+						  <label>Stage</label>
+						  <div class="ui selection dropdown">
+							  <input type="hidden" name="stage" id="stageName">
+							  <i class="dropdown icon"></i>
+							  <div class="default text">Stage</div>
+							  <div class="menu">
+								<div class="item" data-value="Friendly" data-text="Friendly">
+								  Friendly
+								</div>
+								<div class="item" data-value="Qualifiers" data-text="Qualifiers">
+								  Qualifiers
+								</div>
+								<div class="item" data-value="Round of 64" data-text="RO64">
+								  RO64
+								</div>
+								<div class="item" data-value="Round of 32" data-text="RO32">
+								  RO32
+								</div>
+								<div class="item" data-value="Round of 16" data-text="RO16">
+								  RO16
+								</div>
+								<div class="item" data-value="Quarterfinals" data-text="Quarterfinals">
+								  Quarterfinals
+								</div>
+								<div class="item" data-value="Semifinals" data-text="Semifinals">
+								  Semifinals
+								</div>
+								<div class="item" data-value="Finals" data-text="Finals">
+								  Finals
+								</div>
+								<div class="item" data-value="Grand Finals" data-text="Grand Finals">
+								  Grand Finals
 								</div>
 							  </div>
-						  </div>
-						  <div class="required field">
-							<label>Best of</label>
-							<div class="ui selection dropdown">
-								<input type="hidden" name="bestof">
-								<i class="dropdown icon"></i>
-								<div class="default text">Best of</div>
-								<div class="menu">
-								  <div class="item" data-value="5" data-text="BO5">
-									BO5
-								  </div>
-								  <div class="item" data-value="7" data-text="BO7">
-									BO7
-								  </div>
-								  <div class="item" data-value="9" data-text="BO9">
-									BO9
-								  </div>
-								  <div class="item" data-value="11" data-text="BO11">
-									BO11
-								  </div>
-								  <div class="item" data-value="13" data-text="BO13">
-									BO13
-								  </div>
-								  <div class="item" data-value="15" data-text="BO15">
-									BO15
-								  </div>
-								  <div class="item" data-value="17" data-text="BO17">
-									BO17
-								  </div>
+							</div>
+						</div>
+						<div class="required field" id="bestofDIV">
+						  <label>Best of</label>
+						  <div class="ui selection dropdown">
+							  <input type="hidden" name="bestof" id="bestofDIVinput">
+							  <i class="dropdown icon"></i>
+							  <div class="default text">Best of</div>
+							  <div class="menu">
+								<div class="item" data-value="5" data-text="BO5">
+								  BO5
+								</div>
+								<div class="item" data-value="7" data-text="BO7">
+								  BO7
+								</div>
+								<div class="item" data-value="9" data-text="BO9">
+								  BO9
+								</div>
+								<div class="item" data-value="11" data-text="BO11">
+								  BO11
+								</div>
+								<div class="item" data-value="13" data-text="BO13">
+								  BO13
+								</div>
+								<div class="item" data-value="15" data-text="BO15">
+								  BO15
+								</div>
+								<div class="item" data-value="17" data-text="BO17">
+								  BO17
 								</div>
 							  </div>
-						  </div>
-					</div>
-					<div class="fields">
-						<div class="field">
-							<label>Warmups</label>
-							<input type="number" name="warmups" id="warmups" data-value="0" placeholder="Warmups"/>
-						  </div>
-						<div class="field">
-							<label>Score Reverse</label>
-							<div class="ui selection dropdown">
-								<input type="hidden" name="reverse">
-								<i class="dropdown icon"></i>
-								<div class="default text">Score Reverse</div>
-								<div class="menu">
-								  <div class="item" data-value="false" data-text="False">
-									false
-								  </div>
-								  <div class="item" data-value="true" data-text="True">
-									true
-								  </div>
+							</div>
+						</div>
+						<div class="field" id="nOFmapsDIV" style="display: none;">
+						  <label>N. of maps</label>
+						  <input type="number" name="mapsNumber" id="mapsNumber" data-value="1" placeholder="N. of maps"/>
+						</div>
+				  </div>
+				  <div class="fields">
+					  <div class="field" id="warmupField">
+						  <label>Warmups</label>
+						  <input type="number" name="warmups" id="warmups" data-value="0" placeholder="Warmups"/>
+						</div>
+					  <div class="field" id="scoreReverseField">
+						  <label>Score Reverse</label>
+						  <div class="ui selection dropdown">
+							  <input type="hidden" name="reverse">
+							  <i class="dropdown icon"></i>
+							  <div class="default text">Score Reverse</div>
+							  <div class="menu">
+								<div class="item" data-value="false" data-text="False">
+								  false
+								</div>
+								<div class="item" data-value="true" data-text="True">
+								  true
 								</div>
 							  </div>
-						  </div>
-					</div>
-				
-			  </div>
-			  <div class="ui bottom attached tab segment" data-tab="settings">
+							</div>
+						</div>
+				  </div>
+			</div>
 
-				<div id="updatemessage1" name="updatemessage1" class="updatemessage">
-					<div class="ui warning message">
-						<div class="header">Old Version</div>
-						<p>You're using an older version of the displayer, please be sure to update to the latest version to avoid bugs and malfunctions!
-							You can update to the latest by:</p>
-						<ul class="list">
-						  <li>Closing the displayer and run <b>update.exe</b></li>
-						  <li>Download the latest version <a href="https://github.com/AkinariHex/oTMD/releases/latest">here</a></li>
-						</ul>
-					</div>
-				</div>
-
+			<div class="leftmaintab ui vertical tab segment" id="displayer-settings_tab" data-tab="displayer-settings">
 				<div class="fields">
 					<div class="required field">
 					  <label>APIkey</label>
@@ -214,33 +254,104 @@
 						<input placeholder="130" readonly="" type="text">
 					</div>
 				</div>
-			  </div>
-			  <button class="ui submit button" name="save" id="save" type="submit">Save</button>
-			  <button class="ui button" name="loadold" id="loadold" type="button">Load old settings</button>
 			</div>
+
+				
+			<div class="buttonField">
+				<button class="ui submit button" name="save" id="save" type="submit">Save</button>
+				<button class="ui button" name="loadold" id="loadold" type="button">Load old settings</button>
+			</div>
+
+			
+			<div class="leftmaintab ui vertical tab segment" id="app-settings_tab" data-tab="app-settings">
+				<div class="app_settings_fields">
+					<label>User Interface</label>
+					<div class="field">
+						<div class="ui toggle checkbox" id="compactUI">
+							<input type="checkbox" name="compactUI">
+							<label>Enable compact UI</label>
+						</div>
+					</div>
+					<label>System Tray</label>
+					<div class="field">
+						<div class="ui toggle checkbox" id="systemTray">
+							<input type="checkbox" name="systemTray">
+							<label>Enable minimize to system tray</label>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<div class="ui positive message Invisible" style="width: 11.4%; margin:auto" id="saveMessage">
+				<div class="header">
+				  Settings saved!
+				</div>
+			  </div>
+
 		</div>
+
+		
+		
 	</body>
 
 	<script>
-		fetch('/version')
-		.then((res) => res.json())
-		.then((versiondata) => {
-			const { oldVer, newVer } = versiondata
+		window.addEventListener('load', () => {
+			setTimeout(()=>{
+				$('.loadingapp').addClass('hidden')
+			}, 200)
+			fetch('/version').then((res) => res.json()).then((data) => {
+				document.querySelector('.appVersion').innerHTML = `v${data.ver}`
+			})
+    	})
 
-			console.log(oldVer < newVer)
+		$('.menu .item').tab();
+	</script>
 
-			if(oldVer != newVer && oldVer < newVer){
-				document.querySelector('#updatemessage').style.display = 'block';
-				document.querySelector('.ui.form .warning.message').style.display = 'block';
-				document.querySelector('#updatemessage1').style.display = 'block';
+	<script>
+		$('#stageName').change(() => {
+			let currentStage = $('#stageName').val();
+			if(currentStage == 'Qualifiers'){
+				$('#bestofDIV').css('display', 'none')
+				$('#nOFmapsDIV').css('display', 'block')
+				$('#warmupField').css('display', 'none')
+				$('#scoreReverseField').css('display', 'none')
+				$('#bestofDIVinput').val('Qualifiers')
+				$('.ui.equal.width.form').form('set values', {
+					matchtype     	: 'h1v1'
+				})
 			} else {
-				document.querySelector('#updatemessage').style.display = 'none';
-				document.querySelector('.ui.form .warning.message').style.display = 'none';
-				document.querySelector('#updatemessage1').style.display = 'none';
+				$('#bestofDIV').css('display', 'block')
+				$('#nOFmapsDIV').css('display', 'none')
+				$('#warmupField').css('display', 'block')
+				$('#scoreReverseField').css('display', 'block')
+				if($('#bestofDIVinput').val() == 'Qualifiers'){
+					$('#bestofDIVinput').val('')
+				}
 			}
+
 		})
 
+		document.querySelector('#app_settings_button').addEventListener('click', e => {
+			e.preventDefault();
+			document.querySelector('.buttonField').style.display = 'none'
+		})
+
+		document.querySelector('#displayer_settings_button').addEventListener('click', e => {
+			e.preventDefault();
+			document.querySelector('.buttonField').style.display = 'block'
+		})
+
+		document.querySelector('#match_button').addEventListener('click', e => {
+			e.preventDefault();
+			document.querySelector('.buttonField').style.display = 'block'
+		})
+
+
+
 	</script>
+
+
 
 	<script>
 		$('.menu .item').tab();
@@ -249,17 +360,20 @@
 			matchtype     	: 'teamvs',
 			warmups 		: '0',
 			reverse 		: 'false',
-			visualizerstyle : '0px 0px 0px 0px'
+			visualizerstyle : '0px 0px 0px 0px',
+			compactUI		: false,
+			systemTray      : true
 		});
 	</script>
 	<script src="/socketio"></script>
 	<script type="module">
 		const socket = io()
+
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
 			res = await res.json()
 
-			const { apikey, matchid, stage, warmups, bestof, matchtype, userid, reverse, visualizerstyle } = res
+			const { apikey, matchid, stage, nofmaps, warmups, bestof, matchtype, userid, reverse, visualizerstyle, compactUI, systemTray } = res
 
 			if(res != null){
 				$('.ui.equal.width.form').form('set values', {
@@ -270,14 +384,60 @@
 					matchid: matchid,
 					matchtype: matchtype,
 					stage: stage,
+					mapsNumber: nofmaps,
 					bestof: bestof,
 					warmups: warmups,
 					reverse: reverse,
-					visualizerstyle: visualizerstyle
+					visualizerstyle: visualizerstyle,
+					compactUI: compactUI,
+					systemTray: systemTray
 				});
 			}
 
+			if(compactUI == true){
+				document.querySelector('#match_button .item_text').style.display = 'none'
+				document.querySelector('#displayer_settings_button .item_text').style.display = 'none'
+				document.querySelector('#app_settings_button .item_text').style.display = 'none'
+				document.querySelector('.leftverticalmenu').style.width = '4.22rem'
+				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '4.22rem'
+				document.querySelector('#displayer_settings_button').style.width = '4.22rem'
+				document.querySelector('.copyright').style.position = 'fixed'
+			}
+
 		}
+
+
+		$('#compactUI').click(e => {
+			e.preventDefault();
+			let status = false;
+			document.querySelector('#match_button .item_text').style.display = 'block'
+			document.querySelector('#displayer_settings_button .item_text').style.display = 'block'
+			document.querySelector('#app_settings_button .item_text').style.display = 'block'
+			document.querySelector('.leftverticalmenu').style.width = '14rem'
+			document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '14rem'
+			document.querySelector('#displayer_settings_button').style.width = '14rem'
+			document.querySelector('.copyright').style.position = 'absolute'
+			if ($('#compactUI input').is(':checked')) {
+				status = true;
+				document.querySelector('#match_button .item_text').style.display = 'none'
+				document.querySelector('#displayer_settings_button .item_text').style.display = 'none'
+				document.querySelector('#app_settings_button .item_text').style.display = 'none'
+				document.querySelector('.leftverticalmenu').style.width = '4.22rem'
+				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '4.22rem'
+				document.querySelector('#displayer_settings_button').style.width = '4.22rem'
+				document.querySelector('.copyright').style.position = 'fixed'
+			}
+			socket.emit('compactUIclick', status)
+		})
+
+		$('#systemTray').click(e => {
+			e.preventDefault();
+			let status = false;
+			if ($('#systemTray input').is(':checked')) {
+				status = true;
+			}
+			socket.emit('systemTrayclick', status)
+		})
 
 
 
@@ -293,6 +453,7 @@
 					matchid: 'empty',
 					matchtype: 'empty',
 					stage: 'empty',
+					mapsNumber: 'empty',
 					bestof: 'empty',
 					warmups: 'empty',
 					reverse: 'empty',
@@ -306,23 +467,34 @@
 				var $form = $('.ui.equal.width.form');
 				var allFields = $form.form('get values');
 
+				var uiEdit = '';
+				var trayEdit = '';
+
+				if(allFields.compactUI == 'on') {uiEdit = true } else { uiEdit = false}
+				if(allFields.systemTray == 'on') { trayEdit = true } else {  trayEdit = false }
+
 				if(allFields.apikey == allFields.apikey1 && allFields.userid == allFields.userid1){
-				const data = {
-					apikey: allFields.apikey,
-					matchid: allFields.matchid,
-					stage: allFields.stage,
-					warmups: allFields.warmups,
-					bestof: allFields.bestof,
-					matchtype: allFields.matchtype,
-					userid: allFields.userid,
-					reverse: allFields.reverse,
-					visualizerstyle: allFields.visualizerstyle
-				}
+					const data = {
+						apikey: allFields.apikey,
+						matchid: allFields.matchid,
+						stage: allFields.stage,
+						nofmaps: allFields.mapsNumber,
+						warmups: allFields.warmups,
+						bestof: allFields.bestof,
+						matchtype: allFields.matchtype,
+						userid: allFields.userid,
+						reverse: allFields.reverse,
+						visualizerstyle: allFields.visualizerstyle,
+						compactUI: uiEdit,
+						systemTray: trayEdit
+					}
 
-				socket.emit('save', data)
+					socket.emit('save', data)
+					$('#saveMessage').css('display', 'block')
+					setTimeout(() => {
+						$('#saveMessage').css('display', 'none')
+					}, 2000)
 
-				let secondWindow = window.open('/visualizer')
-				secondWindow.location.reload(true)
 				}
 
 			}
@@ -357,4 +529,33 @@
 		//console.clear()
 		loadConfig()
 	</script>
+
+	<script>
+		var socket = io();
+
+
+		$('.headerappbar').bind('contextmenu', function(e) {
+			return false;
+		}); 
+
+
+		var minimizebutton = document.querySelector('#minimizebutton');
+		minimizebutton.addEventListener('click', (e) => {
+			e.preventDefault()
+			socket.emit('minimizeapp')
+		})
+
+		var maximizebutton = document.querySelector('#maximizebutton');
+		maximizebutton.addEventListener('click', (e) => {
+			e.preventDefault()
+			socket.emit('maximizeapp')
+		})
+
+		var closeappbutton = document.querySelector('#closewinbutton');
+		closeappbutton.addEventListener('click', (e) => {
+			e.preventDefault()
+			socket.emit('closewinbutton')
+		})
+	</script>
+
 </html>

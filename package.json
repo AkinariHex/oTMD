@@ -1,26 +1,63 @@
 {
-	"name": "otmd",
-	"version": "1.4.0",
-	"description": "o!TMDisplayer",
+	"name": "osu-tourney-match-displayer",
+	"version": "1.5.0",
+	"description": "osu! Tourney Match Displayer",
 	"main": "index.js",
+	"build": {
+		"appId": "com.akinari.osu-tourney-match-displayer",
+		"productName": "osu! Tourney Match Displayer",
+		"copyright": "Copyright © 2021 Akinari",
+		"win": {
+			"target": [
+			  "nsis",
+			  "zip",
+			  "portable"
+			],
+			"artifactName": "otmd_v${version}_${arch}.${ext}"
+		},
+		"nsis": {
+			"oneClick": false,
+			"perMachine": true,
+			"allowToChangeInstallationDirectory": true,
+			"deleteAppDataOnUninstall": true,
+      		"artifactName": "otmd_v${version}_${arch}_installer.${ext}"
+		},
+		"files": [
+			"frontend/**/*",
+			"node_modules/**/*",
+			"index.js",
+			"package.json"
+		],
+		"directories": {
+			"buildResources": "resources"
+		},
+		"publish": null
+	},
 	"scripts": {
 		"build": "pkg index.js",
 		"server:dev": "nodemon index.js",
-		"server": "node index.js"
+		"server": "node index.js",
+		"electron": "electron .",
+		"builder": "electron-builder --x64"
 	},
 	"keywords": [],
-	"author": "Akinari & RLPG",
-	"license": "ISC",
+	"author": "Akinari",
+	"license": "MIT",
 	"dependencies": {
 		"cors": "^2.8.5",
+		"electron-log": "^4.3.2",
+		"electron-updater": "^4.3.8",
 		"express": "^4.17.1",
 		"node-fetch": "^2.6.1",
 		"open": "^7.3.0",
 		"pkg": "^4.4.9",
 		"socket.io": "^3.0.4",
+		"update-electron-app": "^2.0.1",
 		"ws": "^7.4.0"
 	},
 	"devDependencies": {
+		"electron": "^12.0.2",
+		"electron-builder": "^22.10.5",
 		"nodemon": "^2.0.6"
 	}
 }

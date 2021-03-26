@@ -1,7 +1,7 @@
 * {
 	padding: 0;
 	margin: 0;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: 'QSVF', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body,
@@ -74,6 +74,29 @@ input[type='number'] {
 }
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
+
+.loadingapp {
+    z-index: 999;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.loadingapp.hidden {
+    animation: fadeOut 0.3s;
+    animation-fill-mode: forwards;
+	display: none;
+}
+
+.ui.inverted.segment {
+    height: calc(100% - 24px);
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------ */
+
 
 .formcontainer {
 	display: flex;
@@ -179,9 +202,16 @@ input[type='number'] {
 	padding-bottom: 0px
 }
 
+.buttonField {
+	display: flex;
+	flex-direction: row;
+	margin-left: 43.5px;
+}
+
 .ui.form {
-	max-width: 80%;
 	margin: auto;
+    display: flex;
+	flex-direction: column;
 }
 
 .ui.form .field > label {
@@ -277,3 +307,173 @@ input::-webkit-inner-spin-button {
 .ui.form .error.message, .ui.form .success.message, .ui.form .warning.message {
 	display: none;
 }
+
+.ui.dropdown .menu {
+	background-color: rgb(43, 41, 43);
+}
+
+/* ---------------------------------WINDOW BAR----------------------------------------------------------------------------- */
+
+.headerappbar {
+    height: 24px;
+    background-color: #171717;
+    border-bottom: 0px solid;
+    -webkit-app-region: drag;
+    z-index: 3001;
+}
+
+#applicationName {
+    padding: 0px;
+    top: -10px;
+    left: 15px;
+    color: #ccc;
+    font-weight: 900;
+    font-size: 0.9em;
+    cursor: unset;
+}
+
+#applicationButtons {
+    height: 24px;
+    margin-right: 4.6px;
+    -webkit-app-region: no-drag;
+}
+
+.headerappbarbutton {
+    padding: 0px 8px !important;
+    padding-top: 0.5px !important;
+    background-color: transparent !important;
+    fill: #fff !important;
+    border-radius: 0px !important;
+    margin: 0px !important
+}
+
+.headerappbarbutton:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.closewinbutton:hover {
+    background-color: rgba(255, 0, 0, 0.3) !important;
+}
+
+
+
+/* ================================================================= */
+
+.appInfo {
+	display: flex;
+    position: absolute;
+    bottom: 0px;
+    padding: 1px 8px;
+    color: #aaa;
+	width: 100%;
+	font-size: 10pt;
+    font-weight: 600;
+}
+
+.copyright {
+	position: absolute;
+    padding-right: 8px;
+    right: 0px;
+}
+
+
+/* ================================================================= */
+
+.leftverticalmenu {
+    background-color: #171717;
+    height: calc(100% - 24px);
+    width: 14rem;
+    float: left;
+	position: relative;
+}
+
+.leftmaintab {
+    float: left !important;
+    width: calc(100% - 8rem) !important;
+    height: calc(100% - 24px) !important;
+    padding: 0px !important;
+	margin: 10px auto !important;
+}
+
+.ui.secondary.vertical.pointing.menu {
+ 	width: 14rem
+}
+
+.ui.secondary.vertical.pointing.menu .active.item {
+    color: #eee;
+    border-color: #eee;
+}
+
+.ui.secondary.vertical.pointing.menu .item {
+    color: #aaa;
+	display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.ui.secondary.pointing.menu .dropdown.item:hover, .ui.secondary.pointing.menu .link.item:hover, .ui.secondary.pointing.menu a.item:hover {
+    color: #ccc;
+    border-color: #aaa;
+}
+
+.item_text {
+	margin-left: 10px;
+}
+
+.app_settings_fields label{
+	color: #fff;
+	font-weight: 700;
+}
+
+.app_settings_fields .field {
+	margin-top: 5px !important;
+}
+
+.app_settings_fields .field label{
+	color: #ccc !important;
+	font-weight: 500;
+}
+
+.ui.toggle.checkbox label:before{
+	background-color: #bbb;
+}
+
+.ui.toggle.checkbox label:hover::before {
+	background-color: #bbb;
+}
+
+input::selection, textarea::selection {
+	background-color: #bbb !important;
+}
+
+.ui.toggle.checkbox label:before {
+	background-color: #bbb !important;
+}
+
+.ui.toggle.checkbox input:checked~label, .ui.toggle.checkbox input:focus:checked~label{
+    color: #ccc !important;
+	font-weight: 500;
+}
+
+.ui.toggle.checkbox input:checked~.box:before, .ui.toggle.checkbox input:checked~label:before, .ui.toggle.checkbox input:focus:checked~.box:before, .ui.toggle.checkbox input:focus:checked~label:before {
+    background-color: #121212!important;
+}
+
+.Invisible {
+	display: none
+}
+
+
+@supports (font-variation-settings: normal) {
+	@font-face {
+	  font-family: 'QSVF';
+	  src: url('/assets/fonts/Quicksand-VariableFont_wght.ttf') format('woff2 supports variations'),
+		   url('/assets/fonts/Quicksand-VariableFont_wght.ttf') format('woff2-variations');
+	  font-weight: 100 1000;
+	}
+  
+  }
+
+
+
+
