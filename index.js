@@ -8,13 +8,19 @@ const fetch = require('node-fetch')
 const socket = require('socket.io')
 const appexp = express()
 
-const { app, BrowserWindow, Menu, Tray, autoUpdater } = require('electron');
+const { app, BrowserWindow, Menu, Tray, globalShortcut } = require('electron');
 
-require('update-electron-app')({
-	repo: 'AkinariHex/oTMD',
-	updateInterval: '1 hour',
-	logger: require('electron-log')
-})
+const { NsisUpdater } = require("electron-updater")
+
+const options = {
+	provider: 'generic',
+	url: 'https://github.com/AkinariHex/oTMD/releases/latest'
+}
+
+const autoUpdater = new NsisUpdater(options)
+autoUpdater.checkForUpdatesAndNotify()
+autoUpdater.logger = require("electron-log")
+autoUpdater.logger.transports.file.level = "info"
 
 appexp.use(express.json())
 appexp.use(cors())
@@ -141,7 +147,8 @@ app.on('ready', function() {
         console.log(`Running on http://localhost:${server.address().port}`)
     })
 
-    
+	globalShortcut.unregister('Control+Shift+I')
+
     /*let loading = new BrowserWindow({show: false, width: 1000, height: 600, frame: false})
     var mainWindow = null;*/
 
@@ -154,7 +161,7 @@ app.on('ready', function() {
         darkTheme: true,
         frame: false,
         webPreferences: {
-            devTools: true
+            devTools: false
         },
         titleBarStyle: 'hidden',
         show: false,

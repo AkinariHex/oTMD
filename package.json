@@ -1,17 +1,21 @@
 {
 	"name": "osu-tourney-match-displayer",
 	"version": "1.5.0",
-	"description": "osu! Tourney Match Displayer",
+	"description": "Displayer for osu! Tournament Matches",
 	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AkinariHex/oTMD.git"
+	},
+	"homepage": "https://github.com/AkinariHex/oTMD#otmd-project",
 	"build": {
 		"appId": "com.akinari.osu-tourney-match-displayer",
 		"productName": "osu! Tourney Match Displayer",
 		"copyright": "Copyright © 2021 Akinari",
 		"win": {
 			"target": [
-			  "nsis",
-			  "zip",
-			  "portable"
+				"nsis",
+				"zip"
 			],
 			"artifactName": "otmd_v${version}_${arch}.${ext}"
 		},
@@ -20,7 +24,7 @@
 			"perMachine": true,
 			"allowToChangeInstallationDirectory": true,
 			"deleteAppDataOnUninstall": true,
-      		"artifactName": "otmd_v${version}_${arch}_installer.${ext}"
+			"artifactName": "otmd_v${version}_${arch}_installer.${ext}"
 		},
 		"files": [
 			"frontend/**/*",
@@ -30,19 +34,19 @@
 		],
 		"directories": {
 			"buildResources": "resources"
-		},
-		"publish": null
+		}
 	},
 	"scripts": {
 		"build": "pkg index.js",
 		"server:dev": "nodemon index.js",
 		"server": "node index.js",
 		"electron": "electron .",
-		"builder": "electron-builder --x64"
+		"builder": "electron-builder --x64 -p always",
+		"pack": "electron-builder -w"
 	},
-	"keywords": [],
+	"keywords": ["osu", "displayer", "tournament", "match", "lobby", "score", "obs", "slobs", "osugame", "tourney", "tournament-match"],
 	"author": "Akinari",
-	"license": "MIT",
+	"license": "GPL-3.0",
 	"dependencies": {
 		"cors": "^2.8.5",
 		"electron-log": "^4.3.2",
