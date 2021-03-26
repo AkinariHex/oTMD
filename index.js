@@ -30,6 +30,25 @@ if (!fs.existsSync('./teams')) {
     })
 }
 
+//create settings file at first run
+if (!fs.existsSync('./settings.json')) {
+	let data = {
+		"apikey":"",
+		"matchid":"",
+		"stage":"",
+		"nofmaps":"",
+		"warmups":"",
+		"bestof":"",
+		"matchtype":"",
+		"userid":"",
+		"reverse":"",
+		"visualizerstyle":"",
+		"compactUI":false,
+		"systemTray":true
+	}
+    fs.writeFileSync('./settings.json', JSON.stringify(data))
+}
+
 function readSettingsJson() {
 	try {
 		let data = JSON.parse(fs.readFileSync('./settings.json'))
