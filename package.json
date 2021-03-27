@@ -1,13 +1,13 @@
 {
 	"name": "osu-tourney-match-displayer",
-	"version": "1.5.0",
+	"version": "1.5.1",
 	"description": "Displayer for osu! Tournament Matches",
 	"main": "index.js",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/AkinariHex/oTMD.git"
+		"url": "https://github.com/AkinariHex/oTMD.git"
 	},
-	"homepage": "https://github.com/AkinariHex/oTMD#otmd-project",
+	"homepage": "https://github.com/AkinariHex/oTMD",
 	"build": {
 		"appId": "com.akinari.osu-tourney-match-displayer",
 		"productName": "osu! Tourney Match Displayer",
@@ -17,7 +17,8 @@
 				"nsis",
 				"zip"
 			],
-			"artifactName": "otmd_v${version}_${arch}.${ext}"
+			"artifactName": "otmd_v${version}_${arch}.${ext}",
+			"requestedExecutionLevel": "requireAdministrator"
 		},
 		"nsis": {
 			"oneClick": false,
@@ -56,7 +57,6 @@
 		"open": "^7.3.0",
 		"pkg": "^4.4.9",
 		"socket.io": "^3.0.4",
-		"update-electron-app": "^2.0.1",
 		"ws": "^7.4.0"
 	},
 	"devDependencies": {

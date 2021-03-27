@@ -702,6 +702,188 @@
             "end": "28/02/2021"
         }
     },
+    "3WC": {
+        "name": "3 digit world cup 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1256770",
+        "date": {
+            "start": "02/04/2021",
+            "end": "09/05/2021"
+        }
+    },
+    "GSHT": {
+        "name": "Gary's Spring Hidden Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1266715",
+        "date": {
+            "start": "26/03/2021",
+            "end": ""
+        }
+    },
+    "ATSW": {
+        "name": "Azu's Tourneys: Summer vs Winter",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1272759",
+        "date": {
+            "start": "09/04/2021",
+            "end": "09/05/2021"
+        }
+    },
+    "BBC": { 
+        "name": "Bamboo Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1274066",
+        "date": {
+            "start": "09/05/2021",
+            "end": "20/06/2021"
+        }
+    },
+    "5DDC": {
+        "name": "5 Digit Draft Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "2.00"
+            }
+        },
+        "forumID": "1279137",
+        "date": {
+            "start": "09/04/2021",
+            "end": ""
+        }
+    },
+    "TPR": {
+        "name": "The Perennial",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.60"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1268244",
+        "date": {
+            "start": "17/04/2021",
+            "end": "30/05/2021"
+        }
+    },
+    "NCT": {
+        "name": "Neko's Club Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1250915",
+        "date": {
+            "start": "13/03/2021",
+            "end": "21/04/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
