@@ -1,6 +1,6 @@
 {
 	"name": "osu-tourney-match-displayer",
-	"version": "1.5.1",
+	"version": "1.5.2",
 	"description": "Displayer for osu! Tournament Matches",
 	"main": "index.js",
 	"repository": {
@@ -25,7 +25,9 @@
 			"perMachine": true,
 			"allowToChangeInstallationDirectory": true,
 			"deleteAppDataOnUninstall": true,
-			"artifactName": "otmd_v${version}_${arch}_installer.${ext}"
+			"artifactName": "otmd_v${version}_${arch}_installer.${ext}",
+			"installerIcon": "./resources/icon.ico",
+			"uninstallerIcon": "./resources/icon.ico"
 		},
 		"files": [
 			"frontend/**/*",
@@ -45,7 +47,19 @@
 		"builder": "electron-builder --x64 -p always",
 		"pack": "electron-builder -w"
 	},
-	"keywords": ["osu", "displayer", "tournament", "match", "lobby", "score", "obs", "slobs", "osugame", "tourney", "tournament-match"],
+	"keywords": [
+		"osu",
+		"displayer",
+		"tournament",
+		"match",
+		"lobby",
+		"score",
+		"obs",
+		"slobs",
+		"osugame",
+		"tourney",
+		"tournament-match"
+	],
 	"author": "Akinari",
 	"license": "GPL-3.0",
 	"dependencies": {
@@ -57,6 +71,7 @@
 		"open": "^7.3.0",
 		"pkg": "^4.4.9",
 		"socket.io": "^3.0.4",
+		"v8-compile-cache": "^2.3.0",
 		"ws": "^7.4.0"
 	},
 	"devDependencies": {

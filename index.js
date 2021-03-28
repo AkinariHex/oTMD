@@ -8,17 +8,11 @@ const fetch = require('node-fetch')
 const socket = require('socket.io')
 const appexp = express()
 
-const { app, BrowserWindow, Menu, Tray, globalShortcut } = require('electron');
+const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification } = require('electron');
+require('v8-compile-cache');
+const { autoUpdater } = require("electron-updater")
 
-const { NsisUpdater } = require("electron-updater")
 
-const options = {
-	provider: 'generic',
-	url: 'https://github.com/AkinariHex/oTMD/releases/latest'
-}
-
-const autoUpdater = new NsisUpdater(options)
-autoUpdater.checkForUpdatesAndNotify()
 autoUpdater.logger = require("electron-log")
 autoUpdater.logger.transports.file.level = "info"
 
@@ -140,6 +134,7 @@ appexp.get('/version', (req, res) => {
 
 // -----------------------------------------------------------------------------
 
+app.setAppUserModelId('osu! Tourney Match Displayer')
 
 app.on('ready', function() {
 
@@ -172,7 +167,27 @@ app.on('ready', function() {
         mainWindow.show();
     })
 
-    mainWindow.loadURL(`http://localhost:${server.address().port}/`); 
+	function showNotification(title, body) {
+		const notification = {
+		  title: title,
+		  body: body,
+		  icon: path.join(__dirname, "frontend/assets/OTMD_logo_icona.ico")
+		}
+		new Notification(notification).show()
+	}
+
+    mainWindow.loadURL(`http://localhost:${server.address().port}/`)
+	.then(autoUpdater.checkForUpdatesAndNotify())
+
+	
+	  autoUpdater.on('update-available', () => {
+		showNotification("Update Available!", "A new update is available for OTMD!")
+	  });
+	  autoUpdater.on('update-downloaded', () => {
+		autoUpdater.quitAndInstall()
+		showNotification("Update Downloaded!", "A newer version has been downloaded, restarting soon!")
+	  });
+
     //mainWindow.webContents.openDevTools();
 
 
@@ -281,4 +296,4 @@ app.on('window-all-closed', () => {
     }
   })
 
-
+  

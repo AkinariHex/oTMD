@@ -5,3 +5,5 @@ settings.json
 index-linux
 index-macos
 index-win.exe
+
+package-lock.json
