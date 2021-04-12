@@ -365,7 +365,7 @@ app.on('ready', function() {
 
 		socket.on('changelog_load', () => {
 			var md = require('markdown-it')({html: true});
-			fetch('https://raw.githubusercontent.com/AkinariHex/otmdUPDATE/main/CHANGELOG.md')
+			fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/CHANGELOG.md')
 			.then((res) => res.text())
 			.then((changelogData) => {
 				var result = md.render(changelogData)
