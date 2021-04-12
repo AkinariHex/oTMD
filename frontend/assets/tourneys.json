@@ -884,6 +884,32 @@
             "end": "21/04/2021"
         }
     },
+    "o!ET": {
+        "name": "osu! European Tournament 4",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1286344",
+        "date": {
+            "start": "15/05/2021",
+            "end": "27/06/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {

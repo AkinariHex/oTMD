@@ -6,10 +6,12 @@
 		<title>OTMD Dashboard</title>
 		<link rel="stylesheet" type="text/css" href="/assets/semantic.min.css">
 		<script
-		src="https://code.jquery.com/jquery-3.1.1.min.js"
-		integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-		crossorigin="anonymous"></script>
+			src="https://code.jquery.com/jquery-3.1.1.min.js"
+			integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+			crossorigin="anonymous">
+		</script>
 		<script src="/assets/semantic.min.js"></script>
+		<script src="/assets/clipboard.min.js"></script>
 		<link rel="stylesheet" href="/assets/style.css" />
 	</head>
 	<body>
@@ -43,6 +45,27 @@
 			</div>
 		</div>
 
+		<div class="firstrun hidden">
+			<div class="header">
+				Welcome to o!TMD
+				<div class="text">
+					This is your first run on the app, please complete the fields with your APIkey and your userID to continue!
+				</div>
+			</div>
+			<div class="content">
+				<div class="ui input">
+				  	<input type="text" placeholder="APIkey" id="credAPIKEY">
+					<label><a href="https://osu.ppy.sh/p/api">Where can I find the APIkey?</a></label>
+				</div>
+				<div class="ui input">
+					<input type="text" placeholder="UserID" id="credUID">
+				</div>
+				<button class="ui button" id="credentialsbtn">
+				  Continue
+				</button>
+			  </div>
+		</div>
+
 		<div class="leftverticalmenu">  
 			<div class="ui secondary vertical pointing menu" >
 				<a class="item active" id="match_button" data-tab="match">
@@ -68,6 +91,26 @@
 					<span class="item_text">
 						App Settings
 					</span>
+				</a>
+				<a class="item" id="changelog_button" data-tab="changelog" style="position: absolute; bottom: 25px; width: 14rem; fill: #aaa">
+					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 2.457v11.543h-16v-20h7.362zm.827-2h-10.189v24h20v-14.386c0-2.391-6.648-9.614-9.811-9.614zm4.811 13h-10v-1h10v1zm0 2h-10v1h10v-1zm0 3h-10v1h10v-1z"/></svg>
+					<span class="item_text">
+						Changelog
+					</span>
+				</a>
+				<a class="item" id="update_button" data-tab="update" style="position: absolute; bottom: 74px; width: 14rem; fill: #aaa">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg>
+					<span class="item_text">
+						<span id="update_status">Updated</span>
+						<div class="update_info">
+							<span id="download_speed"></span>
+							&nbsp;|&nbsp;
+							<span id="download_percent"></span>
+						</div>
+					</span>
+					<div class="ui tiny progress" data-percent="0" id="update_bar" >
+						<div class="bar"></div>
+					</div>
 				</a>
 			</div>
 			<div class="appInfo">
@@ -222,11 +265,30 @@
 					</div>
 				</div>
 				<h4 class="ui dividing header"></h4>
+				<div class="visualizer_settings_fields">
+					<label>Old Colors</label>
+					<div class="field">
+						<div class="ui toggle checkbox" id="oldColors">
+							<input type="checkbox" name="oldColors">
+							<label>Enable old colors</label>
+						</div>
+					</div>
+					<div class="info_text">The displayer uses the osu!lazer colors for teams! (First team = <span style="color: rgb(247, 86, 86)">red</span> / Second team = <span style="color: rgb(95, 95, 255)">blue</span>)<br>Enable old colors to revert to osu!stable colors (First team = <span style="color: rgb(95, 95, 255)">blue</span> / Second team = <span style="color: rgb(247, 86, 86)">red</span>)</div>
+					<label>Small Displayer</label>
+					<div class="field">
+						<div class="ui toggle checkbox" id="smallDisplayer">
+							<input type="checkbox" name="smallDisplayer">
+							<label>Enable the small displayer</label>
+						</div>
+					</div>
+					<div class="info_text">Enable the small displayer that have less height.<br>Instead of tournament name will be displayed its acronym if is too long. <b>Small spaces small names 👀</b></div>
+				</div>
+				<h4 class="ui dividing header"></h4>
 				<div class="fields">
 					<div class="required field">
 						<label>Visualizer Style</label>
 						<div class="ui selection dropdown">
-							<input type="hidden" name="visualizerstyle">
+							<input type="hidden" name="visualizerstyle" id="visualizerstyle">
 							<i class="dropdown icon"></i>
 							<div class="default text">Style</div>
 							<div class="menu">
@@ -247,18 +309,18 @@
 					</div>
 					<div class="field">
 						<label>Width</label>
-						<input placeholder="400" readonly="" type="text">
+						<input placeholder="400px" readonly="" type="text">
 					</div>
 					<div class="field">
 						<label>Height</label>
-						<input placeholder="130" readonly="" type="text">
+						<input placeholder="130px" id="Dheight" readonly="" type="text">
 					</div>
 				</div>
 			</div>
 
 				
 			<div class="buttonField">
-				<button class="ui submit button" name="save" id="save" type="submit">Save</button>
+				<button class="ui submit button" name="save" id="save" type="submit" data-clipboard-text="http://localhost:3000/visualizer">Save</button>
 				<button class="ui button" name="loadold" id="loadold" type="button">Load old settings</button>
 			</div>
 
@@ -283,32 +345,72 @@
 			</div>
 
 
-			<div class="ui positive message Invisible" style="width: 11.4%; margin:auto" id="saveMessage">
+			<div class="ui positive message Invisible" style="width: 180px; margin:auto" id="saveMessage">
 				<div class="header">
-				  Settings saved!
-				</div>
+				  Settings saved!<br>URL copied!</div>
 			  </div>
 
-		</div>
+			<div class="leftmaintab ui vertical tab segment" id="changelog_tab" data-tab="changelog">
+				<div class="ui inverted segment" id="changelog_load_sign" style="background-color: rgb(32, 31, 32);	position: absolute;	width: 100%; z-index: 20; height: 88vh; top: 100%">
+					<div class="ui active large inverted loader"></div>
+					<br>
+					<br>
+					<br>
+					<br>
+				</div>
+				<div class="changelog_content" id="changelog_c_id"></div>
+			</div>
 
-		
-		
+		</div>
 	</body>
 
+	<!-- Semantic UI and Clipboard.js -->
+	<script>
+
+		new ClipboardJS('#save');
+
+		$('#update_bar').progress();
+		$('.menu .item').tab();
+		$('.ui.selection.dropdown').dropdown();
+		$('.ui.equal.width.form').form('set values', {
+			matchtype     	: 'teamvs',
+			warmups 		: '0',
+			reverse 		: 'false',
+			visualizerstyle : '0px 0px 0px 0px',
+			compactUI		: false,
+			systemTray      : true
+		});
+	</script>
+
+	<!-- On load event -->
 	<script>
 		window.addEventListener('load', () => {
+			document.querySelector('#download_speed').innerHTML = '3MB/s'
 			setTimeout(()=>{
 				$('.loadingapp').addClass('hidden')
 			}, 200)
 			fetch('/version').then((res) => res.json()).then((data) => {
 				document.querySelector('.appVersion').innerHTML = `v${data.ver}`
 			})
+			
+		
     	})
 
 		$('.menu .item').tab();
 	</script>
 
+	<!-- Match type and Stage events -->
 	<script>
+
+		$('#matchtype').change(() => {
+			let currentMtype = $('#matchtype').val();
+			if(currentMtype == 'h1v1'){
+				$('#scoreReverseField').css('display', 'none')
+			} else {
+				$('#scoreReverseField').css('display', 'block')
+			}
+		})
+
 		$('#stageName').change(() => {
 			let currentStage = $('#stageName').val();
 			if(currentStage == 'Qualifiers'){
@@ -339,7 +441,7 @@
 
 		document.querySelector('#displayer_settings_button').addEventListener('click', e => {
 			e.preventDefault();
-			document.querySelector('.buttonField').style.display = 'block'
+			document.querySelector('.buttonField').style.display = 'none'
 		})
 
 		document.querySelector('#match_button').addEventListener('click', e => {
@@ -348,32 +450,34 @@
 		})
 
 
-
 	</script>
 
-
-
-	<script>
-		$('.menu .item').tab();
-		$('.ui.selection.dropdown').dropdown();
-		$('.ui.equal.width.form').form('set values', {
-			matchtype     	: 'teamvs',
-			warmups 		: '0',
-			reverse 		: 'false',
-			visualizerstyle : '0px 0px 0px 0px',
-			compactUI		: false,
-			systemTray      : true
-		});
-	</script>
 	<script src="/socketio"></script>
 	<script type="module">
 		const socket = io()
+
+		socket.on('test', (text) => {
+			console.log(text)
+		})
+
+		socket.on('update_downloading', (update) => {
+			console.log(update)
+			document.querySelector('#update_status').innerHTML = 'Downloading'
+			document.querySelector('#download_speed').innerHTML = `${update.speed}MB/s`
+			document.querySelector('#download_percent').innerHTML = `${update.percent}%`
+			document.querySelector('#update_bar').style.display = 'block'
+			document.querySelector('.update_info').style.display = 'block'
+			
+			$('#update_bar').progress({
+					percent: update.percent
+			});
+		})
 
 		const loadConfig = async () => {
 			let res = await fetch('/settings')
 			res = await res.json()
 
-			const { apikey, matchid, stage, nofmaps, warmups, bestof, matchtype, userid, reverse, visualizerstyle, compactUI, systemTray } = res
+			const { apikey, matchid, stage, nofmaps, warmups, bestof, matchtype, userid, reverse, visualizerstyle, oldColors, smallVisualizer, compactUI, systemTray, firstRun } = res
 
 			if(res != null){
 				$('.ui.equal.width.form').form('set values', {
@@ -388,10 +492,20 @@
 					bestof: bestof,
 					warmups: warmups,
 					reverse: reverse,
+					oldColors: oldColors,
+					smallDisplayer: smallVisualizer,
 					visualizerstyle: visualizerstyle,
 					compactUI: compactUI,
 					systemTray: systemTray
 				});
+			}
+
+			if(matchtype == 'h1v1'){
+				$('#scoreReverseField').css('display', 'none')
+			}
+
+			if(smallVisualizer == true){
+				document.querySelector('#Dheight').placeholder = "80px"
 			}
 
 			if(compactUI == true){
@@ -401,11 +515,65 @@
 				document.querySelector('.leftverticalmenu').style.width = '4.22rem'
 				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '4.22rem'
 				document.querySelector('#displayer_settings_button').style.width = '4.22rem'
+				document.querySelector('#changelog_button').style.width = '4.22rem'
+				document.querySelector('#changelog_button .item_text').style.display = 'none'
+				document.querySelector('.changelog_content').style.width = "100% - 4.22rem)"
 				document.querySelector('.copyright').style.position = 'fixed'
+				document.querySelector('.changelog_content').style.setProperty('width', 'calc(100% - 59px)');
+				document.querySelector('#update_bar').style.width = '15%'
+				document.querySelector('#update_button').style.width = '4.22rem'
+				document.querySelector('#update_button .item_text').style.display = 'none'
+			}
+
+			if(firstRun == true){
+				document.querySelector('.firstrun').classList.remove('hidden');
+				document.querySelector('#credentialsbtn').addEventListener('click', (e) => {
+					console.log('click')
+					e.preventDefault();
+					let APIKEYclient = document.querySelector('#credAPIKEY');
+      				let UserIDclient = document.querySelector('#credUID');
+					let data = {
+						apikey: APIKEYclient.value,
+						userid: UserIDclient.value
+					}
+					socket.emit('firstrunwrite', data)
+					document.querySelector('.firstrun').classList.add('hidden');
+					$('.ui.equal.width.form').form('set values', {
+						apikey: APIKEYclient.value,
+						apikey1: APIKEYclient.value,
+						userid: UserIDclient.value,
+						userid1: UserIDclient.value
+					});
+				})
 			}
 
 		}
 
+		$("#visualizerstyle").change(function () {
+			var val = this.value;
+			socket.emit('visualizerStyleChange', val)
+   		});
+
+		$('#oldColors').click(e => {
+			e.preventDefault();
+			let status = true;
+			if ($('#oldColors input').is(':checked')) {
+				status = false;
+			}
+			socket.emit('oldColorsClick', status)
+		})
+
+		$('#smallDisplayer').click(e => {
+			e.preventDefault();
+			let status = true;
+			let height = '80px'
+			if ($('#smallDisplayer input').is(':checked')) {
+				status = false;
+				height = '130px'
+			}
+			document.querySelector('#Dheight').placeholder = height
+			socket.emit('smallVisualizerClick', status)
+		})
 
 		$('#compactUI').click(e => {
 			e.preventDefault();
@@ -413,19 +581,31 @@
 			document.querySelector('#match_button .item_text').style.display = 'block'
 			document.querySelector('#displayer_settings_button .item_text').style.display = 'block'
 			document.querySelector('#app_settings_button .item_text').style.display = 'block'
+			document.querySelector('#changelog_button .item_text').style.display = 'block'
 			document.querySelector('.leftverticalmenu').style.width = '14rem'
 			document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '14rem'
 			document.querySelector('#displayer_settings_button').style.width = '14rem'
+			document.querySelector('#changelog_button').style.width = '14rem'
 			document.querySelector('.copyright').style.position = 'absolute'
+			document.querySelector('.changelog_content').style.setProperty('width', 'calc(100% - 196px)');
+			document.querySelector('#update_bar').style.width = '84%'
+			document.querySelector('#update_button').style.width = '14rem'
+			document.querySelector('#update_button .item_text').style.display = 'block'
 			if ($('#compactUI input').is(':checked')) {
 				status = true;
 				document.querySelector('#match_button .item_text').style.display = 'none'
 				document.querySelector('#displayer_settings_button .item_text').style.display = 'none'
 				document.querySelector('#app_settings_button .item_text').style.display = 'none'
+				document.querySelector('#changelog_button .item_text').style.display = 'none'
 				document.querySelector('.leftverticalmenu').style.width = '4.22rem'
 				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '4.22rem'
 				document.querySelector('#displayer_settings_button').style.width = '4.22rem'
+				document.querySelector('#changelog_button').style.width = '4.22rem'
 				document.querySelector('.copyright').style.position = 'fixed'
+				document.querySelector('.changelog_content').style.setProperty('width', 'calc(100% - 59px)');
+				document.querySelector('#update_bar').style.width = '15%'
+				document.querySelector('#update_button').style.width = '4.22rem'
+				document.querySelector('#update_button .item_text').style.display = 'none'
 			}
 			socket.emit('compactUIclick', status)
 		})
@@ -456,22 +636,25 @@
 					mapsNumber: 'empty',
 					bestof: 'empty',
 					warmups: 'empty',
-					reverse: 'empty',
-					visualizerstyle: 'empty'
+					reverse: 'empty'
 				}
 			});
 			
 			$('.ui.equal.width.form').form('submit');
 
-			if($('.ui.equal.width.form').form('is valid') == true){	
+				
 				var $form = $('.ui.equal.width.form');
 				var allFields = $form.form('get values');
 
+				var oldColorsEdit = '';
+				var smallDEdit = '';
 				var uiEdit = '';
 				var trayEdit = '';
 
 				if(allFields.compactUI == 'on') {uiEdit = true } else { uiEdit = false}
-				if(allFields.systemTray == 'on') { trayEdit = true } else {  trayEdit = false }
+				if(allFields.systemTray == 'on') { trayEdit = true } else { trayEdit = false }
+				if(allFields.oldColors == 'on') {oldColorsEdit = true } else { oldColorsEdit = false}
+				if(allFields.smallDisplayer == 'on') { smallDEdit = true } else { smallDEdit = false }
 
 				if(allFields.apikey == allFields.apikey1 && allFields.userid == allFields.userid1){
 					const data = {
@@ -485,8 +668,11 @@
 						userid: allFields.userid,
 						reverse: allFields.reverse,
 						visualizerstyle: allFields.visualizerstyle,
+						oldColors: oldColorsEdit,
+						smallVisualizer: smallDEdit,
 						compactUI: uiEdit,
-						systemTray: trayEdit
+						systemTray: trayEdit,
+						firstRun: false
 					}
 
 					socket.emit('save', data)
@@ -497,7 +683,7 @@
 
 				}
 
-			}
+			
 
 		})
 
@@ -533,6 +719,22 @@
 	<script>
 		var socket = io();
 
+		document.querySelector('#changelog_button').addEventListener('click', (e) => {
+			e.preventDefault()
+			document.querySelector('.buttonField').style.display = 'none'
+			if(document.querySelector('.changelog_content').innerHTML == ''){
+				socket.emit('changelog_load')
+				setTimeout(async () => {
+					let res = await fetch('/changelog')
+					res = await res.json()
+					document.querySelector('#changelog_load_sign').classList.add('hidden')
+					document.querySelector('.changelog_content').innerHTML = res.changelog
+					var els = document.getElementsByTagName('a');
+					for (var i=0, len = els.length; i<len; i++)
+						els[i].setAttribute('target', '_blank');
+				}, 500)
+			}
+		})
 
 		$('.headerappbar').bind('contextmenu', function(e) {
 			return false;

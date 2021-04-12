@@ -284,7 +284,7 @@ input::-webkit-inner-spin-button {
 }
 
 .ui.dividing.header {
-	border-bottom: 1px solid rgb(62, 62, 62);
+	border-bottom: 1px solid rgb(48, 48, 48);
 	padding-bottom: 0px;
 }
 
@@ -420,6 +420,27 @@ input::-webkit-inner-spin-button {
 	margin-left: 10px;
 }
 
+.visualizer_settings_fields label{
+	color: #fff;
+	font-weight: 700;
+}
+
+.visualizer_settings_fields .field {
+	margin-top: 5px !important;
+	margin-bottom: 5px !important;
+}
+
+.visualizer_settings_fields .field label{
+	color: #ccc !important;
+	font-weight: 500;
+}
+
+.visualizer_settings_fields .info_text{
+	color: #999 !important;
+	font-weight: 400;
+	margin-bottom: 1em;
+}
+
 .app_settings_fields label{
 	color: #fff;
 	font-weight: 700;
@@ -463,6 +484,119 @@ input::selection, textarea::selection {
 	display: none
 }
 
+/*------------------------------------------------------------------------------------------------*/
+
+.firstrun {
+    z-index: 985;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: #232323;
+    color: #eee;
+    text-align: center;
+    display: flex;
+	flex-direction: column;
+}
+
+.firstrun .content{
+    margin: 40px auto auto auto;
+}
+
+.firstrun .content input{
+    background-color: rgba(40, 38, 40, 1);
+    border: 1px solid rgb(28, 26, 28);
+    color: #ccc;
+	height: 39px;
+    font-size: 12px;
+}
+
+.firstrun .content input:focus{
+    background-color: rgba(40, 38, 40, 1);
+    border: 1px solid rgb(28, 26, 28);
+    color: #ccc;
+	height: 39px;
+    font-size: 12px;
+}
+
+.firstrun .content label {
+	bottom: -22px;
+    position: absolute;
+    left: 10px;
+    font-size: 9pt;
+}
+
+.firstrun.hidden {
+    animation: fadeOut 0.2s;
+    animation-fill-mode: forwards;
+	display: none;
+}
+
+.firstrun .header {
+	height: auto;
+    display: block;
+    margin: auto auto 10px auto;
+	font-size: 25pt;
+	font-weight: 800;
+}
+
+.firstrun .header .text {
+	height: auto;
+    display: block;
+    margin-top: 20px;
+	font-size: 15pt;
+	font-weight: 400;
+}
+
+
+
+#changelog_tab {
+	color: #ccc;
+	width: 100% !important;
+}
+
+#changelog_load_sign.hidden {
+	animation: fadeOut 0.3s;
+    animation-fill-mode: forwards;
+	display: none;
+}
+
+.changelog_content {
+	position: fixed;
+    overflow-y: auto;
+    width: calc(100% - 196px);
+    height: calc(100% - 26px);
+    list-style-position: inside;
+    padding-left: 15px;
+    padding-top: 10px;
+    margin-top: -9px;
+}
+
+
+
+
+.ui.progress {
+	background: rgba(0,0,0,0.3);
+}
+
+.ui.tiny.progress .bar {
+	height: .35em;
+	min-width: 0px !important;
+}
+
+#update_bar {
+	position: absolute;
+	bottom: 0px;
+	margin: 0px;
+	width: 84%;
+	display: none;
+}
+
+.update_info {
+	display: none;
+	font-size: 11px;
+    margin-top: 1px;
+    font-weight: 800;
+}
 
 @supports (font-variation-settings: normal) {
 	@font-face {

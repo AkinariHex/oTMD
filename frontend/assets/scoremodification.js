@@ -119,11 +119,11 @@ function modsModifiersQualifiers(mods){
 	  if(!mod == 0){
 		for (var i = 31; i >= 0; i--) {
 			if (fullbit[i] == 1) {
-				modarr += `<img src="https://raw.githubusercontent.com/ppy/osu-web/master/public/images/badges/mods/mod_${modlist.find(m => m.pos == i+1).linkIMG}%402x.png" alt="">`
+				modarr += `<object type="image/svg+xml" data="/assets/images/modsIcons/${modlist.find(m => m.pos == i+1).mod}.svg"></object>`
 			}
 		}
 	  } else {
-		modarr = '<img src="https://raw.githubusercontent.com/ppy/osu-web/master/public/images/badges/mods/mod_no-mod%402x.png" alt="">'
+		modarr = '`<object type="image/svg+xml" data="/assets/images/modsIcons/NM.svg"></object>'
 	  }
 	} 
   

@@ -9,7 +9,9 @@ const team2img = document.querySelector('.teaminner2')
 const textzone = document.querySelector('#score')
 const tourneyheadertext = document.querySelector('.tourney_info_top')
 const tourneyfootertext = document.querySelector('.tourney_info_down')
+const visualizer_header = document.querySelector('.v_header')
 const visualizer_content = document.querySelector('.v_content')
+const visualizer_footer = document.querySelector('.v_footer')
 
 const socket = io()
 
@@ -23,6 +25,8 @@ let bestof = null
 let matchtype = null
 let userid = null
 let visualizerborder = null
+let smallvisualizer = null
+let oldcolors = null
 
 // invoke once on page opening
 function init() {
@@ -42,6 +46,8 @@ function init() {
 			userid = data.userid
 			reverse = data.reverse
 			visualizerborder = data.visualizerstyle
+			smallvisualizer = data.smallVisualizer
+			oldcolors = data.oldColors
 
 			checkData()
 		})
@@ -82,10 +88,19 @@ function checkData() {
 	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/frontend/assets/tourneys.json')
 		.then((res) => res.json())
 		.then((tourneydata) => {
+			if(oldcolors == true){
+				visualizer.style.setProperty('--visualizer-background', 'url("/assets/images/blueVSred.png")');
+			}
+			if(smallvisualizer == true){
+				visualizer.style.height = '80px';
+				visualizer.style.setProperty('background-position', 'bottom')
+				visualizer_header.style.height = '20px';
+				visualizer_footer.style.height = '20px';
+				visualizer_content.style.height = '40px';
+			}
 			visualizer.style.setProperty('--visualizer-border-radius', visualizerborder);
 			if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
 				if (userid != 'null' && matchtype == 'h1v1') {
-					console.log(stage)
 					if(stage == 'Qualifiers') {	
 						matchdatasoloQualifiers(osuapi, matchid, warmups, osuinterval, tourneydata, stage, userid, maps)
 					} else {
@@ -200,7 +215,6 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 					}
 					// CHECK FOR TEAMS IMAGE
 					data.forEach(image => {
-						console.log(image.includes(team1nospace.toLowerCase()));
 						if(image.includes(team1nospace.toLowerCase())){
 							team1imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
 						}
@@ -219,7 +233,14 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 			  team1img.innerHTML = `${team1imgstring} ${team1name}`;
 			  team2img.innerHTML = `${team2imgstring} ${team2name}`;
 			  tourneyheadertext.innerHTML = stage + "<br />BO" + bestof;
-			  tourneyfootertext.textContent = tournament_info_name;
+			  if(smallvisualizer == true) {
+				tourneyheadertext.innerHTML = stage + " | BO" + bestof;
+			  }
+			  	if(smallvisualizer == true && tournament_info_name.length >= 22){
+					tourneyfootertext.textContent = tournamentid;
+				} else {
+					tourneyfootertext.textContent = tournament_info_name;
+				}
 		  
 		  
 		  
@@ -234,8 +255,10 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 				  tourneyfootertext.textContent = '';        
 				  if(team1 == (bestof/2)+0.5){
 					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
 				  } else {
 					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
 				  }
 				} else {
 				  team1Element.textContent = team2;
@@ -252,8 +275,10 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 				  tourneyfootertext.textContent = '';  
 				  if(team1 == (bestof/2)+0.5){
 					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
 				  } else {
 					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
 				  }
 				} else {
 				  team1Element.textContent = team1;
@@ -369,8 +394,15 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 				  
 					  team1img.innerHTML = `${team1imgstring} ${team1name}`;
 					  team2img.innerHTML = `${team2imgstring} ${team2name}`;
-					  tourneyheadertext.textContent = stage;
-					  tourneyfootertext.textContent = tournament_info_name;
+					  tourneyheadertext.innerHTML = stage + "<br />BO" + bestof;
+						if(smallvisualizer == true) {
+							tourneyheadertext.innerHTML = stage + " | BO" + bestof;
+						}
+					  	if(smallvisualizer == true && tournament_info_name.length >= 22){
+							tourneyfootertext.textContent = tournamentid;
+						} else {
+							tourneyfootertext.textContent = tournament_info_name;
+						}
 				  
 				  
 				  
@@ -385,8 +417,10 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 						  tourneyfootertext.textContent = '';  
 						  if(team1 == (bestof/2)+0.5){
 							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
 						  } else {
 							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
 						  }
 						} else {
 						  team1Element.textContent = team1;
@@ -429,6 +463,19 @@ function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage
 	const mapsLeft = document.querySelector('.mapsLeft')
 	const QualifiersData_Scores_Table = document.querySelector('#QualifiersData_Scores_Table')
 	const QualifiersData_Total = document.querySelector('.QualifiersData_Total')
+
+	if(oldcolors == true){
+		visualizer.style.setProperty('--visualizer-background', 'url("/assets/images/winnerBlue.png")');
+	} else {
+		visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
+	}
+
+	if(smallvisualizer == true){
+		team_Q_propic.style.height = "45px";
+		team_Q_propic.style.width = "45px";
+		document.querySelector('.mapsInfo').style.setProperty('top', "10px");
+		document.querySelector('.QualifiersData_Scores').style.height = "51px"
+	}
 
 	const MapsToPlay = maps;
 
@@ -505,7 +552,12 @@ function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage
 					QualifiersData_Total.innerHTML = `${getNumberWithCommas(team1score)}`
 				  
 					tourneyheadertext.textContent = stage;
-					tourneyfootertext.textContent = tournament_info_name;
+					if(smallvisualizer == true && tournament_info_name.length >= 22){
+						tourneyfootertext.textContent = tournamentid;
+					} else {
+						tourneyfootertext.textContent = tournament_info_name;
+					}
+					
 				  
 					if(team1Scores.length == MapsToPlay){
 						  clearInterval(interval);
