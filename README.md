@@ -4,11 +4,15 @@
 
 osu! Tourney Match Displayer is a simple displayer made to be used as a browser source on OBS/SLOBS that displays the current state of a tournament match!
 
--   <b>[How to use o!TMD](https://github.com/AkinariHex/oTMD#how-to-use-otmd)</b>
-    -   [Installation](https://github.com/AkinariHex/oTMD#installation)
-    -   [Display on OBS](https://github.com/AkinariHex/oTMD#display-on-obs)
-    -   [Close the displayer](https://github.com/AkinariHex/oTMD#close-the-displayer)
--   <b>[Displayer styles](https://github.com/AkinariHex/oTMD#displayer-styles)</b>
+-   <b>[How to Install](https://github.com/AkinariHex/oTMD#how-to-install)</b>
+    -   [Installer](https://github.com/AkinariHex/oTMD#installer)
+    -   [Zip File](https://github.com/AkinariHex/oTMD#zip-file)
+-   <b>[Change the fields](https://github.com/AkinariHex/oTMD#change-the-fields)</b>
+    -   [Match Section](https://github.com/AkinariHex/oTMD#match-section)
+    -   [Displayer Settings Section](https://github.com/AkinariHex/oTMD#displayer-settings-section)
+    -   [App Settings Section](https://github.com/AkinariHex/oTMD#app-settings-section)
+-   <b>[How to add custom teams pic](https://github.com/AkinariHex/oTMD#how-to-add-custom-teams-pic)</b>
+-   <b>[Display on OBS](https://github.com/AkinariHex/oTMD#display-on-obs)</b>
 -   <b>[Join the community](https://github.com/AkinariHex/oTMD#join-the-community)</b>
 -   <b>[Contacts](https://github.com/AkinariHex/oTMD#contacts)</b>
 -   <b>[License](https://github.com/AkinariHex/oTMD#license)</b>
@@ -73,8 +77,7 @@ Now you can open the folder and run `osu! Tourney Match Displayer.exe`!
 -   `UserID`: put your userid | **Your userid will be used only if you want to display a 1vs1 match but it's required to have it always saved for next times. You can find your userid at the end of your profile link https&#58;//osu.ppy.sh/users/`4001304`**
 -   `Old Colors`: Enable the old colors that matches the old osu! stable colors (First team = blue / Second team = red)
 -   `Small Displayer`: Enable the small displayer that have less height.
--   `Visualizer Style`: <img src="https://akinariosu.s-ul.eu/dmQD6Z4J">
-    You can choose from 4 different styles:
+-   `Visualizer Style`: You can choose from 4 different styles:
     * `Default`: No rounded corners <img src="https://akinariosu.s-ul.eu/PMSB7638">
     * `Rounded`: All 4 corners rounded  <img src="https://akinariosu.s-ul.eu/7j4nClSu">
     * `Top-Rounded`: Top 2 corners rounded  <img src="https://akinariosu.s-ul.eu/6GWWbzZ4">
@@ -92,7 +95,7 @@ Open the o!TMD directory (%appdata% > otmd) and go to `Teams` folder!<br>
 
 Put here the images of the teams! The images should have the same name of the teams but lowercases and without spaces! (Ex. Team name: `Alligator Space Jam` // Image name: `alligatorspacejam`)<br /><img src="https://akinariosu.s-ul.eu/lYl1RZLQ">
  
- ## Display on OBS
+## Display on OBS
  
  On OBS add a new ``source > browser source``, name it and put these settings:
  * Uncheck "Local File box"
