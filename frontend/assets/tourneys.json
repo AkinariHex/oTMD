@@ -910,6 +910,136 @@
             "end": "06/27/2021"
         }
     },
+    "DDT": {
+        "name": "Diao's Draftphism Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.50"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.50"
+            }
+        },
+        "forumID": "1305175",
+        "date": {
+            "start": "05/24/2021",
+            "end": "07/04/2021"
+        }
+    },
+    "ASS": {
+        "name": "Aetherian’s Summer Singles",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1310798",
+        "date": {
+            "start": "05/28/2021",
+            "end": "07/04/2021"
+        }
+    },
+    "BQT3": {
+        "name": "BubblyQT 3",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "2.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1311662",
+        "date": {
+            "start": "06/12/2021",
+            "end": "07/31/2021"
+        }
+    },
+    "COPE": {
+        "name": "Cope Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1317363",
+        "date": {
+            "start": "06/19/2021",
+            "end": "08/01/2021"
+        }
+    },
+    "AGTS 2021": {
+        "name": "Advanced Global Taiko Showdown 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1299094",
+        "date": {
+            "start": "05/15/2021",
+            "end": "06/26/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
