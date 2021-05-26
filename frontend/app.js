@@ -214,11 +214,11 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 						}
 					}
 					// CHECK FOR TEAMS IMAGE
-					data.forEach(image => {
-						if(image.includes(team1nospace.toLowerCase())){
+					data.images.forEach(image => {
+						if(image.includes(team1nameNoSpan)){
 							team1imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
 						}
-						if(image.includes(team2nospace.toLowerCase())){
+						if(image.includes(team2nameNoSpan)){
 							team2imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
 						}
 					});
@@ -242,49 +242,94 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 					tourneyfootertext.textContent = tournament_info_name;
 				}
 		  
-		  
-		  
-			  if(reverse == 'true' || reverse == true){
-				team1Element.textContent = team2;
-				team2Element.textContent = team1;
-				if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
-				  clearInterval(interval);
-				  team1img.innerHTML = '';
-				  team2img.innerHTML = '';
-				  tourneyheadertext.textContent = '';
-				  tourneyfootertext.textContent = '';        
-				  if(team1 == (bestof/2)+0.5){
-					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
-					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
-				  } else {
-					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
-					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
-				  }
+
+				
+				if(oldcolors == true){
+					if(reverse == 'true' || reverse == true){
+						team1Element.textContent = team2;
+						team2Element.textContent = team1;
+						if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+						  clearInterval(interval);
+						  team1img.innerHTML = '';
+						  team2img.innerHTML = '';
+						  tourneyheadertext.textContent = '';
+						  tourneyfootertext.textContent = '';        
+						  if(team1 == (bestof/2)+0.5){
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
+						  } else {
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
+						  }
+						} else {
+						  team1Element.textContent = team2;
+						  team2Element.textContent = team1;
+						}
+					  } else {
+						team1Element.textContent = team1;
+						team2Element.textContent = team2;
+						if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+						  clearInterval(interval);
+						  team1img.innerHTML = '';
+						  team2img.innerHTML = '';
+						  tourneyheadertext.textContent = '';
+						  tourneyfootertext.textContent = '';  
+						  if(team1 == (bestof/2)+0.5){
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
+						  } else {
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
+						  }
+						} else {
+						  team1Element.textContent = team1;
+						  team2Element.textContent = team2;
+						}
+					  }
 				} else {
-				  team1Element.textContent = team2;
-				  team2Element.textContent = team1;
+					if(reverse == 'false' || reverse == false){
+						team1Element.textContent = team2;
+						team2Element.textContent = team1;
+						if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+						  clearInterval(interval);
+						  team1img.innerHTML = '';
+						  team2img.innerHTML = '';
+						  tourneyheadertext.textContent = '';
+						  tourneyfootertext.textContent = '';        
+						  if(team1 == (bestof/2)+0.5){
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
+						  } else {
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
+						  }
+						} else {
+						  team1Element.textContent = team2;
+						  team2Element.textContent = team1;
+						}
+					  } else {
+						team1Element.textContent = team1;
+						team2Element.textContent = team2;
+						if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
+						  clearInterval(interval);
+						  team1img.innerHTML = '';
+						  team2img.innerHTML = '';
+						  tourneyheadertext.textContent = '';
+						  tourneyfootertext.textContent = '';  
+						  if(team1 == (bestof/2)+0.5){
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
+						  } else {
+							textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
+							visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
+						  }
+						} else {
+						  team1Element.textContent = team1;
+						  team2Element.textContent = team2;
+						}
+					  }
 				}
-			  } else {
-				team1Element.textContent = team1;
-				team2Element.textContent = team2;
-				if(team1 == (bestof/2)+0.5 || team2 == (bestof/2)+0.5){
-				  clearInterval(interval);
-				  team1img.innerHTML = '';
-				  team2img.innerHTML = '';
-				  tourneyheadertext.textContent = '';
-				  tourneyfootertext.textContent = '';  
-				  if(team1 == (bestof/2)+0.5){
-					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team1imgstring} ${team1name} wins!</span>`;
-					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerBlue.png')");
-				  } else {
-					textzone.innerHTML = `<span style="color: #93ff93; font-size: 16px">${team2imgstring} ${team2name} wins!</span>`;
-					visualizer.style.setProperty('--visualizer-background', "url('/assets/images/winnerRed.png')");
-				  }
-				} else {
-				  team1Element.textContent = team1;
-				  team2Element.textContent = team2;
-				}
-			  }
+		  
 		  
 			  
 		  

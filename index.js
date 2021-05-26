@@ -4,6 +4,9 @@ const fs = require('fs')
 const open = require('open')
 const path = require('path')
 const fetch = require('node-fetch')
+const os = require('os')
+
+os.setPriority(-20)
 
 const socket = require('socket.io')
 const appexp = express()
@@ -80,6 +83,14 @@ appexp.get('/', (req, res) => {
 
 appexp.get('/assets/style.css', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/assets/style.css'))
+})
+
+appexp.get('/assets/odometer.min.js', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/odometer.min.js'))
+})
+
+appexp.get('/assets/odometer-theme-minimal.css', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/odometer-theme-minimal.css'))
 })
 
 appexp.get('/assets/semantic.min.css', (req, res) => {
@@ -163,7 +174,7 @@ appexp.get('/settings', (req, res) => {
 })
 
 appexp.get('/teams', (req, res) => {
-	fs.readdir(documentsFolder + '/otmd/teams', async (err, data) => {	
+	fs.readdir(documentsFolder + `/otmd/teams`, async (err, data) => {	
 		if(err){
 			res.json(['nodata']);
 			return
@@ -172,7 +183,21 @@ appexp.get('/teams', (req, res) => {
 		if(data == ''){
 			res.json(['nodata']);
 		} else {
-			res.json(data)
+			let teamimages = [];
+			let teamsettings = [];
+			data.forEach((file) => {
+				if(file.search('.*\.(jpeg|jpg|png)$') === 0){
+					teamimages.push(file)
+				} else {
+					teamsettings.push(file.replace(/\.[^/.]+$/, ""))
+					appexp.get(`/teams/${file.replace(/\.[^/.]+$/, "")}`, (req, res) => {
+						let datafile = fs.readFileSync(documentsFolder + `/otmd/teams/${file}`, 'utf8');
+						res.json(JSON.parse(datafile))
+					})
+				}
+			})
+			let finalData = { images: teamimages, settings: teamsettings}
+			res.json(finalData)
 		}
 
 	})
@@ -198,6 +223,7 @@ appexp.get('/version', (req, res) => {
 // -----------------------------------------------------------------------------
 
 app.setAppUserModelId('osu! Tourney Match Displayer')
+app.disableHardwareAcceleration()
 
 app.on('ready', function() {
 
@@ -205,7 +231,7 @@ app.on('ready', function() {
         console.log(`Running on http://localhost:${server.address().port}`)
     })
 
-	//globalShortcut.unregister('Control+Shift+I')
+	globalShortcut.unregister('Control+Shift+I')
 
     /*let loading = new BrowserWindow({show: false, width: 1000, height: 600, frame: false})
     var mainWindow = null;*/
@@ -230,6 +256,7 @@ app.on('ready', function() {
     mainWindow.webContents.on('dom-ready', () => {
         mainWindow.show();
     })
+	mainWindow.webContents.setFrameRate(60)
 
 	function showNotification(title, body) {
 		const notification = {
@@ -411,6 +438,69 @@ app.on('ready', function() {
 		socket.on('save', (data) => {
 			fs.writeFileSync(documentsFolder+'/otmd/settings.json', JSON.stringify(data))
 			io.emit('new_settings')
+		})
+
+		socket.on('open_team_folder', (data) => {
+			require('electron').shell.openPath(documentsFolder + '/otmd/teams')
+		})
+
+
+		socket.on('edit_teamname', (datatoSave) => {
+			let datafile = JSON.parse(fs.readFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, 'utf8'))
+			const { img, file, team_name, players } = datafile
+			let newData = { 
+				"img": img,
+				"file": `${datatoSave.name}.json`,
+				"team_name": datatoSave.name,
+				"players": players
+			}
+			fs.writeFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, JSON.stringify(newData))
+			let nameforimage = datatoSave.file.split('.').slice(0, -1).join('.');
+			fs.renameSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, documentsFolder + `/otmd/teams/${datatoSave.name}.json`)
+			fs.renameSync(documentsFolder + `/otmd/teams/${nameforimage}.${img}`, documentsFolder + `/otmd/teams/${datatoSave.name}.${img}`)
+		})
+
+		socket.on('remove_player', (datatoSave) => {
+			let datafile = JSON.parse(fs.readFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, 'utf8'))
+			const { img, file, team_name, players } = datafile
+			players.splice(datatoSave.position - 1, 1);
+			let newData = {
+				"img": img, 
+				"file": file,
+				"team_name": team_name,
+				"players": players
+			}
+			fs.writeFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, JSON.stringify(newData))
+		})
+
+		socket.on('save_team', (datatoSave) => {
+
+			let folder = fs.readdirSync(documentsFolder + '/otmd/teams')
+			if(!folder.includes(datatoSave.file)){
+				folder.forEach((file) => {
+					if(file.search(`${datatoSave.team}.*\.(jpeg|jpg|png)$`) === 0){
+						var re = /(?:\.([^.]+))?$/;
+						var ext = re.exec(file)[1]; 
+						let dataFirst = {
+							"img": ext,
+							"file": datatoSave.file,
+							"team_name": datatoSave.team,
+							"players": []
+						}
+						fs.writeFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, JSON.stringify(dataFirst))
+					}
+				})
+			}
+			let datafile = JSON.parse(fs.readFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, 'utf8'))
+			const { img, file, team_name, players } = datafile
+			players[datatoSave.position - 1] = { "name": datatoSave.playername, "id": datatoSave.playerid }
+			let newData = { 
+				"img": img,
+				"file": file,
+				"team_name": team_name,
+				"players": players
+			}
+			fs.writeFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, JSON.stringify(newData))
 		})
 	})
 	

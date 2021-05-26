@@ -1040,6 +1040,230 @@
             "end": "06/26/2021"
         }
     },
+    "SEAL": {
+        "name": "Seal Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.80"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1306857",
+        "date": {
+            "start": "05/21/2021",
+            "end": "07/04/2021"
+        }
+    },
+    "CC": {
+        "name": "Corsace Closed 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1324620",
+        "date": {
+            "start": "05/22/2021",
+            "end": "07/04/2021"
+        }
+    },
+    "CT2": {
+        "name": "Cursed Tourney #2",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1306163",
+        "date": {
+            "start": "05/22/2021",
+            "end": "07/11/2021"
+        }
+    },
+    "FDC": {
+        "name": "Finnish Duo Cup",
+        "modifiers": {
+            "NM": {
+                "type": "*",
+                "value": "0.75"
+            },
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.06"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HDHR": {
+                "type": "*",
+                "value": "1.03"
+            },
+            "HDEZ": {
+                "type": "*",
+                "value": "1.85"
+            }
+        },
+        "forumID": "1313956",
+        "date": {
+            "start": "05/28/2021",
+            "end": "07/11/2021"
+        }
+    },
+    "GST3": {
+        "name": "Great Singapore Tournament 3",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1323720",
+        "date": {
+            "start": "06/19/2021",
+            "end": "08/01/2021"
+        }
+    },
+    "CO21": {
+        "name": "Centaurea Open 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.10"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.80"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1323736",
+        "date": {
+            "start": "06/19/2021",
+            "end": "08/01/2021"
+        }
+    },
+    "BST": {
+        "name": "Baku's Summer Trios",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "2.00"
+            },
+            "EZFL": {
+                "type": "*",
+                "value": "2.50"
+            }
+        },
+        "forumID": "1331732",
+        "date": {
+            "start": "06/25/2021",
+            "end": "08/01/2021"
+        }
+    },
+    "EMT": {
+        "name": "Endless Mirage Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "https://discord.com/invite/RT9MBs6",
+        "date": {
+            "start": "06/05/2021",
+            "end": "07/20/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {

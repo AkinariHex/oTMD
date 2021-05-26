@@ -16,10 +16,11 @@ body, html {
     background: rgba(40,38,40,1.05);
     font-weight: 600;
     overflow: hidden;
+    background-color: transparent;
 }
 
 .settings {
-    background: rgba(40,38,40,1.05) !important;
+    background: transparent !important;
 }
 
 body {
@@ -111,7 +112,7 @@ input[type='number'] {
 	justify-content: center;
 	height: 100%;
 	width: 100%;
-    background-color: magenta;
+    background-color: transparent;
 }
 
 .selectmatchtype {
@@ -216,6 +217,10 @@ input[type='number'] {
 	padding: 2px 3px !important;
 }
 
+.paddingfix .odometer, .paddingfix .odometer-inside, .paddingfix .odometer-digit, .paddingfix .odometer-digit-spacer, .paddingfix .odometer-digit-inner, .paddingfix .odometer-ribbon, .paddingfix .odometer-ribbon-inner, .paddingfix .odometer-value {
+	padding: 0px 0px !important;
+}
+
 .teaminner1 {
 	display: table;
 	font-size: 1.1em;
@@ -318,6 +323,27 @@ input[type='number'] {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.odometer.odometer-animating-up .odometer-ribbon-inner, .odometer.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+    -webkit-transition-duration: 300ms !important;
+    -moz-transition-duration: 300ms !important;
+    -ms-transition-duration: 300ms !important;
+    -o-transition-duration: 300ms !important;
+    transition-duration: 300ms !important
+}
 
 
 @supports (font-variation-settings: normal) {

@@ -598,6 +598,224 @@ input::selection, textarea::selection {
     font-weight: 800;
 }
 
+
+/*----------------------------------------------------------- Teams List -------------------------------------------*/
+
+#openfolderteams {
+	margin: 0px 0px 10px 0px;
+    padding: 10px;
+    align-items: center;
+    display: flex;
+	fill: #222;
+}
+
+#teams_tab {
+	margin: 15px 15px !important;
+}
+
+.ui.card>.button, .ui.card>.buttons, .ui.cards>.card>.button, .ui.cards>.card>.buttons {
+    margin: 0;
+    width: calc(100%);
+    position: absolute;
+    bottom: -34px;
+}
+
+.ui.card, .ui.cards>.card {
+	max-width: 150px;
+	font-size: 12px;
+	background: #181818;
+	box-shadow: 0 1px 3px 0 #2b2b2b, 0 0 0 1px #222223;
+	-webkit-box-shadow: 0 1px 3px 0 #2b2b2b, 0 0 0 1px #222223;
+	margin-bottom: 35px;
+}
+
+.ui.card, .ui.cards>.card>.content {
+	flex-grow: 0;
+}
+
+.ui.cards>.card div.header {
+	color: #DDD !important;
+}
+
+.ui.cards>.card .meta {
+    display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+.team_player_list {
+	display: flex;
+    flex-direction: row;
+    margin: auto !important;
+    width: 140px;
+    padding: 0px;
+    flex-wrap: wrap;
+}
+
+.listeditteam {
+	background: #181818;
+	box-shadow: 0 1px 3px 0 #2b2b2b, 0 0 0 1px #222223;
+	-webkit-box-shadow: 0 1px 3px 0 #2b2b2b, 0 0 0 1px #222223;
+}
+
+.listeditteam_players {
+	margin-top: 2px;
+	margin-bottom: 2px;
+	margin-right: 3px !important;
+}
+
+.team_player_list_noplayers {
+	color: rgb(252, 82, 82);
+    text-align: center;
+    width: 140px;
+	padding-bottom: 16px;
+}
+
+.team_player_list .list {
+	display: flex;
+    flex-direction: row;
+    margin: auto !important;
+    width: auto;
+    padding: 0px;
+    flex-wrap: wrap;
+	justify-content: center;
+}
+
+.team_player_list_edit {
+	display: block;
+    position: absolute;
+    z-index: 333;
+	background: #181818;
+	width: 150px;
+    left: 0px;
+	bottom: -18px;
+}
+
+.team_player_list_edit .list {
+	display: flex;
+    flex-direction: column;
+    margin: auto !important;
+    width: auto;
+    padding: 0px;
+    flex-wrap: wrap;
+	justify-content: center;
+}
+
+.team_player_list_edit .list .item {
+	display: flex;
+    flex-direction: row;
+	align-items: center;
+	margin-right: 5px !important;
+	margin-top: 0px !important;
+	margin-bottom: 3px !important;
+    height: 26px;
+}
+
+#teamname_input {
+	margin-left: 8px;
+    width: 134px;
+    font-size: 11px;
+}
+
+input.errPlayer {
+	border: 1px rgb(224, 83, 83) solid !important;
+}
+
+.buttoneditlist {
+	height: 20px;
+    font-size: 11px !important;
+    padding: 3px 20px !important;
+    border-radius: 15px !important;
+    margin: auto !important;
+    margin-top: 2px !important;
+    background-color: transparent !important;
+}
+
+.buttoneditlist.add {
+	border: 1px solid rgb(79, 79, 225);
+	color: rgb(79, 79, 225);
+	margin-top: 0px !important;
+}
+
+.buttoneditlist.add:hover {
+	border: 1px solid rgb(79, 79, 225);
+	color: rgb(65, 65, 225);
+}
+
+.buttoneditlist.save {
+	border: 1px solid rgb(95, 224, 83);
+	color: rgb(95, 224, 83);
+	width: 65px;
+	margin: 0px !important;
+	margin-right: 3.5px !important;
+}
+
+.buttoneditlist.save:hover {
+	border: 1px solid rgb(95, 224, 83);
+	color: rgb(80, 221, 83);
+}
+
+.buttoneditlist.cancel {
+	border: 1px solid rgb(224, 83, 83);
+	color: rgb(224, 83, 83);
+	width: 65px;
+	margin: 0px !important;
+	margin-left: 3.5px !important;
+	padding: 3px 12px !important
+}
+
+.buttoneditlist.cancel:hover {
+	border: 1px solid rgb(224, 83, 83);
+	color: rgb(223, 68, 83);
+}
+
+.buttonremplayer {
+	width: 25px;
+    height: 25px;
+    padding: 0px !important;
+    border-radius: 50% !important;
+	background-color: transparent !important;
+	border: 1px solid rgb(224, 83, 83) !important;
+	fill: rgb(224, 83, 83) !important;
+	margin-left: 2px !important;
+}
+
+.list_buttons {
+	flex-direction: row;
+	display: flex;
+	align-self: center;
+	margin: 1px 0px 5px 0px;
+}
+
+.team_player_list_edit .list .item div.field {
+	display: flex;
+    height: 25px;
+    align-content: center;
+    vertical-align: middle;
+}
+
+.team_player_list_edit .list .item div.field input {
+	padding: 4px;
+    font-size: 10px;
+	width: 76px;
+}
+
+.team_player_list .list img, .team_player_list_edit .list img {
+	width: 25px;
+	height: 25px;
+    border-radius: 50%;
+    margin-left: 5px;
+    margin-right: 5px !important;
+    margin-bottom: 10px;
+}
+
+.team_player_list_edit {
+	display: none;
+    position: absolute;
+    top: -35px;
+	background: #181818;
+}
+
 @supports (font-variation-settings: normal) {
 	@font-face {
 	  font-family: 'QSVF';

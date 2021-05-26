@@ -54,7 +54,54 @@ function modsModifiers(mods, score, modifier){
   
 	let scoremod = score;
 
-  
+	if(modarr.includes('NM') == true){
+		if(modifier.NM.type == '*'){
+			scoremod = score * parseFloat(modifier.NM.value);
+		} else if (modifier.NM.type == '/'){
+			scoremod = score / parseFloat(modifier.NM.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
+	}
+	if(modarr.includes('HR') == true){
+		if(modifier.HR.type == '*'){
+			scoremod = score * parseFloat(modifier.HR.value);
+		} else if (modifier.HR.type == '/'){
+			scoremod = score / parseFloat(modifier.HR.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
+	}
+	if(modarr.includes('HD') == true){
+		if(modifier.HD.type == '*'){
+			scoremod = score * parseFloat(modifier.HD.value);
+		} else if (modifier.HD.type == '/'){
+			scoremod = score / parseFloat(modifier.HD.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
+	}
+	if(modarr.includes('HDHR') == true){
+		if(modifier.HDHR.type == '*'){
+			scoremod = score * parseFloat(modifier.HDHR.value);
+		} else if (modifier.HDHR.type == '/'){
+			scoremod = score / parseFloat(modifier.HDHR.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
+	}
+	if(modarr.includes('HDEZ') == true){
+		if(modifier.HDEZ.type == '*'){
+			scoremod = score * parseFloat(modifier.HDEZ.value);
+		} else if (modifier.HDEZ.type == '/'){
+			scoremod = score / parseFloat(modifier.HDEZ.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
+	}
+	if(modarr.includes('EZFL') == true){
+		if(modifier.EZFL.type == '*'){
+			scoremod = score * parseFloat(modifier.EZFL.value);
+		} else if (modifier.EZFL.type == '/'){
+			scoremod = score / parseFloat(modifier.EZFL.value);
+		}
+		//scoremod = score * parseFloat(modifier.FL);
+	}
 	if(modarr.includes('EZ') == true){
 		if(modifier.EZ.type == '*'){
 			scoremod = score * parseFloat(modifier.EZ.value);

@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>osu! Match OBS Displayer</title>
 		<link rel="stylesheet" href="/visualizer/style.css" />
+		<link rel="stylesheet" href="/assets/odometer-theme-minimal.css"> 
 	</head>
 	<body>
 		<div class="container">
@@ -54,7 +55,7 @@
 							<div class="teaminner1"></div>
 						</div>
 						<div id="score" class="score">
-							<span class="paddingfix"><span id="team1">0</span> - <span id="team2">0</span></span>
+							<span class="paddingfix"><span class="odometer" id="team1">0</span> - <span class="odometer" id="team2">0</span></span>
 						</div>
 						<div class="team2">
 							<div class="teaminner2"></div>
@@ -63,6 +64,7 @@
 				})
 		</script>
 		<script src="/socketio"></script>
+		<script src="/assets/odometer.min.js"></script>
 		<script src="/app.js" type="module"></script>
 	</body>
 </html>

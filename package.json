@@ -1,6 +1,6 @@
 {
 	"name": "osu-tourney-match-displayer",
-	"version": "1.6.0",
+	"version": "1.7.0",
 	"description": "Displayer for osu! Tournament Matches",
 	"main": "index.js",
 	"repository": {
