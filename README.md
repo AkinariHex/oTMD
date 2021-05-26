@@ -33,12 +33,12 @@ The project is currently into its early stage and is not written perfectly. We'l
 
 ## How to Install
 
-The current documentation is valid for the `v1.6.0` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
+The current documentation is valid for the `v1.7.0` of o!TMD. Download the latest version [here](https://github.com/AkinariHex/oTMD/releases/latest)!<br>
 With the latest update now you have two methods to install it, using the installer or just unzipping the `.zip` file.
 
 ### Installer
 
-First of all you need to download the `otmd_v1.6.0_installer.exe` from the release page!<br>
+First of all you need to download the `otmd_v1.7.0_installer.exe` from the release page!<br>
 Once downloaded, run the installer and continue installing it!
 
 The installer runs with Administrator Privileges.<br>
@@ -51,7 +51,7 @@ At first run it will ask you to allow the ``.exe`` for the firewall, check only 
 
 ### Zip File
 
-First of all you need to download the `otmd_v1.6.0_x64.zip` from the release page!<br>
+First of all you need to download the `otmd_v1.7.0_x64.zip` from the release page!<br>
 Once downloaded, extract the ``.zip`` file wherever you want and you're done!
 
 Now you can open the folder and run `osu! Tourney Match Displayer.exe`!
@@ -93,7 +93,7 @@ Now you can open the folder and run `osu! Tourney Match Displayer.exe`!
 
 Open the o!TMD directory (%appdata% > otmd) and go to `Teams` folder!<br>
 
-Put here the images of the teams! The images should have the same name of the teams but lowercases and without spaces! (Ex. Team name: `Alligator Space Jam` // Image name: `alligatorspacejam`)<br /><img src="https://akinariosu.s-ul.eu/lYl1RZLQ">
+Put here the images of the teams! The images should have the same name of the teams! (Ex. Team name: `Alligator Space Jam` // Image name: `Alligator Space Jam`)
  
 ## Display on OBS
  
