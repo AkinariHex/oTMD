@@ -181,32 +181,6 @@
             "end": "02/20/2021"
         }
     },
-    "FOT": {
-        "name": "Fox Open Tournament",
-        "modifiers": {
-            "HD": {
-                "type": "*",
-                "value": "1.00"
-            },
-            "HR": {
-                "type": "*",
-                "value": "1.00"
-            },
-            "EZ": {
-                "type": "*",
-                "value": "1.00"
-            },
-            "FL": {
-                "type": "*",
-                "value": "1.00"
-            }
-        },
-        "forumID": "1196836",
-        "date": {
-            "start": "01/09/2021",
-            "end": ""
-        }
-    },
     "L42": {
         "name": "Lobby 42: EMRTT2",
         "modifiers": {
@@ -230,7 +204,7 @@
         "forumID": "1195407",
         "date": {
             "start": "01/08/2021",
-            "end": ""
+            "end": "03/20/2021"
         }
     },
     "ONZOT": {
@@ -517,7 +491,7 @@
         "forumID": "1223454",
         "date": {
             "start": "02/26/2021",
-            "end": ""
+            "end": "04/10/2021"
         }
     },
     "NVC": {
@@ -751,7 +725,7 @@
         "forumID": "1266715",
         "date": {
             "start": "03/26/2021",
-            "end": ""
+            "end": "05/23/2021"
         }
     },
     "ATSW": {
@@ -829,7 +803,7 @@
         "forumID": "1279137",
         "date": {
             "start": "04/09/2021",
-            "end": ""
+            "end": "05/31/2021"
         }
     },
     "TPR": {
@@ -1262,6 +1236,166 @@
         "date": {
             "start": "06/05/2021",
             "end": "07/20/2021"
+        }
+    },
+    "EST": {
+        "name": "Entropy's Summer Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.90"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1334728",
+        "date": {
+            "start": "07/10/2021",
+            "end": "07/22/2021"
+        }
+    },
+    "FTT": {
+        "name": "Full Technical Tournament 3",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1337843",
+        "date": {
+            "start": "07/09/2021",
+            "end": "08/29/2021"
+        }
+    },
+    "NAT": {
+        "name": "North America Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1333199",
+        "date": {
+            "start": "07/03/2021",
+            "end": "08/23/2021"
+        }
+    },
+    "AAT": {
+        "name": "Asuna's Asia Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "2.20"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1330959",
+        "date": {
+            "start": "06/12/2021",
+            "end": "07/18/2021"
+        }
+    },
+    "OIST": {
+        "name": "osu! India Summer Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1328854",
+        "date": {
+            "start": "06/12/2021",
+            "end": "07/31/2021"
+        }
+    },
+    "STT": {
+        "name": "Scarlet's Touhou Tournament",
+        "modifiers": {
+            "NM": {
+                "type": "*",
+                "value": "0.80"
+            },
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.80"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1323843",
+        "date": {
+            "start": "06/26/2021",
+            "end": "08/14/2021"
         }
     },
     "": {

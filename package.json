@@ -1,6 +1,6 @@
 {
 	"name": "osu-tourney-match-displayer",
-	"version": "1.7.0",
+	"version": "1.8.0",
 	"description": "Displayer for osu! Tournament Matches",
 	"main": "index.js",
 	"repository": {
@@ -14,20 +14,26 @@
 		"copyright": "Copyright © 2021 Akinari",
 		"win": {
 			"target": [
-				"nsis",
-				"zip"
+				"nsis", "zip"
 			],
 			"artifactName": "otmd_v${version}_${arch}.${ext}",
-			"requestedExecutionLevel": "requireAdministrator"
+			"verifyUpdateCodeSignature": false,
+			"requestedExecutionLevel": "requireAdministrator",
+			"icon": "./resources/otmd.ico"
 		},
 		"nsis": {
-			"oneClick": false,
+			"oneClick": true,
 			"perMachine": true,
-			"allowToChangeInstallationDirectory": true,
+			"allowToChangeInstallationDirectory": false,
 			"deleteAppDataOnUninstall": true,
 			"artifactName": "otmd_v${version}_${arch}_installer.${ext}",
-			"installerIcon": "./resources/icon.ico",
-			"uninstallerIcon": "./resources/icon.ico"
+			"installerIcon": "./resources/otmd.ico",
+			"uninstallerIcon": "./resources/otmd.ico",
+			"uninstallDisplayName": "${productName}",
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": true,
+			"shortcutName": "osu! Tourney Match Displayer",
+			"runAfterFinish": true
 		},
 		"files": [
 			"frontend/**/*",
@@ -37,6 +43,20 @@
 		],
 		"directories": {
 			"buildResources": "resources"
+		},
+		"fileAssociations": [
+			{
+				"ext": "otmdt",
+				"name": "OTMD Team File",
+				"role": "Editor",
+				"icon": "./resources/otmd.ico"
+			}
+		],
+		"protocols": {
+			"name": "otmd-protocol",
+			"schemes": [
+				"otmd"
+			]
 		}
 	},
 	"scripts": {
@@ -63,8 +83,10 @@
 	"author": "Akinari",
 	"license": "GPL-3.0",
 	"dependencies": {
+		"adm-zip": "^0.5.5",
 		"cors": "^2.8.5",
 		"electron-log": "^4.3.2",
+		"electron-reload": "^1.5.0",
 		"electron-updater": "^4.3.8",
 		"express": "^4.17.1",
 		"markdown-it": "^12.0.4",
@@ -73,7 +95,7 @@
 		"pkg": "^4.4.9",
 		"socket.io": "^3.0.4",
 		"v8-compile-cache": "^2.3.0",
-		"ws": "^7.4.0"
+		"ws": "^7.4.6"
 	},
 	"devDependencies": {
 		"electron": "^12.0.2",

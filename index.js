@@ -6,12 +6,14 @@ const path = require('path')
 const fetch = require('node-fetch')
 const os = require('os')
 
+/* console.log(sock()) */ 
+
 os.setPriority(-20)
 
 const socket = require('socket.io')
 const appexp = express()
 
-const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification } = require('electron');
+const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification, ipcMain, protocol, shell } = require('electron');
 require('v8-compile-cache');
 var { autoUpdater } = require("electron-updater")
 
@@ -33,6 +35,15 @@ if (!fs.existsSync(documentsFolder + '/otmd')) {
             return console.error(err);
         }
     })
+}
+
+//create exports folder at first run
+if (!fs.existsSync(documentsFolder + '/otmd/exports')) {
+	fs.mkdir(documentsFolder + '/otmd/exports', (err) => {
+		if (err) {
+			return console.error(err);
+		}
+	})
 }
 
 //create teams folder at first run
@@ -76,6 +87,7 @@ function readSettingsJson() {
 		return null
 	}
 }
+
 
 appexp.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/index.html'))
@@ -176,12 +188,12 @@ appexp.get('/settings', (req, res) => {
 appexp.get('/teams', (req, res) => {
 	fs.readdir(documentsFolder + `/otmd/teams`, async (err, data) => {	
 		if(err){
-			res.json(['nodata']);
+			res.json({status: 1});
 			return
 		}
 
 		if(data == ''){
-			res.json(['nodata']);
+			res.json({status: 1});
 		} else {
 			let teamimages = [];
 			let teamsettings = [];
@@ -189,14 +201,14 @@ appexp.get('/teams', (req, res) => {
 				if(file.search('.*\.(jpeg|jpg|png)$') === 0){
 					teamimages.push(file)
 				} else {
-					teamsettings.push(file.replace(/\.[^/.]+$/, ""))
-					appexp.get(`/teams/${file.replace(/\.[^/.]+$/, "")}`, (req, res) => {
+					teamsettings.push(encodeURIComponent(file.replace(/\.[^/.]+$/, "").trim()))
+					appexp.get(`/teams/${encodeURIComponent(file.replace(/\.[^/.]+$/, "")).trim()}`, (req, res) => {
 						let datafile = fs.readFileSync(documentsFolder + `/otmd/teams/${file}`, 'utf8');
 						res.json(JSON.parse(datafile))
 					})
 				}
 			})
-			let finalData = { images: teamimages, settings: teamsettings}
+			let finalData = { images: teamimages, settings: teamsettings, status: 0}
 			res.json(finalData)
 		}
 
@@ -222,47 +234,108 @@ appexp.get('/version', (req, res) => {
 
 // -----------------------------------------------------------------------------
 
-app.setAppUserModelId('osu! Tourney Match Displayer')
-app.disableHardwareAcceleration()
+function readProtocol(string) {
+	if(string.filename.endsWith('.otmdt')){
+		let AdmZip = require('adm-zip');
+		try {
+			let zip = new AdmZip(string.path);
+			zip.extractAllTo(documentsFolder + `/otmd/teams/`, true);
+			fs.unlinkSync(string.path)
+		} catch (err) {
+			/*err*/
+		}
+		
+	}
+}
 
-app.on('ready', function() {
+let mainWindow;
 
-    const server = appexp.listen(3000, () => {
-        console.log(`Running on http://localhost:${server.address().port}`)
-    })
-
+function createWindow() {
+	
 	globalShortcut.unregister('Control+Shift+I')
+  
+	let iconPath = path.join(__dirname, '/frontend/assets/otmd.ico');
 
-    /*let loading = new BrowserWindow({show: false, width: 1000, height: 600, frame: false})
-    var mainWindow = null;*/
-
-    var mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 600,
-        //autoHideMenuBar: true,
-        useContentSize: true,
+  
+	// Create the browser window.
+	mainWindow = new BrowserWindow({
+		width: 1000,
+    	height: 600,
+		useContentSize: true,
         resizable: false,
         darkTheme: true,
         frame: false,
         webPreferences: {
             devTools: false,
-			nodeIntegration: true
+			nodeIntegration: false
         },
         titleBarStyle: 'hidden',
         show: false,
-		name: 'osu! Tourney Match Displayer'
-    });
+		name: 'osu! Tourney Match Displayer',
+		icon: iconPath
+	});
+  
+	// Handle external links
+	mainWindow.webContents.on('new-window', async (event, link) => {
+	  event.preventDefault(); 
+	  await shell.openExternal(link);
+	});
+  
+	// Set the menu to null so we can remove default shortcuts like CTRL + W
+	mainWindow.setMenu(null);
+  
+	
+	mainWindow.webContents.openDevTools();
+  
+		/* require('electron-reload')(__dirname, {
+			electron: require(`${__dirname}/node_modules/electron`)
+	  	}); */
+	const server = appexp.listen(3000, () => {
+		console.log(`Running on http://localhost:3000`)
+		mainWindow.loadURL(`http://localhost:3000/`)
+		.then(autoUpdater.checkForUpdatesAndNotify())
+	})
 
-    mainWindow.webContents.on('dom-ready', () => {
+
+	server.once('error', function(err) {
+		if (err.code == 'EADDRINUSE') {
+		  console.log(err.code + ':3000' + ' already in use');
+		}
+		if (process.platform == 'win32' && process.argv.length >= 2) {
+			var filename = path.basename(process.argv[1]);
+			readProtocol({filename: filename, path: process.argv[1]})
+			app.quit()
+		}
+	
+	})
+
+	mainWindow.webContents.on('dom-ready', () => {
         mainWindow.show();
+		mainWindow.focus()
     })
-	mainWindow.webContents.setFrameRate(60)
+	
+  
+	// Emitted when the window is closed.
+	mainWindow.on('closed', () => {
+	  // Dereference the window object, usually you would store window
+	  // in an array if your app supports multi windows, this is the time
+	  // when you should delete the corresponding element.
+	  mainWindow = null;
+	});
+
+
+
+	if (process.platform == 'win32' && process.argv.length >= 2) {
+		var filename = path.basename(process.argv[1]);
+		readProtocol({filename: filename, path: process.argv[1]})
+		mainWindow.focus()
+	}
 
 	function showNotification(title, body) {
 		const notification = {
 		  title: title,
 		  body: body,
-		  icon: path.join(__dirname, "frontend/assets/OTMD_logo_icona.ico")
+		  icon: iconPath
 		}
 		new Notification(notification).show()
 	}
@@ -274,14 +347,14 @@ app.on('ready', function() {
 	});
 
 	
-	mainWindow.loadURL(`http://localhost:${server.address().port}/`)
-	.then(autoUpdater.checkForUpdatesAndNotify())
+
+	
+	
 
     //mainWindow.webContents.openDevTools();
 
-
 	function createTray() {
-		let appIcon = new Tray(path.join(__dirname, "frontend/assets/OTMD_logo_icona.ico"));
+		let appIcon = new Tray(iconPath);
 		const contextMenu = Menu.buildFromTemplate([
 			{
 				label: 'Open', click: function () {
@@ -444,8 +517,44 @@ app.on('ready', function() {
 			require('electron').shell.openPath(documentsFolder + '/otmd/teams')
 		})
 
+		socket.on('addteam_readfile', (data) => {
+			let d = {filename: path.basename(data), path: data}
+			readProtocol(d)
+		})
+
+		socket.on('export_team', (team) => {
+			let folder = fs.readdirSync(documentsFolder + '/otmd/teams')
+			let pathFiles = []
+			let AdmZip = require('adm-zip');
+			let zip = new AdmZip();
+			folder.forEach((file) => {
+				if(file.search(team) === 0){
+					pathFiles.push(file)
+					zip.addLocalFile(documentsFolder + '/otmd/teams/' + file);
+				}
+			})
+			zip.writeZip(`${documentsFolder}/otmd/exports/${team}.otmdt`)
+			zip.extractAllTo(documentsFolder + `/otmd/teams/`, true)
+			require('electron').shell.openPath(documentsFolder + '/otmd/exports')
+		})
 
 		socket.on('edit_teamname', (datatoSave) => {
+			let folder = fs.readdirSync(documentsFolder + '/otmd/teams')
+			if(!folder.includes(datatoSave.file)){
+				folder.forEach((file) => {
+					if(file.search(`${datatoSave.team}.*\.(jpeg|jpg|png)$`) === 0){
+						var re = /(?:\.([^.]+))?$/;
+						var ext = re.exec(file)[1]; 
+						let dataFirst = {
+							"img": ext,
+							"file": datatoSave.file,
+							"team_name": datatoSave.team,
+							"players": []
+						}
+						fs.writeFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, JSON.stringify(dataFirst))
+					}
+				})
+			}
 			let datafile = JSON.parse(fs.readFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, 'utf8'))
 			const { img, file, team_name, players } = datafile
 			let newData = { 
@@ -474,7 +583,6 @@ app.on('ready', function() {
 		})
 
 		socket.on('save_team', (datatoSave) => {
-
 			let folder = fs.readdirSync(documentsFolder + '/otmd/teams')
 			if(!folder.includes(datatoSave.file)){
 				folder.forEach((file) => {
@@ -503,25 +611,40 @@ app.on('ready', function() {
 			fs.writeFileSync(documentsFolder + `/otmd/teams/${datatoSave.file}`, JSON.stringify(newData))
 		})
 	})
-	
-	
-})
 
-app.on('new-window', function(event, url){
-    event.preventDefault();
-    open(url);
-});
+}
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
-  })
+try {
+	app.allowRendererProcessReuse = true;
+	app.setAppUserModelId('osu! Tourney Match Displayer')
+	app.disableHardwareAcceleration()
+	app.setAsDefaultProtocolClient('otmd')
   
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
-  })
-
+	// This method will be called when Electron has finished
+	// initialization and is ready to create browser windows.
+	// Some APIs can only be used after this event occurs.
+	app.on('ready', () => setTimeout(createWindow, 400));
   
+	// Quit when all windows are closed.
+	app.on('window-all-closed', () => {
+	  // On OS X it is common for applications and their menu bar
+	  // to stay active until the user quits explicitly with Cmd + Q
+	  if (process.platform !== 'darwin') {
+		app.quit();
+	  }
+	});
+
+	app.on('new-window', function(event, url){
+		event.preventDefault();
+		open(url);
+	});
+
+  } catch (e) {
+	// Catch Error
+	// throw e;
+  }
+
+
+
+
+

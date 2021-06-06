@@ -14,6 +14,15 @@
 					<span class="tourney_info_top"></span>
 				</div>
 				<div class="v_content">
+					<div class="team1">
+						<div class="teaminner1"></div>
+					</div>
+					<div id="score" class="score">
+						<span class="paddingfix"><span class="odometer" id="team1">0</span> - <span class="odometer" id="team2">0</span></span>
+					</div>
+					<div class="team2">
+						<div class="teaminner2"></div>
+					</div>
 				</div>
 				<div class="v_footer">
 					<span class="tourney_info_down"></span>
@@ -49,17 +58,6 @@
 							000.000
 						</div>
 					</div>`
-					} else {
-						document.querySelector('.v_content').innerHTML = `
-						<div class="team1">
-							<div class="teaminner1"></div>
-						</div>
-						<div id="score" class="score">
-							<span class="paddingfix"><span class="odometer" id="team1">0</span> - <span class="odometer" id="team2">0</span></span>
-						</div>
-						<div class="team2">
-							<div class="teaminner2"></div>
-						</div>`
 					}
 				})
 		</script>

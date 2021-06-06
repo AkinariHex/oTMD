@@ -2,6 +2,9 @@ dist/
 node_modules
 settings.json
 
+extract.html
+extract.css
+
 index-linux
 index-macos
 index-win.exe

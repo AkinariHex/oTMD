@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>OTMD Dashboard</title>
+		<title>osu! Tourney Match Displayer</title>
 		<link rel="stylesheet" type="text/css" href="/assets/semantic.min.css">
 		<script
 			src="https://code.jquery.com/jquery-3.1.1.min.js"
@@ -57,7 +57,7 @@
 			<div class="content">
 				<div class="ui input">
 				  	<input type="text" placeholder="APIkey" id="credAPIKEY">
-					<label><a href="https://osu.ppy.sh/p/api">Where can I find the APIkey?</a></label>
+					<label><a href="https://osu.ppy.sh/p/api" target="_blank">Where can I find the APIkey?</a></label>
 				</div>
 				<div class="ui input">
 					<input type="text" placeholder="UserID" id="credUID">
@@ -71,18 +71,18 @@
 		<div class="leftverticalmenu">  
 			<div class="ui secondary vertical pointing menu" >
 				<a class="item active" id="match_button" data-tab="match">
-					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 72 72">
-						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzUlEQVRYhcWYy29NURTGfz2DhkvaiQ4ojdtWZx7xSnTgGSYGEhrpkAFKGuofqPgPUCFhwLBeA4+RR7QGJIR6japUqhhUbkLSkk7Iar7dbNvtvef03nt8yck+e+fs9X1nn7XWXvtU5XI5YqIKWA9sU7sMWABkgAngG/AOeAo8UPs7ju04IozkINAJNMVVDLwHzgIXJHLWInYDp4HFwfhH4BXwFfgO1AILgZXA0uDZUaALuJFUxBzgHLA/MHYe6AU+FBDeCLQDHcASb/wycBj4FUeEvdVNYJP69qYnJGCyAHmIapGelE1DP7BLNmcUYd//DrBF/RdAGzCcgDxEFrgOrNZ4H7DT95MomNDjCejTapQiAM03Ow/V3yyHnYa/Enuk2PAc2FjMqxPCVvkRsEbT2pyzOhFzFeP1wA9gVRlWIB/s07wEaoDPQIu9qPschyTA0F0hAchut+7rlX+mVsIy4ZBC6xPQnDAKksKiZkjha6HeHCkFN8pQ0jCcDSbFg3hbI+0FDr0VFpCPZ4eJWKfOcAV9IYTPtSGShxrepCTA4a3alkjbMQqZNDEqrrpISYQwn6cAx5eJvKxYm7IIxzeVrKwiwktWacHxjUVK14blKYtwfIMm4pk6WV1pwOd6YiLue6TtKYnwee6Ge8eIquhK7x3mAg1KWE2RyvIePdCg2rCS6BCP4Yzxu3rCcsXg/64nLFcc0709cNVLYuVCRnZrZK/L5Si/xrRS65Lu1wK3gfllEmB2bsku4nGl5D+FbqfKcsNW3ZcatlnZcSVDv3imEYqY0LnACbEyfQA4Kq9OgmrNG/DKfXfu+KuALnQCs+pnnzc2orErRZzW3nwvcMSLAnQCs7Gf4YRiZ1Ery0/l2VdMxGvgi6LJnG0RsCLP57MoOA5cm4kkzql8HnCghFP5RWC80INJ/0+0AtvVWozXef8nxpRrHgP31Bb/PwH8AVLgv5UFJt+gAAAAAElFTkSuQmCC"/>
-						<image id="VS" x="19" y="24" width="36" height="25" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAANCAYAAACkTj4ZAAABNElEQVQokaWTwU0CYRCFPwhXo0wJtIDxbrKWACXYApQAdoBnb1sCJl49sPHgVbeEt8YKzOBb82dDoolzWeafmffevAlIupP0Kemaf8QYOAfOgKshjKSppNVf4CfAM3ALVMB2UN8Dc0kt0AAbYObf+fYYEU0P9OKh2UDNLkE8dMihomde9CXgw8jJu5suk8HrJHsH3HhwZ9Ct88ozU+B1YuDGj1X6YpCMtYEr521E1EBdKMraW6+oV1CbKcG2EbF2feb1plbZeNX7iMicUYG6LyyqI2I58CwPshp42dmOdlQ0yoyti92pM0vq/cnvoicdFz2NGZYliKSFpIOkjVV1EZGG9z4dFfZmExF5nVORjclenjxJU31GevXt0W9hJT3YD6BBjhv8CWjg0QWQ/8uPiHg6PgJfUbuL8u6zyQQAAAAASUVORK5CYII="/>
+					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" style="fill: #aaa;" viewBox="0 0 72 72">
+						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzUlEQVRYhcWYy29NURTGfz2DhkvaiQ4ojdtWZx7xSnTgGSYGEhrpkAFKGuofqPgPUCFhwLBeA4+RR7QGJIR6japUqhhUbkLSkk7Iar7dbNvtvef03nt8yck+e+fs9X1nn7XWXvtU5XI5YqIKWA9sU7sMWABkgAngG/AOeAo8UPs7ju04IozkINAJNMVVDLwHzgIXJHLWInYDp4HFwfhH4BXwFfgO1AILgZXA0uDZUaALuJFUxBzgHLA/MHYe6AU+FBDeCLQDHcASb/wycBj4FUeEvdVNYJP69qYnJGCyAHmIapGelE1DP7BLNmcUYd//DrBF/RdAGzCcgDxEFrgOrNZ4H7DT95MomNDjCejTapQiAM03Ow/V3yyHnYa/Enuk2PAc2FjMqxPCVvkRsEbT2pyzOhFzFeP1wA9gVRlWIB/s07wEaoDPQIu9qPschyTA0F0hAchut+7rlX+mVsIy4ZBC6xPQnDAKksKiZkjha6HeHCkFN8pQ0jCcDSbFg3hbI+0FDr0VFpCPZ4eJWKfOcAV9IYTPtSGShxrepCTA4a3alkjbMQqZNDEqrrpISYQwn6cAx5eJvKxYm7IIxzeVrKwiwktWacHxjUVK14blKYtwfIMm4pk6WV1pwOd6YiLue6TtKYnwee6Ge8eIquhK7x3mAg1KWE2RyvIePdCg2rCS6BCP4Yzxu3rCcsXg/64nLFcc0709cNVLYuVCRnZrZK/L5Si/xrRS65Lu1wK3gfllEmB2bsku4nGl5D+FbqfKcsNW3ZcatlnZcSVDv3imEYqY0LnACbEyfQA4Kq9OgmrNG/DKfXfu+KuALnQCs+pnnzc2orErRZzW3nwvcMSLAnQCs7Gf4YRiZ1Ery0/l2VdMxGvgi6LJnG0RsCLP57MoOA5cm4kkzql8HnCghFP5RWC80INJ/0+0AtvVWozXef8nxpRrHgP31Bb/PwH8AVLgv5UFJt+gAAAAAElFTkSuQmCC"/>
+						<image id="VS" x="19" y="24" width="36" height="25" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAANCAYAAACkTj4ZAAABNElEQVQokaWTwU0CYRCFPwhXo0wJtIDxbrKWACXYApQAdoBnb1sCJl49sPHgVbeEt8YKzOBb82dDoolzWeafmffevAlIupP0Kemaf8QYOAfOgKshjKSppNVf4CfAM3ALVMB2UN8Dc0kt0AAbYObf+fYYEU0P9OKh2UDNLkE8dMihomde9CXgw8jJu5suk8HrJHsH3HhwZ9Ct88ozU+B1YuDGj1X6YpCMtYEr521E1EBdKMraW6+oV1CbKcG2EbF2feb1plbZeNX7iMicUYG6LyyqI2I58CwPshp42dmOdlQ0yoyti92pM0vq/cnvoicdFz2NGZYliKSFpIOkjVV1EZGG9z4dFfZmExF5nVORjclenjxJU31GevXt0W9hJT3YD6BBjhv8CWjg0QWQ/8uPiHg6PgJfUbuL8u6zyQQAAAAASUVORK5CYII="/>
 					  </svg>					  
 					<span class="item_text">
 						Match
 					</span>
 				</a>
 				<a class="item" id="displayer_settings_button" data-tab="displayer-settings">
-					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 72 72">
-						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzklEQVRYhcWYy29NURjFfz2DG0raiQ6oNm5bnXkEITrwDBMDCY10yADVNNQ/UPEfoELCgGG9Bh4jgl4DQkK9RlWPVDGo3IRESSfka9Zutu323nPae481OXfve8631tl7f99e+1Tl83liogpYC2wB1gEtwAKgGhgHvgLDwGPgHvAE+B0ndhwRRnIA6Aaa4yoG3gKngXMSOWMRu4CTwOKg/wPwAvgCfANqgYXACmBJcO8o0ANcSypiDnAG2BcEOwv0A++KCG8COoBOoMHrvwgcAn7FEWFvdR3YqLa96TEJmChCHiIj0uOKacgBOxVzWhE2/7eAzWo/A9qB9wnIQ2SBq8Aq9Q8AO/x1EgUP9HkCBjQasxGAnrc499XepAU7BX8kdkux4SmwodSqTggb5QfAaj3W7harEzEXeAPUA9+BlWUYgUKwqXkO1ACfgFZ7UTcdByXA0FshAShur37Xq/5MjoRVwmGl1kdVwiRZkBQZVdYGpXpLpFLcpEBJ03AmmBAP4m2LtBc49FdYQCGe7W4k0HxVai2E8LnWR1qhhlcpCXB4rWtrpO0YpUyaGBVXXaQaQVjPU4DjqzYRP9WoTVmE45ssVuaI8IpVWnB8Y5HKtWFZyiIc31AkL4jqejYlAT7XIxNx1/uzIyURPs/tcO8YAZamsHfYEmhUwWqOZMv7dEOjvGEl0Skewynjd37CDMfQ//YT5qCO6LfdcFnCyolqxa1RzB7n3HyPaVbrgn6vAW4C88skwuLcUFzE46zkP0a3W7YcbfG5MqRtVnG2qp0TzxRCEeM6FzghZtMHgcNa1UmQ0XODnt13546/DHSxE5i5n71e34j6LpVYtPbme4AuLwvQCazL26tKinAwW36iwL5iIl4Cn5VNttgWAcsLTJ9lwVHgynQkcU7l84D9sziVnwd+FLsx6feJNmCbrpbjdd73iTHVmofAHV1Lf58A/gBRNb+VvfBaAwAAAABJRU5ErkJggg=="/>
-						<image id="Ellipse_1_copy" data-name="Ellipse 1 copy" x="11" y="11" width="51" height="51" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbCAYAAACN1PRVAAACa0lEQVRIibXWW6iNaRgH8N9e26GRhAvHkEMomjIXXEkNkjAlYlIulKJcGWJKDIlhFMoNN+4QpQi5UMK1O9Q45tBMTrM3k0Pbjq0nz1fLstbC3mv/b77ve9/3ef7f8z7HppaWFl9BX/yC6ZiCkShhHY6kaC804209VaU6e4OwD09T6WpMw1AMxtI8NwD38B8OpFxV1LJsCQ6mogIduI1beI7d+BuTcL3s3AuswdFKpZVkTdiTV1TgLvbjRFpZDcuxFWPK9v7C7/mTVcl+xbF8f48/Uqi9znUXCL9tTJnmXNuC7cWBSp+9zD+J5wLs+EaiwLtUHHL/59o2LKplWWBiOvvZN5JUwzycTgtfpM4nhWWT8wpL6fSuEAXOpVWB/thcWNYP/2Q+/Zbh3gj8gJsYkfnXNyyZm0SB1w0ikgRr05eX8KEHZuZmBMapBpIFTiJurk36aFJu3KmTR11BWyFbKkvER91AFJiF+9gZZH1ysasRWAsrMAqrguxNHurXTWRD8tleShMDo7uJbEQ+HwbZjfyYUK89dBKhb1yKXg2yy/kRFX9hg8kWp97AlSA7W+a3wQ0k6pkVKfAKZyKpWzEHP+FQA8nWY2y+H47qVK3qD8tS09oFop9xPnvc86KTVPazqRmdUU1mdJIoCvDxJOrIESFa1hfNc1je9UBcyLbe8zvJmso69e4cJz5tVJlBdmFD2dqdshmkWpUZlaNehPifeJxr4a+LnymvMV0ty7FsYNlaMV39m6S9MT79UWBvxbD0ucl1htRIg01YmX74GiJ9otuf6QxZgaiZ8zEbP2J4kkfEPsC1SNgkqR3B+AhRpZbRzaZaagAAAABJRU5ErkJggg=="/>
+					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" style="fill: #aaa;" viewBox="0 0 72 72">
+						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzklEQVRYhcWYy29NURjFfz2DG0raiQ6oNm5bnXkEITrwDBMDCY10yADVNNQ/UPEfoELCgGG9Bh4jgl4DQkK9RlWPVDGo3IRESSfka9Zutu323nPae481OXfve8631tl7f99e+1Tl83liogpYC2wB1gEtwAKgGhgHvgLDwGPgHvAE+B0ndhwRRnIA6Aaa4yoG3gKngXMSOWMRu4CTwOKg/wPwAvgCfANqgYXACmBJcO8o0ANcSypiDnAG2BcEOwv0A++KCG8COoBOoMHrvwgcAn7FEWFvdR3YqLa96TEJmChCHiIj0uOKacgBOxVzWhE2/7eAzWo/A9qB9wnIQ2SBq8Aq9Q8AO/x1EgUP9HkCBjQasxGAnrc499XepAU7BX8kdkux4SmwodSqTggb5QfAaj3W7harEzEXeAPUA9+BlWUYgUKwqXkO1ACfgFZ7UTcdByXA0FshAShur37Xq/5MjoRVwmGl1kdVwiRZkBQZVdYGpXpLpFLcpEBJ03AmmBAP4m2LtBc49FdYQCGe7W4k0HxVai2E8LnWR1qhhlcpCXB4rWtrpO0YpUyaGBVXXaQaQVjPU4DjqzYRP9WoTVmE45ssVuaI8IpVWnB8Y5HKtWFZyiIc31AkL4jqejYlAT7XIxNx1/uzIyURPs/tcO8YAZamsHfYEmhUwWqOZMv7dEOjvGEl0Skewynjd37CDMfQ//YT5qCO6LfdcFnCyolqxa1RzB7n3HyPaVbrgn6vAW4C88skwuLcUFzE46zkP0a3W7YcbfG5MqRtVnG2qp0TzxRCEeM6FzghZtMHgcNa1UmQ0XODnt13546/DHSxE5i5n71e34j6LpVYtPbme4AuLwvQCazL26tKinAwW36iwL5iIl4Cn5VNttgWAcsLTJ9lwVHgynQkcU7l84D9sziVnwd+FLsx6feJNmCbrpbjdd73iTHVmofAHV1Lf58A/gBRNb+VvfBaAwAAAABJRU5ErkJggg=="/>
+						<image id="Ellipse_1_copy" data-name="Ellipse 1 copy" x="11" y="11" width="51" style="fill: #aaa;" height="51" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbCAYAAACN1PRVAAACa0lEQVRIibXWW6iNaRgH8N9e26GRhAvHkEMomjIXXEkNkjAlYlIulKJcGWJKDIlhFMoNN+4QpQi5UMK1O9Q45tBMTrM3k0Pbjq0nz1fLstbC3mv/b77ve9/3ef7f8z7HppaWFl9BX/yC6ZiCkShhHY6kaC804209VaU6e4OwD09T6WpMw1AMxtI8NwD38B8OpFxV1LJsCQ6mogIduI1beI7d+BuTcL3s3AuswdFKpZVkTdiTV1TgLvbjRFpZDcuxFWPK9v7C7/mTVcl+xbF8f48/Uqi9znUXCL9tTJnmXNuC7cWBSp+9zD+J5wLs+EaiwLtUHHL/59o2LKplWWBiOvvZN5JUwzycTgtfpM4nhWWT8wpL6fSuEAXOpVWB/thcWNYP/2Q+/Zbh3gj8gJsYkfnXNyyZm0SB1w0ikgRr05eX8KEHZuZmBMapBpIFTiJurk36aFJu3KmTR11BWyFbKkvER91AFJiF+9gZZH1ysasRWAsrMAqrguxNHurXTWRD8tleShMDo7uJbEQ+HwbZjfyYUK89dBKhb1yKXg2yy/kRFX9hg8kWp97AlSA7W+a3wQ0k6pkVKfAKZyKpWzEHP+FQA8nWY2y+H47qVK3qD8tS09oFop9xPnvc86KTVPazqRmdUU1mdJIoCvDxJOrIESFa1hfNc1je9UBcyLbe8zvJmso69e4cJz5tVJlBdmFD2dqdshmkWpUZlaNehPifeJxr4a+LnymvMV0ty7FsYNlaMV39m6S9MT79UWBvxbD0ucl1htRIg01YmX74GiJ9otuf6QxZgaiZ8zEbP2J4kkfEPsC1SNgkqR3B+AhRpZbRzaZaagAAAABJRU5ErkJggg=="/>
 					  </svg>
 					<span class="item_text">
 						Displayer Settings
@@ -333,13 +333,8 @@
 			</div>
 
 			<div class="leftmaintab ui vertical tab segment" id="teams_tab" data-tab="teams-tab">
-				<button class="ui button" id="openfolderteams">
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M22 22h-20l-2-13h24l-2 13zm.406-15l.594-3h-13c-1.979 0-2.041-.417-3.306-2h-5.694l.605 5h20.801z"/></svg>
-					&nbsp;
-					Open Teams Folder
-				</button>
 				<div id="teamslist" class="ui special cards">
-						
+					
 				</div>
 			</div>
 			
@@ -478,11 +473,11 @@
 
 	<script src="/socketio"></script>
 	<script type="module">
-
+/* 
 		document.getElementById('openfolderteams').addEventListener('click', e => {
 			e.preventDefault();
 			socket.emit('open_team_folder')
-		})
+		}) */
 
 		const socket = io()
 
@@ -802,6 +797,17 @@
 	<!-- Team List -->
 	<script>
 		
+		function readFile(file){
+			if(file.length != 0){
+				socket.emit('addteam_readfile', file[0].path)
+			}
+			
+		}
+
+		function openTeamsFolder(){
+			socket.emit('open_team_folder')
+		}
+
 		function changeTeamName(value, file, team){
 			let playerNotEditList = document.getElementById(`team_players_${team}`)
 			let meta = playerNotEditList.parentElement;
@@ -824,22 +830,27 @@
 			location.reload()
 		}
 
+		function exportTeam(clickedID){
+			socket.emit('export_team', clickedID)
+		}
+
 		function editTeam(clickedID){
 				document.getElementById(`team_players_edit_${clickedID}`).style.display = "block";
-				document.getElementsByName(`b_${clickedID}`)[0].style.display = "none"
+				document.getElementsByName(`bt_${clickedID}`)[0].style.display = "none"
 		}
 
 		function closeTeam(clickedID){
 				document.getElementById(`team_players_edit_${clickedID}`).style.display = "none";
-				document.getElementsByName(`b_${clickedID}`)[0].style.display = "block"
+				document.getElementsByName(`bt_${clickedID}`)[0].style.display = "flex"
 		}
 
 		function addPlayer(clickedID, counter, file){
 			var count = $(`#listeditteam_players_${clickedID} .item`).length;
+			console.log($(`#listeditteam_players_${clickedID} .item`))
 			if(count <= 8) {
 				let playerlistedit = document.getElementById(`listeditteam_players_${clickedID}`)
 				$(`<div class="item" id="${count}-player">
-					<img src="http://s.ppy.sh/a/">
+					<div style="height: 45px; margin-right: 0px;" data-tooltip="" data-inverted="" data-position="top center" data-variation="mini"><img src="http://s.ppy.sh/a/"></div>
 					<div class="field">
 						<input type="text" id="${count}" name="${count}_player" placeholder="userid" onchange="saveTeam(this.value, this.id, '${file}', '${clickedID}')">
 						<div id="remove_${count}" onclick="removePlayer(this.id, '${file}', '${clickedID}', '${counter}')" class="ui bottom attached button buttonremplayer">
@@ -864,7 +875,8 @@
 		function saveTeam(value, id, file, team){
 			let input = document.getElementById(id).parentElement;
 			let itemInput = input.parentElement;
-			let imgPlayer = itemInput.firstElementChild;
+			let tooltip = itemInput.firstElementChild;
+			let imgPlayer = tooltip.firstElementChild;
 			let playerNotEditList = document.getElementById(`team_players_${team}`).firstElementChild;
 			let currentPlayer = playerNotEditList.children[id-1]
 			/* console.log(value + " " + id)
@@ -883,24 +895,19 @@
 					}
 
 					let data = { playerid: value, playername: osuPlayer[0].username, position: id, file: file, team: team}
-					if(id <= playerNotEditList.childElementCount){
+					if(id <= playerNotEditList.childElementCount && playerNotEditList.childElementCount != 0){
 						currentPlayer.src = `http://s.ppy.sh/a/${value}`
 					} else {
-						playerNotEditList.innerHTML += `<img src="http://s.ppy.sh/a/${value}" id="img_player">`
+						playerNotEditList.innerHTML += `<div style="width: 35px; height: 35px; margin-right: 0px;" data-tooltip="${osuPlayer[0].username}" data-inverted="" data-position="bottom center"><img src="http://s.ppy.sh/a/${value}" id="img_player"></div>`
 					}
 					imgPlayer.src = `http://s.ppy.sh/a/${value}`
 					input.children[0].classList.remove('errPlayer')
 					socket.emit('save_team', data)
 				}).catch((err) => {
 					input.children[0].classList.add('errPlayer')
+					console.log(err)
 				})
 			})
-			/* $(`#form_${clickedID}`).form('submit')
-				let $form = $(`#form_${clickedID}`);
-				let allFields = $form.form('get values');
-				let data = { file: file, data: allFields }
-				
-				$(`#form_${clickedID}`).form('submit'); */
 				
 		}
 		
@@ -915,36 +922,55 @@
 
 				const { images, settings } = data
 
-
 				let teamslist = document.querySelector('#teamslist')
-				teamslist.innerHTML = '';
+				teamslist.innerHTML = `
+					<div class="card newcard">
+						<div class="addteam" onclick="document.getElementById('addteam-input').click();">
+							<input id="addteam-input" type="file" style="display: none;" onchange="readFile(this.files)"/>
+							<div class="content">
+								<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
+								<br>
+								Add Team
+							</div>
+						</div> 
+						<div class="openfolder" id="openfolderteams" onclick="openTeamsFolder()">
+							<div class="content">
+								<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path d="M22 22h-20l-2-13h24l-2 13zm.406-15l.594-3h-13c-1.979 0-2.041-.417-3.306-2h-5.694l.605 5h20.801z"/></svg>
+								<br>
+								Open Teams<br>Folder
+							</div>
+						</div>
+					</div>
+				`
 
 				images.forEach((image) => {
-					let teamname = image.replace(/\.[^/.]+$/, "");
+					let teamname = encodeURIComponent(image.replace(/\.[^/.]+$/, "")).trim();
 
 					let team_player_list = `<span class="team_player_list_noplayers" id="${teamname}">No players</span>`;
+
+					
 
 					if(settings.includes(teamname)){
 						fetch(`/teams/${settings[settings.indexOf(teamname)]}`)
 						.then((res) => res.json())
 						.then((dataTeam) => {
 							const { img, file, team_name, players } = dataTeam
-							teamname = team_name
+							teamname = team_name.split(' ').join('_')
 							let playersText = ""
 							let editList = `<div class="item team">
 										<div class="field">
-											<input type="text" name="teamname" id="teamname_input" placeholder="Team Name" value="${teamname}" onchange="changeTeamName(this.value, '${file}', '${teamname}')">
+											<input type="text" name="teamname" id="teamname_input" placeholder="Team Name" value="${team_name}" onchange="changeTeamName(this.value, '${file}', '${teamname}')">
 										</div>
 									</div>`
 							let counter = 1;
 							players.forEach((player) => {
-								playersText += `<img src="http://s.ppy.sh/a/${player.id}" id="img_player">`
+								playersText += `<div style="width: 35px; height: 35px; margin-right: 0px;" data-tooltip="${player.name}" data-inverted="" data-position="bottom center"><img src="http://s.ppy.sh/a/${player.id}" id="img_player"></div>`
 								
 								editList += `
 									<div class="item" id="item_${player.id}">
-										<img src="http://s.ppy.sh/a/${player.id}">
+										<div style="height: 45px; margin-right: 0px;" data-tooltip="${player.name}" data-inverted="" data-position="top center" data-variation="mini"><img src="http://s.ppy.sh/a/${player.id}"></div>
 										<div class="field">
-											<input type="text" id="${counter}" name="${counter}_player" placeholder="userid" value="${player.id}" onchange="saveTeam(this.value, this.id, '${file}', '${teamname}')">
+											<input type="text" id="${counter}" name="${counter}_player" placeholder="userid" value="${player.id}" onchange="saveTeam(this.value, this.id, '${file}', '${team_name}')">
 											<div id="remove_${player.id}" onclick="removePlayer(this.id, '${file}', '${teamname}', '${counter}')" class="ui bottom attached button buttonremplayer">
 												<svg xmlns="http://www.w3.org/2000/svg" style="transform: scale(0.45); position: relative; top: -10.2px;" width="24" height="24" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
 											</div>
@@ -952,15 +978,16 @@
 									</div>`
 								counter++;
 							})
-
-							team_player_list = `<div class="list">${playersText}</div>`
-							teamslist.innerHTML += `
+							if(players.length !== 0){
+								team_player_list = `<div class="list">${playersText}</div>`
+							}
+							teamslist.insertAdjacentHTML('afterbegin', `
 								<div class="card">
 									<div class="image">
 										<img src="/teamsimg/${image}">
 									</div>
 									<div class="content">
-										<div class="header">${teamname}</div>
+										<div class="header">${team_name}</div>
 									</div>
 									<div class="meta">
 										<div class="team_player_list" id="team_players_${teamname}">
@@ -984,20 +1011,25 @@
 											</form>
 										</div>
 									</div>
-									<div id="${teamname}" name="b_${teamname}" onclick="editTeam(this.id)" class="ui bottom attached button">
-										Edit Team
+									<div class="ui two bottom attached buttons" name="bt_${teamname}">
+										<div id="${teamname}" name="e_${teamname}" onclick="exportTeam(this.id)" class="ui bottom attached button" data-tooltip="Export" data-inverted="" data-position="bottom center" data-variation="mini">
+											<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></svg>
+										</div>
+										<div id="${teamname}" name="b_${teamname}" onclick="editTeam(this.id)" class="ui bottom attached button" data-tooltip="Edit" data-inverted="" data-position="bottom center" data-variation="mini">
+											<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M18 14.45v6.55h-16v-12h6.743l1.978-2h-10.721v16h20v-10.573l-2 2.023zm1.473-10.615l1.707 1.707-9.281 9.378-2.23.472.512-2.169 9.292-9.388zm-.008-2.835l-11.104 11.216-1.361 5.784 5.898-1.248 11.103-11.218-4.536-4.534z"/></svg>
+										</div>
 									</div>
 								</div>
-							`;
+							`)
 						})
 					} else {
 						let counter = 1;
 						let editList = `<div class="item team">
 										<div class="field">
-											<input type="text" name="teamname" id="teamname_input" placeholder="Team Name" value="${teamname}" onchange="changeTeamName(this.value, '${teamname}.json', '${teamname}')">
+											<input type="text" name="teamname" id="teamname_input" placeholder="Team Name" value="${team_name}" onchange="changeTeamName(this.value, '${team_name}.json', '${team_name}')">
 										</div>
 									</div>`
-						teamslist.innerHTML += `
+						teamslist.insertAdjacentHTML('afterbegin', `
 						<div class="card">
 							<div class="blurring dimmable image">
 								<div class="ui dimmer">
@@ -1034,11 +1066,16 @@
 									</form>
 								</div>
 							</div>
-							<div id="${teamname}" name="b_${teamname}" onclick="editTeam(this.id)" class="ui bottom attached button">
-								Edit Team
+							<div class="ui two bottom attached buttons" name="bt_${teamname}">
+								<div id="${teamname}" name="e_${teamname}" onclick="exportTeam(this.id)" class="ui bottom attached button">
+									<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></svg>
+								</div>
+								<div id="${teamname}" name="b_${teamname}" onclick="editTeam(this.id)" class="ui bottom attached button">
+									<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M18 14.45v6.55h-16v-12h6.743l1.978-2h-10.721v16h20v-10.573l-2 2.023zm1.473-10.615l1.707 1.707-9.281 9.378-2.23.472.512-2.169 9.292-9.388zm-.008-2.835l-11.104 11.216-1.361 5.784 5.898-1.248 11.103-11.218-4.536-4.534z"/></svg>
+								</div>
 							</div>
 						</div>
-					`;
+					`);
 					}
 
 

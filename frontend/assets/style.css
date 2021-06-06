@@ -336,6 +336,11 @@ input::-webkit-inner-spin-button {
     height: 24px;
     margin-right: 4.6px;
     -webkit-app-region: no-drag;
+	cursor: unset !important;
+}
+
+#applicationButtons button:hover, #applicationButtons button svg:hover {
+    cursor: unset !important;
 }
 
 .headerappbarbutton {
@@ -344,7 +349,8 @@ input::-webkit-inner-spin-button {
     background-color: transparent !important;
     fill: #fff !important;
     border-radius: 0px !important;
-    margin: 0px !important
+    margin: 0px !important;
+	cursor: unset !important;
 }
 
 .headerappbarbutton:hover {
@@ -601,6 +607,73 @@ input::selection, textarea::selection {
 
 /*----------------------------------------------------------- Teams List -------------------------------------------*/
 
+[data-position~=bottom][data-tooltip]:after{
+	font-size: 12px;
+    font-family: 'QSVF';
+	z-index: 12;
+}
+
+[data-position~=top][data-tooltip]:after{
+	font-size: 12px;
+    font-family: 'QSVF';
+	z-index: 12;
+}
+
+.card.newcard {
+    height: 264.7px;
+    border: 2px dashed #80c3ff !important;
+	display: grid !important;
+	grid-template-areas: 	'a'
+							'b';
+	grid-template-rows: 50% 50%;
+	cursor: pointer !important;
+}
+
+.card.newcard::after {
+	content: "";
+    background-color: #80c3ffb8;
+    height: 0.2px;
+    width: 70%;
+    bottom: 130px;
+    left: 21.907px;
+    position: absolute;
+}
+
+.card.newcard .addteam {
+	grid-area: a;
+    width: auto;
+	height: 100%;
+	display: flex;
+	cursor: pointer !important;
+}
+
+.card.newcard .openfolder {
+    grid-area: b;
+    width: auto;
+	height: 100%;
+	display: flex;
+	cursor: pointer !important;
+}
+
+.card.newcard .addteam .content, .card.newcard .openfolder .content{
+    color: #80c3ff;
+    fill: #80c3ff;
+    width: auto;
+    text-align: center;
+    font-size: 14px;
+    align-self: center;
+	margin: auto;
+	cursor: pointer !important;
+}
+
+.card.newcard .addteam .content #text, .card.newcard .openfolder .content #text{
+  	cursor: pointer !important;
+}
+
+.card.newcard .addteam:hover, .card.newcard .openfolder:hover {
+	background-color:rgba(0, 0, 0, 0.11)
+}
+
 #openfolderteams {
 	margin: 0px 0px 10px 0px;
     padding: 10px;
@@ -643,6 +716,23 @@ input::selection, textarea::selection {
 	position: relative;
 }
 
+.ui.two.bottom.attached.buttons {
+	width: 150px !important;
+	display: flex;
+    position: unset;
+}
+
+.ui.two.bottom.attached.buttons .button {
+	background: transparent;
+	color: #ddd;
+	fill: #ddd;
+	box-shadow: 0 0 0 0px transparent inset !important;
+}
+
+.ui.two.bottom.attached.buttons .button:hover {
+	background: rgba(0, 0, 0, 0.11);
+}
+
 .team_player_list {
 	display: flex;
     flex-direction: row;
@@ -654,8 +744,6 @@ input::selection, textarea::selection {
 
 .listeditteam {
 	background: #181818;
-	box-shadow: 0 1px 3px 0 #2b2b2b, 0 0 0 1px #222223;
-	-webkit-box-shadow: 0 1px 3px 0 #2b2b2b, 0 0 0 1px #222223;
 }
 
 .listeditteam_players {

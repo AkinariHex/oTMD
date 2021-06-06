@@ -213,15 +213,18 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 							team2imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/${country[team2pos].id}.png"> <br />`;
 						}
 					}
-					// CHECK FOR TEAMS IMAGE
-					data.images.forEach(image => {
-						if(image.includes(team1nameNoSpan)){
-							team1imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
-						}
-						if(image.includes(team2nameNoSpan)){
-							team2imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
-						}
-					});
+					//CHECK IF TEAMS IMAGES ARE AVAILABLE
+					if(data.status === 0) {
+						// CHECK FOR TEAMS IMAGE
+						data.images.forEach(image => {
+							if(image.includes(team1nameNoSpan)){
+								team1imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
+							}
+							if(image.includes(team2nameNoSpan)){
+								team2imgstring = `<img class="teamimg" src="/teamsimg/${image}"> <br />`;
+							}
+						});
+					}
 					// CHECK IF FOUND THE FLAG AND REPLACE THE BLANK IMAGE WITH A BLANK FLAG
 			if(team1imgstring == ''){
 				team1imgstring = `<img class="countryimg" src="https://osu.ppy.sh/images/flags/A1.png"> <br />`;
