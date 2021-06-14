@@ -14,7 +14,8 @@
 		"copyright": "Copyright © 2021 Akinari",
 		"win": {
 			"target": [
-				"nsis", "zip"
+				"nsis",
+				"zip"
 			],
 			"artifactName": "otmd_v${version}_${arch}.${ext}",
 			"verifyUpdateCodeSignature": false,
