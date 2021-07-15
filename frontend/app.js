@@ -27,6 +27,7 @@ let userid = null
 let visualizerborder = null
 let smallvisualizer = null
 let oldcolors = null
+let transpBackground = null
 
 // invoke once on page opening
 function init() {
@@ -48,6 +49,7 @@ function init() {
 			visualizerborder = data.visualizerstyle
 			smallvisualizer = data.smallVisualizer
 			oldcolors = data.oldColors
+			transpBackground = data.transparentBackground
 
 			checkData()
 		})
@@ -88,6 +90,7 @@ function checkData() {
 	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/frontend/assets/tourneys.json')
 		.then((res) => res.json())
 		.then((tourneydata) => {
+
 			if(oldcolors == true){
 				visualizer.style.setProperty('--visualizer-background', 'url("/assets/images/blueVSred.png")');
 			}
@@ -97,6 +100,10 @@ function checkData() {
 				visualizer_header.style.height = '20px';
 				visualizer_footer.style.height = '20px';
 				visualizer_content.style.height = '40px';
+			}
+			
+			if(transpBackground == true){
+				visualizer.style.setProperty('--visualizer-background', 'transparent')
 			}
 			visualizer.style.setProperty('--visualizer-border-radius', visualizerborder);
 			if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
@@ -130,7 +137,7 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 			var tournamentid = data.match.name.substring(0, tournamentindex);
 		
 			var tournament_info_name = '';
-			var tournament_modifiers = {"HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
+			var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
 		
 			// CHECK FOR TOURNAMENT
 			if(tournament[tournamentid]){
@@ -167,6 +174,7 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 				  }
 				}
 		
+			
 			  if(team1score - team2score == 0){
 				team1 = team1;
 				team2 = team2;
@@ -333,7 +341,9 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 					  }
 				}
 		  
-		  
+				if(transpBackground == true){
+					visualizer.style.setProperty('--visualizer-background', 'transparent')
+				}
 			  
 		  
 			  team1 = 0;
@@ -371,7 +381,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 					var tournamentid = data.match.name.substring(0, tournamentindex);
 
 					var tournament_info_name = '';
-					var tournament_modifiers = {"HD": "1.00","HR": "1.00","EZ": "1.00","FL": "1.00"};
+					var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
 
 					// CHECK FOR TOURNAMENT
 					if(tournament[tournamentid]){
@@ -476,7 +486,9 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 						}
 					  
 				  
-					  
+						if(transpBackground == true){
+							visualizer.style.setProperty('--visualizer-background', 'transparent')
+						}
 				  
 					  team1 = 0;
 					  team2 = 0;
@@ -547,7 +559,7 @@ function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage
 					var tournamentid = data.match.name.substring(0, tournamentindex);
 
 					var tournament_info_name = '';
-					var tournament_modifiers = {"HD": "1.00","HR": "1.00","EZ": "1.00","FL": "1.00"};
+					var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
 
 					// CHECK FOR TOURNAMENT
 					if(tournament[tournamentid]){
@@ -556,7 +568,7 @@ function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage
 					}
 
 					//Score system
-					for(var i=warmups; i<data.games.length; i++){
+					for(var i=0; i<data.games.length; i++){
 						for(var x=0; x<data.games[i].scores.length; x++){
 						  var gameended = data.games[i].end_time==null;
 						  if(gameended == false ){
@@ -613,6 +625,11 @@ function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage
 						  mapsLeft.innerHTML = 'Qualifiers Done!'
 					}
 				  
+					if(transpBackground == true){
+						visualizer.style.setProperty('--visualizer-background', 'transparent')
+					}
+
+
 				})
 				.catch((err) => {
 					clearInterval(interval)

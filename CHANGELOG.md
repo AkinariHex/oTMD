@@ -1,28 +1,20 @@
-## v1.8.0
-### Displayer
-- Fixed error regards teams images, the previous update broke all the displayer!
-
+## v1.9.0
 ### App
-- Added **"Export Team"** button.
-- The app now will accept files with the extension <code>.otmdt</code>
-- <code>.otmdt</code> are files that contain the info about one team.<br>These files can be open with a double click or using the **"Add Team"** button.
-- **"Export Team"** button will create the <code>.otmdt</code> file that you can send to your teammates for a faster configuration without doing it manually!
-- Added **"Add Team"** button, will open the dialog to choose the <code>.otmdt</code> file.
-- Changed style and position of **"Open Teams Folder"** button.
-- Fixed error while trying to find teams with spaces in the name.
-- Fixed adding new players for teams with spaces in the name.
-- Changed style of **"Edit Team"** button.
-- New Logo
-  <br><img src="https://akinariosu.s-ul.eu/f72xTlsv">
-- Revert to fast installer without the possibility to choose where to install the app. When updating you'll not see anymore the annoying window that require your click to close.
-
-### Known Issues
-- Error while changing name with a team that doesn't have a team.json file
+- New Real Time Example of the visualizer in the settings to see how the displayer will appear!
+  <br><img src="https://akinariosu.s-ul.eu/2moHswYA">
+- Added Transparent Background feature!
+- Disabled **Teams Section** // Too many bugs and errors, will be available in the next releases!
+  You can still use the images with the teams naming the image with the exact name of the team and placing the image in the teams folder!
+- Fixed error while minimizing in windows bar with "minimize to tray" disabled.
+- Fixed Qualifiers Matches not being displayed.
+- Added few animations to the left bar.
+- Changed style of the left bar.
 
 ### Tournaments
-- Added [Entropy's Summer Tournament](https://osu.ppy.sh/community/forums/topics/1334728)
-- Added [Full Technical Tournament 3](https://osu.ppy.sh/community/forums/topics/1337843)
-- Added [North America Tournament](https://osu.ppy.sh/community/forums/topics/1333199)
-- Added [Asuna's Asia Tournament](https://osu.ppy.sh/community/forums/topics/1330959)
-- Added [osu! India Summer Tournament](https://osu.ppy.sh/community/forums/topics/1328854)
-- Added [Scarlet's Touhou Tournament](https://osu.ppy.sh/community/forums/topics/1323843)
+- Added [osu! Mercenary Shop 3](https://osu.ppy.sh/community/forums/topics/1341640)
+- Added [Koro's Back 2 Skool Tournament](https://osu.ppy.sh/community/forums/topics/1337953)
+- Added [Elitiri Cup Summer](https://osu.ppy.sh/community/forums/topics/1343263)
+- Added [Neko's Club Tournament - Hot Summer 2021](https://osu.ppy.sh/community/forums/topics/1370076)
+- Added [BubblyQT osu! Party](https://osu.ppy.sh/community/forums/topics/1362858)
+- Added [osu! Polish Masters](https://osu.ppy.sh/community/forums/topics/1368969)
+- Added [Gotta Aim Fast 8](https://osu.ppy.sh/community/forums/topics/1353576)

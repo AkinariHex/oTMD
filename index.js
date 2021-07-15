@@ -13,7 +13,7 @@ os.setPriority(-20)
 const socket = require('socket.io')
 const appexp = express()
 
-const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification, ipcMain, protocol, shell } = require('electron');
+const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification, ipcMain, protocol } = require('electron');
 require('v8-compile-cache');
 var { autoUpdater } = require("electron-updater")
 
@@ -67,9 +67,10 @@ if (!fs.existsSync(documentsFolder+'/otmd/settings.json')) {
 		"matchtype":"",
 		"userid":"",
 		"reverse":"",
-		"visualizerstyle":"",
+		"visualizerstyle":"0px 0px 0px 0px",
 		"oldColors":false,
 		"smallVisualizer": false,
+		"transparentBackground": false,
 		"compactUI":false,
 		"systemTray":true,
 		"firstRun": true
@@ -115,6 +116,10 @@ appexp.get('/assets/semantic.min.js', (req, res) => {
 
 appexp.get('/assets/clipboard.min.js', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/assets/clipboard.min.js'))
+})
+
+appexp.get('/frontend/assets/teamslist.js', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/assets/teamslist.js'))
 })
 
 appexp.get('/assets/countries', (req, res) => {
@@ -275,17 +280,13 @@ function createWindow() {
 		icon: iconPath
 	});
   
-	// Handle external links
-	mainWindow.webContents.on('new-window', async (event, link) => {
-	  event.preventDefault(); 
-	  await shell.openExternal(link);
-	});
+
   
 	// Set the menu to null so we can remove default shortcuts like CTRL + W
 	mainWindow.setMenu(null);
   
 	
-	mainWindow.webContents.openDevTools();
+	/* mainWindow.webContents.openDevTools(); */
   
 		/* require('electron-reload')(__dirname, {
 			electron: require(`${__dirname}/node_modules/electron`)
@@ -391,7 +392,7 @@ function createWindow() {
 	
 	mainWindow.on('restore', function (event) {
 		mainWindow.show();
-		tray.destroy();
+		if(tray !== null) tray.destroy();
 	});
 
 	// init socket server
@@ -456,6 +457,7 @@ function createWindow() {
 				"visualizerstyle":"",
 				"oldColors":false,
 				"smallVisualizer": false,
+				"transparentBackground": false,
 				"compactUI":false,
 				"systemTray":true,
 				"firstRun": false
@@ -492,6 +494,13 @@ function createWindow() {
 		socket.on('smallVisualizerClick', (status) => {
             let data = readSettingsJson();
 			data.smallVisualizer = status;
+			fs.writeFileSync(documentsFolder+'/otmd/settings.json', JSON.stringify(data))
+			io.emit('new_settings')
+        })
+
+		socket.on('transparentBackgroundClick', (status) => {
+            let data = readSettingsJson();
+			data.transparentBackground = status;
 			fs.writeFileSync(documentsFolder+'/otmd/settings.json', JSON.stringify(data))
 			io.emit('new_settings')
         })
@@ -584,8 +593,10 @@ function createWindow() {
 
 		socket.on('save_team', (datatoSave) => {
 			let folder = fs.readdirSync(documentsFolder + '/otmd/teams')
+			console.log(!folder.includes(datatoSave.file))
 			if(!folder.includes(datatoSave.file)){
 				folder.forEach((file) => {
+					console.log(datatoSave.team)
 					if(file.search(`${datatoSave.team}.*\.(jpeg|jpg|png)$`) === 0){
 						var re = /(?:\.([^.]+))?$/;
 						var ext = re.exec(file)[1]; 
@@ -636,6 +647,7 @@ try {
 
 	app.on('new-window', function(event, url){
 		event.preventDefault();
+		console.log(url)
 		open(url);
 	});
 

@@ -14,6 +14,7 @@
 		<script src="/assets/clipboard.min.js"></script>
 		<script src="https://unpkg.com/@popperjs/core@2"></script>
 		<script src="https://unpkg.com/tippy.js@6"></script>
+		<script src="https://unpkg.com/boxicons@latest/dist/boxicons.js"></script>
 		<link rel="stylesheet" href="/assets/style.css" />
 	</head>
 	<body>
@@ -71,44 +72,47 @@
 		<div class="leftverticalmenu">  
 			<div class="ui secondary vertical pointing menu" >
 				<a class="item active" id="match_button" data-tab="match">
-					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" style="fill: #aaa;" viewBox="0 0 72 72">
-						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzUlEQVRYhcWYy29NURTGfz2DhkvaiQ4ojdtWZx7xSnTgGSYGEhrpkAFKGuofqPgPUCFhwLBeA4+RR7QGJIR6japUqhhUbkLSkk7Iar7dbNvtvef03nt8yck+e+fs9X1nn7XWXvtU5XI5YqIKWA9sU7sMWABkgAngG/AOeAo8UPs7ju04IozkINAJNMVVDLwHzgIXJHLWInYDp4HFwfhH4BXwFfgO1AILgZXA0uDZUaALuJFUxBzgHLA/MHYe6AU+FBDeCLQDHcASb/wycBj4FUeEvdVNYJP69qYnJGCyAHmIapGelE1DP7BLNmcUYd//DrBF/RdAGzCcgDxEFrgOrNZ4H7DT95MomNDjCejTapQiAM03Ow/V3yyHnYa/Enuk2PAc2FjMqxPCVvkRsEbT2pyzOhFzFeP1wA9gVRlWIB/s07wEaoDPQIu9qPschyTA0F0hAchut+7rlX+mVsIy4ZBC6xPQnDAKksKiZkjha6HeHCkFN8pQ0jCcDSbFg3hbI+0FDr0VFpCPZ4eJWKfOcAV9IYTPtSGShxrepCTA4a3alkjbMQqZNDEqrrpISYQwn6cAx5eJvKxYm7IIxzeVrKwiwktWacHxjUVK14blKYtwfIMm4pk6WV1pwOd6YiLue6TtKYnwee6Ge8eIquhK7x3mAg1KWE2RyvIePdCg2rCS6BCP4Yzxu3rCcsXg/64nLFcc0709cNVLYuVCRnZrZK/L5Si/xrRS65Lu1wK3gfllEmB2bsku4nGl5D+FbqfKcsNW3ZcatlnZcSVDv3imEYqY0LnACbEyfQA4Kq9OgmrNG/DKfXfu+KuALnQCs+pnnzc2orErRZzW3nwvcMSLAnQCs7Gf4YRiZ1Ery0/l2VdMxGvgi6LJnG0RsCLP57MoOA5cm4kkzql8HnCghFP5RWC80INJ/0+0AtvVWozXef8nxpRrHgP31Bb/PwH8AVLgv5UFJt+gAAAAAElFTkSuQmCC"/>
-						<image id="VS" x="19" y="24" width="36" height="25" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAANCAYAAACkTj4ZAAABNElEQVQokaWTwU0CYRCFPwhXo0wJtIDxbrKWACXYApQAdoBnb1sCJl49sPHgVbeEt8YKzOBb82dDoolzWeafmffevAlIupP0Kemaf8QYOAfOgKshjKSppNVf4CfAM3ALVMB2UN8Dc0kt0AAbYObf+fYYEU0P9OKh2UDNLkE8dMihomde9CXgw8jJu5suk8HrJHsH3HhwZ9Ct88ozU+B1YuDGj1X6YpCMtYEr521E1EBdKMraW6+oV1CbKcG2EbF2feb1plbZeNX7iMicUYG6LyyqI2I58CwPshp42dmOdlQ0yoyti92pM0vq/cnvoicdFz2NGZYliKSFpIOkjVV1EZGG9z4dFfZmExF5nVORjclenjxJU31GevXt0W9hJT3YD6BBjhv8CWjg0QWQ/8uPiHg6PgJfUbuL8u6zyQQAAAAASUVORK5CYII="/>
-					  </svg>					  
-					<span class="item_text">
-						Match
-					</span>
+						<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" style="fill: #aaa;" viewBox="0 0 72 72">
+							<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzUlEQVRYhcWYy29NURTGfz2DhkvaiQ4ojdtWZx7xSnTgGSYGEhrpkAFKGuofqPgPUCFhwLBeA4+RR7QGJIR6japUqhhUbkLSkk7Iar7dbNvtvef03nt8yck+e+fs9X1nn7XWXvtU5XI5YqIKWA9sU7sMWABkgAngG/AOeAo8UPs7ju04IozkINAJNMVVDLwHzgIXJHLWInYDp4HFwfhH4BXwFfgO1AILgZXA0uDZUaALuJFUxBzgHLA/MHYe6AU+FBDeCLQDHcASb/wycBj4FUeEvdVNYJP69qYnJGCyAHmIapGelE1DP7BLNmcUYd//DrBF/RdAGzCcgDxEFrgOrNZ4H7DT95MomNDjCejTapQiAM03Ow/V3yyHnYa/Enuk2PAc2FjMqxPCVvkRsEbT2pyzOhFzFeP1wA9gVRlWIB/s07wEaoDPQIu9qPschyTA0F0hAchut+7rlX+mVsIy4ZBC6xPQnDAKksKiZkjha6HeHCkFN8pQ0jCcDSbFg3hbI+0FDr0VFpCPZ4eJWKfOcAV9IYTPtSGShxrepCTA4a3alkjbMQqZNDEqrrpISYQwn6cAx5eJvKxYm7IIxzeVrKwiwktWacHxjUVK14blKYtwfIMm4pk6WV1pwOd6YiLue6TtKYnwee6Ge8eIquhK7x3mAg1KWE2RyvIePdCg2rCS6BCP4Yzxu3rCcsXg/64nLFcc0709cNVLYuVCRnZrZK/L5Si/xrRS65Lu1wK3gfllEmB2bsku4nGl5D+FbqfKcsNW3ZcatlnZcSVDv3imEYqY0LnACbEyfQA4Kq9OgmrNG/DKfXfu+KuALnQCs+pnnzc2orErRZzW3nwvcMSLAnQCs7Gf4YRiZ1Ery0/l2VdMxGvgi6LJnG0RsCLP57MoOA5cm4kkzql8HnCghFP5RWC80INJ/0+0AtvVWozXef8nxpRrHgP31Bb/PwH8AVLgv5UFJt+gAAAAAElFTkSuQmCC"/>
+							<image id="VS" x="19" y="24" width="36" height="25" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAANCAYAAACkTj4ZAAABNElEQVQokaWTwU0CYRCFPwhXo0wJtIDxbrKWACXYApQAdoBnb1sCJl49sPHgVbeEt8YKzOBb82dDoolzWeafmffevAlIupP0Kemaf8QYOAfOgKshjKSppNVf4CfAM3ALVMB2UN8Dc0kt0AAbYObf+fYYEU0P9OKh2UDNLkE8dMihomde9CXgw8jJu5suk8HrJHsH3HhwZ9Ct88ozU+B1YuDGj1X6YpCMtYEr521E1EBdKMraW6+oV1CbKcG2EbF2feb1plbZeNX7iMicUYG6LyyqI2I58CwPshp42dmOdlQ0yoyti92pM0vq/cnvoicdFz2NGZYliKSFpIOkjVV1EZGG9z4dFfZmExF5nVORjclenjxJU31GevXt0W9hJT3YD6BBjhv8CWjg0QWQ/8uPiHg6PgJfUbuL8u6zyQQAAAAASUVORK5CYII="/>
+						  </svg>					  
+						<span class="item_text">
+							Match
+						</span>
 				</a>
 				<a class="item" id="displayer_settings_button" data-tab="displayer-settings">
-					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" style="fill: #aaa;" viewBox="0 0 72 72">
-						<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzklEQVRYhcWYy29NURjFfz2DG0raiQ6oNm5bnXkEITrwDBMDCY10yADVNNQ/UPEfoELCgGG9Bh4jgl4DQkK9RlWPVDGo3IRESSfka9Zutu323nPae481OXfve8631tl7f99e+1Tl83liogpYC2wB1gEtwAKgGhgHvgLDwGPgHvAE+B0ndhwRRnIA6Aaa4yoG3gKngXMSOWMRu4CTwOKg/wPwAvgCfANqgYXACmBJcO8o0ANcSypiDnAG2BcEOwv0A++KCG8COoBOoMHrvwgcAn7FEWFvdR3YqLa96TEJmChCHiIj0uOKacgBOxVzWhE2/7eAzWo/A9qB9wnIQ2SBq8Aq9Q8AO/x1EgUP9HkCBjQasxGAnrc499XepAU7BX8kdkux4SmwodSqTggb5QfAaj3W7harEzEXeAPUA9+BlWUYgUKwqXkO1ACfgFZ7UTcdByXA0FshAShur37Xq/5MjoRVwmGl1kdVwiRZkBQZVdYGpXpLpFLcpEBJ03AmmBAP4m2LtBc49FdYQCGe7W4k0HxVai2E8LnWR1qhhlcpCXB4rWtrpO0YpUyaGBVXXaQaQVjPU4DjqzYRP9WoTVmE45ssVuaI8IpVWnB8Y5HKtWFZyiIc31AkL4jqejYlAT7XIxNx1/uzIyURPs/tcO8YAZamsHfYEmhUwWqOZMv7dEOjvGEl0Skewynjd37CDMfQ//YT5qCO6LfdcFnCyolqxa1RzB7n3HyPaVbrgn6vAW4C88skwuLcUFzE46zkP0a3W7YcbfG5MqRtVnG2qp0TzxRCEeM6FzghZtMHgcNa1UmQ0XODnt13546/DHSxE5i5n71e34j6LpVYtPbme4AuLwvQCazL26tKinAwW36iwL5iIl4Cn5VNttgWAcsLTJ9lwVHgynQkcU7l84D9sziVnwd+FLsx6feJNmCbrpbjdd73iTHVmofAHV1Lf58A/gBRNb+VvfBaAwAAAABJRU5ErkJggg=="/>
-						<image id="Ellipse_1_copy" data-name="Ellipse 1 copy" x="11" y="11" width="51" style="fill: #aaa;" height="51" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbCAYAAACN1PRVAAACa0lEQVRIibXWW6iNaRgH8N9e26GRhAvHkEMomjIXXEkNkjAlYlIulKJcGWJKDIlhFMoNN+4QpQi5UMK1O9Q45tBMTrM3k0Pbjq0nz1fLstbC3mv/b77ve9/3ef7f8z7HppaWFl9BX/yC6ZiCkShhHY6kaC804209VaU6e4OwD09T6WpMw1AMxtI8NwD38B8OpFxV1LJsCQ6mogIduI1beI7d+BuTcL3s3AuswdFKpZVkTdiTV1TgLvbjRFpZDcuxFWPK9v7C7/mTVcl+xbF8f48/Uqi9znUXCL9tTJnmXNuC7cWBSp+9zD+J5wLs+EaiwLtUHHL/59o2LKplWWBiOvvZN5JUwzycTgtfpM4nhWWT8wpL6fSuEAXOpVWB/thcWNYP/2Q+/Zbh3gj8gJsYkfnXNyyZm0SB1w0ikgRr05eX8KEHZuZmBMapBpIFTiJurk36aFJu3KmTR11BWyFbKkvER91AFJiF+9gZZH1ysasRWAsrMAqrguxNHurXTWRD8tleShMDo7uJbEQ+HwbZjfyYUK89dBKhb1yKXg2yy/kRFX9hg8kWp97AlSA7W+a3wQ0k6pkVKfAKZyKpWzEHP+FQA8nWY2y+H47qVK3qD8tS09oFop9xPnvc86KTVPazqRmdUU1mdJIoCvDxJOrIESFa1hfNc1je9UBcyLbe8zvJmso69e4cJz5tVJlBdmFD2dqdshmkWpUZlaNehPifeJxr4a+LnymvMV0ty7FsYNlaMV39m6S9MT79UWBvxbD0ucl1htRIg01YmX74GiJ9otuf6QxZgaiZ8zEbP2J4kkfEPsC1SNgkqR3B+AhRpZbRzaZaagAAAABJRU5ErkJggg=="/>
-					  </svg>
-					<span class="item_text">
-						Displayer Settings
-					</span>
+						<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" style="fill: #aaa;" viewBox="0 0 72 72">
+							<image id="Ellipse_1" data-name="Ellipse 1" x="4" y="4" width="65" height="65" style="fill: #aaa;" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAACzklEQVRYhcWYy29NURjFfz2DG0raiQ6oNm5bnXkEITrwDBMDCY10yADVNNQ/UPEfoELCgGG9Bh4jgl4DQkK9RlWPVDGo3IRESSfka9Zutu323nPae481OXfve8631tl7f99e+1Tl83liogpYC2wB1gEtwAKgGhgHvgLDwGPgHvAE+B0ndhwRRnIA6Aaa4yoG3gKngXMSOWMRu4CTwOKg/wPwAvgCfANqgYXACmBJcO8o0ANcSypiDnAG2BcEOwv0A++KCG8COoBOoMHrvwgcAn7FEWFvdR3YqLa96TEJmChCHiIj0uOKacgBOxVzWhE2/7eAzWo/A9qB9wnIQ2SBq8Aq9Q8AO/x1EgUP9HkCBjQasxGAnrc499XepAU7BX8kdkux4SmwodSqTggb5QfAaj3W7harEzEXeAPUA9+BlWUYgUKwqXkO1ACfgFZ7UTcdByXA0FshAShur37Xq/5MjoRVwmGl1kdVwiRZkBQZVdYGpXpLpFLcpEBJ03AmmBAP4m2LtBc49FdYQCGe7W4k0HxVai2E8LnWR1qhhlcpCXB4rWtrpO0YpUyaGBVXXaQaQVjPU4DjqzYRP9WoTVmE45ssVuaI8IpVWnB8Y5HKtWFZyiIc31AkL4jqejYlAT7XIxNx1/uzIyURPs/tcO8YAZamsHfYEmhUwWqOZMv7dEOjvGEl0Skewynjd37CDMfQ//YT5qCO6LfdcFnCyolqxa1RzB7n3HyPaVbrgn6vAW4C88skwuLcUFzE46zkP0a3W7YcbfG5MqRtVnG2qp0TzxRCEeM6FzghZtMHgcNa1UmQ0XODnt13546/DHSxE5i5n71e34j6LpVYtPbme4AuLwvQCazL26tKinAwW36iwL5iIl4Cn5VNttgWAcsLTJ9lwVHgynQkcU7l84D9sziVnwd+FLsx6feJNmCbrpbjdd73iTHVmofAHV1Lf58A/gBRNb+VvfBaAwAAAABJRU5ErkJggg=="/>
+							<image id="Ellipse_1_copy" data-name="Ellipse 1 copy" x="11" y="11" width="51" style="fill: #aaa;" height="51" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbCAYAAACN1PRVAAACa0lEQVRIibXWW6iNaRgH8N9e26GRhAvHkEMomjIXXEkNkjAlYlIulKJcGWJKDIlhFMoNN+4QpQi5UMK1O9Q45tBMTrM3k0Pbjq0nz1fLstbC3mv/b77ve9/3ef7f8z7HppaWFl9BX/yC6ZiCkShhHY6kaC804209VaU6e4OwD09T6WpMw1AMxtI8NwD38B8OpFxV1LJsCQ6mogIduI1beI7d+BuTcL3s3AuswdFKpZVkTdiTV1TgLvbjRFpZDcuxFWPK9v7C7/mTVcl+xbF8f48/Uqi9znUXCL9tTJnmXNuC7cWBSp+9zD+J5wLs+EaiwLtUHHL/59o2LKplWWBiOvvZN5JUwzycTgtfpM4nhWWT8wpL6fSuEAXOpVWB/thcWNYP/2Q+/Zbh3gj8gJsYkfnXNyyZm0SB1w0ikgRr05eX8KEHZuZmBMapBpIFTiJurk36aFJu3KmTR11BWyFbKkvER91AFJiF+9gZZH1ysasRWAsrMAqrguxNHurXTWRD8tleShMDo7uJbEQ+HwbZjfyYUK89dBKhb1yKXg2yy/kRFX9hg8kWp97AlSA7W+a3wQ0k6pkVKfAKZyKpWzEHP+FQA8nWY2y+H47qVK3qD8tS09oFop9xPnvc86KTVPazqRmdUU1mdJIoCvDxJOrIESFa1hfNc1je9UBcyLbe8zvJmso69e4cJz5tVJlBdmFD2dqdshmkWpUZlaNehPifeJxr4a+LnymvMV0ty7FsYNlaMV39m6S9MT79UWBvxbD0ucl1htRIg01YmX74GiJ9otuf6QxZgaiZ8zEbP2J4kkfEPsC1SNgkqR3B+AhRpZbRzaZaagAAAABJRU5ErkJggg=="/>
+						</svg>
+						<span class="item_text">
+							Displayer Settings
+						</span>
 				</a>
-				<a class="item" id="teams_button" data-tab="teams-tab">
-					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" style="fill: #aaa;" viewBox="0 0 24 24"><path d="M10.119 16.064c2.293-.53 4.427-.994 3.394-2.946-3.147-5.941-.835-9.118 2.488-9.118 3.388 0 5.643 3.299 2.488 9.119-1.065 1.964 1.149 2.427 3.393 2.946 1.985.458 2.118 1.428 2.118 3.107l-.003.828h-1.329c0-2.089.083-2.367-1.226-2.669-1.901-.438-3.695-.852-4.351-2.304-.239-.53-.395-1.402.226-2.543 1.372-2.532 1.719-4.726.949-6.017-.902-1.517-3.617-1.509-4.512-.022-.768 1.273-.426 3.479.936 6.05.607 1.146.447 2.016.206 2.543-.66 1.445-2.472 1.863-4.39 2.305-1.252.29-1.172.588-1.172 2.657h-1.331c0-2.196-.176-3.406 2.116-3.936zm-10.117 3.936h1.329c0-1.918-.186-1.385 1.824-1.973 1.014-.295 1.91-.723 2.316-1.612.212-.463.355-1.22-.162-2.197-.952-1.798-1.219-3.374-.712-4.215.547-.909 2.27-.908 2.819.015.935 1.567-.793 3.982-1.02 4.982h1.396c.44-1 1.206-2.208 1.206-3.9 0-2.01-1.312-3.1-2.998-3.1-2.493 0-4.227 2.383-1.866 6.839.774 1.464-.826 1.812-2.545 2.209-1.49.345-1.589 1.072-1.589 2.334l.002.618z"/></svg>
-					<span class="item_text">
-						Teams
-					</span>
-				</a>
+				<!-- <a class="item" id="teams_button" data-tab="teams-tab">
+						<box-icon name='group' color='#aaa' ></box-icon>
+ 						<span class="item_text">
+							Teams
+						</span>
+				</a> -->
 				<a class="item" id="app_settings_button" data-tab="app-settings">
-					<svg width="25" height="25" style="fill: #aaa; margin-left: 1px" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 8.666c-1.838 0-3.333 1.496-3.333 3.334s1.495 3.333 3.333 3.333 3.333-1.495 3.333-3.333-1.495-3.334-3.333-3.334m0 7.667c-2.39 0-4.333-1.943-4.333-4.333s1.943-4.334 4.333-4.334 4.333 1.944 4.333 4.334c0 2.39-1.943 4.333-4.333 4.333m-1.193 6.667h2.386c.379-1.104.668-2.451 2.107-3.05 1.496-.617 2.666.196 3.635.672l1.686-1.688c-.508-1.047-1.266-2.199-.669-3.641.567-1.369 1.739-1.663 3.048-2.099v-2.388c-1.235-.421-2.471-.708-3.047-2.098-.572-1.38.057-2.395.669-3.643l-1.687-1.686c-1.117.547-2.221 1.257-3.642.668-1.374-.571-1.656-1.734-2.1-3.047h-2.386c-.424 1.231-.704 2.468-2.099 3.046-.365.153-.718.226-1.077.226-.843 0-1.539-.392-2.566-.893l-1.687 1.686c.574 1.175 1.251 2.237.669 3.643-.571 1.375-1.734 1.654-3.047 2.098v2.388c1.226.418 2.468.705 3.047 2.098.581 1.403-.075 2.432-.669 3.643l1.687 1.687c1.45-.725 2.355-1.204 3.642-.669 1.378.572 1.655 1.738 2.1 3.047m3.094 1h-3.803c-.681-1.918-.785-2.713-1.773-3.123-1.005-.419-1.731.132-3.466.952l-2.689-2.689c.873-1.837 1.367-2.465.953-3.465-.412-.991-1.192-1.087-3.123-1.773v-3.804c1.906-.678 2.712-.782 3.123-1.773.411-.991-.071-1.613-.953-3.466l2.689-2.688c1.741.828 2.466 1.365 3.465.953.992-.412 1.082-1.185 1.775-3.124h3.802c.682 1.918.788 2.714 1.774 3.123 1.001.416 1.709-.119 3.467-.952l2.687 2.688c-.878 1.847-1.361 2.477-.952 3.465.411.992 1.192 1.087 3.123 1.774v3.805c-1.906.677-2.713.782-3.124 1.773-.403.975.044 1.561.954 3.464l-2.688 2.689c-1.728-.82-2.467-1.37-3.456-.955-.988.41-1.08 1.146-1.785 3.126"/></svg>
-					<span class="item_text">
-						App Settings
-					</span>
+<!-- 						<svg width="25" height="25" style="fill: #aaa; margin-left: 1px" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 8.666c-1.838 0-3.333 1.496-3.333 3.334s1.495 3.333 3.333 3.333 3.333-1.495 3.333-3.333-1.495-3.334-3.333-3.334m0 7.667c-2.39 0-4.333-1.943-4.333-4.333s1.943-4.334 4.333-4.334 4.333 1.944 4.333 4.334c0 2.39-1.943 4.333-4.333 4.333m-1.193 6.667h2.386c.379-1.104.668-2.451 2.107-3.05 1.496-.617 2.666.196 3.635.672l1.686-1.688c-.508-1.047-1.266-2.199-.669-3.641.567-1.369 1.739-1.663 3.048-2.099v-2.388c-1.235-.421-2.471-.708-3.047-2.098-.572-1.38.057-2.395.669-3.643l-1.687-1.686c-1.117.547-2.221 1.257-3.642.668-1.374-.571-1.656-1.734-2.1-3.047h-2.386c-.424 1.231-.704 2.468-2.099 3.046-.365.153-.718.226-1.077.226-.843 0-1.539-.392-2.566-.893l-1.687 1.686c.574 1.175 1.251 2.237.669 3.643-.571 1.375-1.734 1.654-3.047 2.098v2.388c1.226.418 2.468.705 3.047 2.098.581 1.403-.075 2.432-.669 3.643l1.687 1.687c1.45-.725 2.355-1.204 3.642-.669 1.378.572 1.655 1.738 2.1 3.047m3.094 1h-3.803c-.681-1.918-.785-2.713-1.773-3.123-1.005-.419-1.731.132-3.466.952l-2.689-2.689c.873-1.837 1.367-2.465.953-3.465-.412-.991-1.192-1.087-3.123-1.773v-3.804c1.906-.678 2.712-.782 3.123-1.773.411-.991-.071-1.613-.953-3.466l2.689-2.688c1.741.828 2.466 1.365 3.465.953.992-.412 1.082-1.185 1.775-3.124h3.802c.682 1.918.788 2.714 1.774 3.123 1.001.416 1.709-.119 3.467-.952l2.687 2.688c-.878 1.847-1.361 2.477-.952 3.465.411.992 1.192 1.087 3.123 1.774v3.805c-1.906.677-2.713.782-3.124 1.773-.403.975.044 1.561.954 3.464l-2.688 2.689c-1.728-.82-2.467-1.37-3.456-.955-.988.41-1.08 1.146-1.785 3.126"/></svg>
+ -->					<box-icon id="cog" name='cog' color="#aaa"></box-icon>
+ 						<span class="item_text">
+							App Settings
+						</span>
 				</a>
-				<a class="item" id="changelog_button" data-tab="changelog" style="position: absolute; bottom: 25px; width: 14rem; fill: #aaa">
-					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 2.457v11.543h-16v-20h7.362zm.827-2h-10.189v24h20v-14.386c0-2.391-6.648-9.614-9.811-9.614zm4.811 13h-10v-1h10v1zm0 2h-10v1h10v-1zm0 3h-10v1h10v-1z"/></svg>
-					<span class="item_text">
+				<a class="item" id="changelog_button" data-tab="changelog" style="position: absolute; bottom: 25px; width: 94%; border-right: 0px; margin: auto; fill: #aaa">
+<!-- 					<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 2.457v11.543h-16v-20h7.362zm.827-2h-10.189v24h20v-14.386c0-2.391-6.648-9.614-9.811-9.614zm4.811 13h-10v-1h10v1zm0 2h-10v1h10v-1zm0 3h-10v1h10v-1z"/></svg>
+ -->				<box-icon name='file' type='solid' ></box-icon>
+ 					<span class="item_text">
 						Changelog
 					</span>
 				</a>
-				<a class="item" id="update_button" data-tab="update" style="position: absolute; bottom: 74px; width: 14rem; fill: #aaa">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg>
-					<span class="item_text">
+				<a class="item" id="update_button" data-tab="update" style="position: absolute; bottom: 74px; width: 94%; border-right: 0px; margin: auto; fill: #aaa">
+<!-- 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg>
+ -->				<box-icon type='solid' name='download'></box-icon>
+ 					<span class="item_text">
 						<span id="update_status">Updated</span>
 						<div class="update_info">
 							<span id="download_speed"></span>
@@ -262,39 +266,34 @@
 			</div>
 
 			<div class="leftmaintab ui vertical tab segment" id="displayer-settings_tab" data-tab="displayer-settings">
-				<div class="fields">
-					<div class="required field">
-					  <label>APIkey</label>
-					  <input type="text" name="apikey1" id="apikey1" placeholder="APIkey"/>
-					</div>
-					<div class="required field">
-					  <label>UserID</label>
-					  <input type="text" name="userid1" id="userid1" placeholder="UserID"/>
+				<div class="displayerVisualization">
+					<div class="container">
+						<div class="displayer">
+							<div class="width">400px</div>
+							<div class="height">130px</div>
+						</div>
+						<div class="topleft">15px</div>
+						<div class="topright">15px</div>
+						<div class="bottomright">15px</div>
+						<div class="bottomleft">15px</div>
+						<div class="teamscolors">
+							<div class="team1color">
+								<div class="content"></div>
+							</div>
+							<div class="team1text">Team 1</div>
+							<div class="team2color">
+								<div class="content"></div>
+							</div>
+							<div class="team2text">Team 2</div>
+						</div>
 					</div>
 				</div>
+			
 				<h4 class="ui dividing header"></h4>
+				
 				<div class="visualizer_settings_fields">
-					<label>Old Colors</label>
-					<div class="field">
-						<div class="ui toggle checkbox" id="oldColors">
-							<input type="checkbox" name="oldColors">
-							<label>Enable old colors</label>
-						</div>
-					</div>
-					<div class="info_text">The displayer uses the osu!lazer colors for teams! (First team = <span style="color: rgb(247, 86, 86)">red</span> / Second team = <span style="color: rgb(95, 95, 255)">blue</span>)<br>Enable old colors to revert to osu!stable colors (First team = <span style="color: rgb(95, 95, 255)">blue</span> / Second team = <span style="color: rgb(247, 86, 86)">red</span>)</div>
-					<label>Small Displayer</label>
-					<div class="field">
-						<div class="ui toggle checkbox" id="smallDisplayer">
-							<input type="checkbox" name="smallDisplayer">
-							<label>Enable the small displayer</label>
-						</div>
-					</div>
-					<div class="info_text">Enable the small displayer that have less height.<br>Instead of tournament name will be displayed its acronym if is too long. <b>Small spaces small names 👀</b></div>
-				</div>
-				<h4 class="ui dividing header"></h4>
-				<div class="fields">
-					<div class="required field">
-						<label>Visualizer Style</label>
+					<label>Visualizer Style</label>
+					<div class="required field" style="margin-bottom: 14px !important;">
 						<div class="ui selection dropdown">
 							<input type="hidden" name="visualizerstyle" id="visualizerstyle">
 							<i class="dropdown icon"></i>
@@ -315,14 +314,30 @@
 							</div>
 						  </div>
 					</div>
+					<label>Small Displayer</label>
 					<div class="field">
-						<label>Width</label>
-						<input placeholder="400px" readonly="" type="text">
+						<div class="ui toggle checkbox" id="smallDisplayer">
+							<input type="checkbox" name="smallDisplayer">
+							<label>Enable the small displayer</label>
+						</div>
 					</div>
+					<div class="info_text">Enable the small displayer that have less height.<br>Instead of tournament name will be displayed its acronym if is too long. <b>Small spaces small names 👀</b></div>
+					<label>Old Colors</label>
 					<div class="field">
-						<label>Height</label>
-						<input placeholder="130px" id="Dheight" readonly="" type="text">
+						<div class="ui toggle checkbox" id="oldColors">
+							<input type="checkbox" name="oldColors">
+							<label>Enable old colors</label>
+						</div>
 					</div>
+					<div class="info_text">The displayer uses the osu!lazer colors for teams! (First team = <span style="color: rgb(247, 86, 86)">red</span> / Second team = <span style="color: rgb(95, 95, 255)">blue</span>)<br>Enable old colors to revert to osu!stable colors (First team = <span style="color: rgb(95, 95, 255)">blue</span> / Second team = <span style="color: rgb(247, 86, 86)">red</span>)</div>
+					<label>Background</label>
+					<div class="field">
+						<div class="ui toggle checkbox" id="transparentBackground">
+							<input type="checkbox" name="transparentBackground">
+							<label>Transparent Background</label>
+						</div>
+					</div>
+					<div class="info_text">The displayer will show the info without a background! Make sure to display it on a good contrast background!</div>
 				</div>
 			</div>
 
@@ -502,14 +517,14 @@
 			let res = await fetch('/settings')
 			res = await res.json()
 
-			const { apikey, matchid, stage, nofmaps, warmups, bestof, matchtype, userid, reverse, visualizerstyle, oldColors, smallVisualizer, compactUI, systemTray, firstRun } = res
+			const { apikey, matchid, stage, nofmaps, warmups, bestof, matchtype, userid, reverse, visualizerstyle, oldColors, smallVisualizer, transparentBackground, compactUI, systemTray, firstRun } = res
 
 			if(res != null){
 				$('.ui.equal.width.form').form('set values', {
 					apikey: apikey,
-					apikey1: apikey,
+					/* apikey1: apikey, */
 					userid: userid,
-					userid1: userid,
+					/* userid1: userid, */
 					matchid: matchid,
 					matchtype: matchtype,
 					stage: stage,
@@ -520,17 +535,40 @@
 					oldColors: oldColors,
 					smallDisplayer: smallVisualizer,
 					visualizerstyle: visualizerstyle,
+					transparentBackground: transparentBackground,
 					compactUI: compactUI,
 					systemTray: systemTray
 				});
 			}
 
+			//Edit show visualizer corners
+			document.querySelector('.displayerVisualization .container .displayer').style.borderRadius = visualizerstyle
+			let splitVisualizer = visualizerstyle.split(' ')
+			document.querySelector('.displayerVisualization .container .topleft').innerHTML = `<input class="visualizerInputShow" type="text" value="${splitVisualizer[0]}" readonly>`
+			document.querySelector('.displayerVisualization .container .topright').innerHTML = `<input class="visualizerInputShow" type="text" value="${splitVisualizer[1]}" readonly>`
+			document.querySelector('.displayerVisualization .container .bottomright').innerHTML = `<input class="visualizerInputShow" type="text" value="${splitVisualizer[2]}" readonly>`
+			document.querySelector('.displayerVisualization .container .bottomleft').innerHTML = `<input class="visualizerInputShow" type="text" value="${splitVisualizer[3]}" readonly>`
+
 			if(matchtype == 'h1v1'){
 				$('#scoreReverseField').css('display', 'none')
 			}
 
+			if(oldColors != true){
+				document.querySelector('.displayerVisualization .container .team1color .content').style.setProperty('background-color', 'rgb(255, 41, 41)')
+				document.querySelector('.displayerVisualization .container .team2color .content').style.setProperty('background-color', 'rgb(95, 95, 255)')
+			} else {
+				document.querySelector('.displayerVisualization .container .team2color .content').style.setProperty('background-color', 'rgb(255, 41, 41)')
+				document.querySelector('.displayerVisualization .container .team1color .content').style.setProperty('background-color', 'rgb(95, 95, 255)')
+			}
+
 			if(smallVisualizer == true){
-				document.querySelector('#Dheight').placeholder = "80px"
+				document.querySelector('.displayerVisualization .container').style.setProperty('grid-template-rows', `30px 80px 30px 30px`)
+				document.querySelector('.displayerVisualization .container .height').innerHTML = '80px'
+				document.querySelector('.visualizer_settings_fields').style.height = '322px'
+			}
+
+			if(transparentBackground == true){
+				document.querySelector('.displayerVisualization .container .displayer').style.setProperty('background', `none`)
 			}
 
 			if(compactUI == true){
@@ -538,18 +576,31 @@
 				document.querySelector('#displayer_settings_button .item_text').style.display = 'none'
 				document.querySelector('#app_settings_button .item_text').style.display = 'none'
 				document.querySelector('.leftverticalmenu').style.width = '4.22rem'
-				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '4.22rem'
-				document.querySelector('#displayer_settings_button').style.width = '4.22rem'
-				document.querySelector('#changelog_button').style.width = '4.22rem'
+				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = 'calc(4.22rem - 14%)'
+				document.querySelector('#match_button').style.cssText = 'width: auto; margin: auto;'
+				document.querySelector('#displayer_settings_button').style.cssText = 'width: auto; margin: auto;'
+				document.querySelector('#changelog_button').style.width = 'auto'
 				document.querySelector('#changelog_button .item_text').style.display = 'none'
 				document.querySelector('.changelog_content').style.width = "100% - 4.22rem)"
-				document.querySelector('.copyright').style.position = 'fixed'
+				document.querySelector('.copyright').style.cssText = `
+					position: fixed;
+					width: calc(100% - 4.22rem);
+					text-align: end;
+					background-color: #171717;
+					padding: 5px;
+					height: 23px;
+					bottom: 0px;
+					z-index: 999;`
 				document.querySelector('.changelog_content').style.setProperty('width', 'calc(100% - 59px)');
 				document.querySelector('#update_bar').style.width = '15%'
-				document.querySelector('#update_button').style.width = '4.22rem'
+				document.querySelector('#update_button').style.width = 'auto'
 				document.querySelector('#update_button .item_text').style.display = 'none'
-				document.querySelector('#teams_button').style.width = '4.22rem'
+				document.querySelector('#teams_button').style.cssText = 'width: auto; margin: auto;'
+				document.querySelector('#app_settings_button').style.cssText = 'width: auto; margin: auto;'
 				document.querySelector('#teams_button .item_text').style.display = 'none'
+				document.querySelector('#displayer-settings_tab').style.width = 'calc(100% - 115px) !important'
+				document.querySelector('.ui.secondary.vertical.pointing.menu .active.item').style.width = '90% !important'
+				document.querySelector('.ui.secondary.vertical.pointing.menu .item').style.cssText = 'margin: auto !important; margin-bottom: 3px !important'
 			}
 
 			if(firstRun == true){
@@ -578,7 +629,15 @@
 
 		$("#visualizerstyle").change(function () {
 			var val = this.value;
+			let valSplit = val.split(' ')
+				document.querySelector('.displayerVisualization .container .topleft').innerHTML = `<input class="visualizerInputShow" type="text" value="${valSplit[0]}" readonly>`
+				document.querySelector('.displayerVisualization .container .topright').innerHTML = `<input class="visualizerInputShow" type="text" value="${valSplit[1]}" readonly>`
+				document.querySelector('.displayerVisualization .container .bottomright').innerHTML = `<input class="visualizerInputShow" type="text" value="${valSplit[2]}" readonly>`
+				document.querySelector('.displayerVisualization .container .bottomleft').innerHTML = `<input class="visualizerInputShow" type="text" value="${valSplit[3]}" readonly>`
 			socket.emit('visualizerStyleChange', val)
+			document.querySelector('.displayerVisualization .container .displayer').style.borderRadius = val
+			
+			
    		});
 
 		$('#oldColors').click(e => {
@@ -586,6 +645,11 @@
 			let status = true;
 			if ($('#oldColors input').is(':checked')) {
 				status = false;
+				document.querySelector('.displayerVisualization .container .team1color .content').style.setProperty('background-color', 'rgb(255, 41, 41)')
+				document.querySelector('.displayerVisualization .container .team2color .content').style.setProperty('background-color', 'rgb(95, 95, 255)')
+			} else {
+				document.querySelector('.displayerVisualization .container .team2color .content').style.setProperty('background-color', 'rgb(255, 41, 41)')
+				document.querySelector('.displayerVisualization .container .team1color .content').style.setProperty('background-color', 'rgb(95, 95, 255)')
 			}
 			socket.emit('oldColorsClick', status)
 		})
@@ -594,13 +658,30 @@
 			e.preventDefault();
 			let status = true;
 			let height = '80px'
+
 			if ($('#smallDisplayer input').is(':checked')) {
 				status = false;
 				height = '130px'
+				document.querySelector('.visualizer_settings_fields').style.height = '272px'
+			} else {
+				document.querySelector('.visualizer_settings_fields').style.height = '322px'
 			}
-			document.querySelector('#Dheight').placeholder = height
+			document.querySelector('.displayerVisualization .container').style.setProperty('grid-template-rows', `30px ${height} 30px 30px`)
+			document.querySelector('.displayerVisualization .container .height').innerHTML = height
 			socket.emit('smallVisualizerClick', status)
 		})
+
+		$('#transparentBackground').click(e => {
+			e.preventDefault();
+			let status = true;
+			if ($('#transparentBackground input').is(':checked')) {
+				status = false;
+				document.querySelector('.displayerVisualization .container .displayer').style.setProperty('background', `repeating-linear-gradient( -45deg, #8181ff57, #8181ff57 3.4px, transparent 2px, transparent 10px )`)
+			} else {
+				document.querySelector('.displayerVisualization .container .displayer').style.setProperty('background', `none`)
+			}
+			socket.emit('transparentBackgroundClick', status)
+		})		
 
 		$('#compactUI').click(e => {
 			e.preventDefault();
@@ -608,35 +689,42 @@
 			document.querySelector('#match_button .item_text').style.display = 'block'
 			document.querySelector('#displayer_settings_button .item_text').style.display = 'block'
 			document.querySelector('#app_settings_button .item_text').style.display = 'block'
+			document.querySelector('#app_settings_button').style.cssText = 'width: auto; margin: auto !important;'
 			document.querySelector('#changelog_button .item_text').style.display = 'block'
 			document.querySelector('.leftverticalmenu').style.width = '14rem'
-			document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '14rem'
-			document.querySelector('#displayer_settings_button').style.width = '14rem'
-			document.querySelector('#changelog_button').style.width = '14rem'
+			document.querySelector('.ui.secondary.vertical.pointing.menu').style.cssText = 'width: 94%; border-right: 0px; margin: auto;'
+			document.querySelector('#match_button').style.cssText = 'width: auto !important; margin: 2px !important;'
+			document.querySelector('#displayer_settings_button').style.width = 'auto'
+			document.querySelector('#changelog_button').style.cssText = 'position: absolute; bottom: 25px; width: 94%; border-right: 0px; margin: auto; fill: rgb(170, 170, 170);'
 			document.querySelector('.copyright').style.position = 'absolute'
 			document.querySelector('.changelog_content').style.setProperty('width', 'calc(100% - 196px)');
 			document.querySelector('#update_bar').style.width = '84%'
-			document.querySelector('#update_button').style.width = '14rem'
+			document.querySelector('#update_button').style.cssText = 'position: absolute; bottom: 74px; width: 94%; border-right: 0px; margin: auto; fill: #aaa;'
 			document.querySelector('#update_button .item_text').style.display = 'block'
-			document.querySelector('#teams_button').style.width = '14rem'
+			document.querySelector('#teams_button').style.width = 'auto'
 			document.querySelector('#teams_button .item_text').style.display = 'block'
+			document.querySelector('.ui.secondary.vertical.pointing.menu .active.item').style.cssText = 'width: auto !important'
+			document.querySelector('.ui.secondary.vertical.pointing.menu .item').style.cssText = 'margin: auto'
 			if ($('#compactUI input').is(':checked')) {
 				status = true;
 				document.querySelector('#match_button .item_text').style.display = 'none'
 				document.querySelector('#displayer_settings_button .item_text').style.display = 'none'
 				document.querySelector('#app_settings_button .item_text').style.display = 'none'
+				document.querySelector('#app_settings_button').style.cssText = 'width: auto; margin: auto !important;'
 				document.querySelector('#changelog_button .item_text').style.display = 'none'
 				document.querySelector('.leftverticalmenu').style.width = '4.22rem'
-				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = '4.22rem'
-				document.querySelector('#displayer_settings_button').style.width = '4.22rem'
-				document.querySelector('#changelog_button').style.width = '4.22rem'
+				document.querySelector('.ui.secondary.vertical.pointing.menu').style.width = 'calc(4.22rem - 14%)'
+				document.querySelector('#match_button').style.cssText = 'width: auto !important; margin: 2px !important;'
+				document.querySelector('#displayer_settings_button').style.width = 'auto'
+				document.querySelector('#changelog_button').style.width = 'auto'
 				document.querySelector('.copyright').style.position = 'fixed'
 				document.querySelector('.changelog_content').style.setProperty('width', 'calc(100% - 59px)');
 				document.querySelector('#update_bar').style.width = '15%'
-				document.querySelector('#update_button').style.width = '4.22rem'
+				document.querySelector('#update_button').style.width = 'auto'
 				document.querySelector('#update_button .item_text').style.display = 'none'
-				document.querySelector('#teams_button').style.width = '4.22rem'
+				document.querySelector('#teams_button').style.width = 'auto'
 				document.querySelector('#teams_button .item_text').style.display = 'none'
+				document.querySelector('.ui.secondary.vertical.pointing.menu .item').style.cssText = 'margin: 0px'
 			}
 			socket.emit('compactUIclick', status)
 		})
@@ -658,9 +746,9 @@
 			$('.ui.equal.width.form').form({
 				fields: {
 					apikey: 'empty',
-					apikey1: 'empty',
+					/* apikey1: 'empty', */
 					userid: 'empty',
-					userid1: 'empty',
+					/* userid1: 'empty', */
 					matchid: 'empty',
 					matchtype: 'empty',
 					stage: 'empty',
@@ -679,6 +767,7 @@
 
 				var oldColorsEdit = '';
 				var smallDEdit = '';
+				var transpBackEdit = '';
 				var uiEdit = '';
 				var trayEdit = '';
 
@@ -686,8 +775,9 @@
 				if(allFields.systemTray == 'on') { trayEdit = true } else { trayEdit = false }
 				if(allFields.oldColors == 'on') {oldColorsEdit = true } else { oldColorsEdit = false}
 				if(allFields.smallDisplayer == 'on') { smallDEdit = true } else { smallDEdit = false }
+				if(allFields.transparentBackground == 'on') { transpBackEdit = true } else { transpBackEdit = false }
 
-				if(allFields.apikey == allFields.apikey1 && allFields.userid == allFields.userid1){
+				/* if(allFields.apikey == allFields.apikey1 && allFields.userid == allFields.userid1){ */
 					const data = {
 						apikey: allFields.apikey,
 						matchid: allFields.matchid,
@@ -701,6 +791,7 @@
 						visualizerstyle: allFields.visualizerstyle,
 						oldColors: oldColorsEdit,
 						smallVisualizer: smallDEdit,
+						transparentBackground: transpBackEdit,
 						compactUI: uiEdit,
 						systemTray: trayEdit,
 						firstRun: false
@@ -712,7 +803,7 @@
 						$('#saveMessage').css('display', 'none')
 					}, 2000)
 
-				}
+				/* } */
 
 			
 
@@ -726,7 +817,7 @@
 
 
 		// same value for the two tabs
-		$('#apikey').change(e => {
+		/* $('#apikey').change(e => {
 			let value = $('#apikey').val();
 			$('#apikey1').val(value);
 		})
@@ -741,7 +832,7 @@
 		$('#userid1').change(e => {
 			let value = $('#userid1').val();
 			$('#userid').val(value);
-		})
+		}) */
 
 		//console.clear()
 		loadConfig()
@@ -792,10 +883,10 @@
 		})
 	</script>
 
-	
+	<script src="/frontend/assets/teamslist.js"></script>
 
 	<!-- Team List -->
-	<script>
+	<!-- <script>
 		
 		function readFile(file){
 			if(file.length != 0){
@@ -911,13 +1002,13 @@
 				
 		}
 		
-		document.querySelector('#teams_button').addEventListener('click', (e) => {
-
-					
+		/* document.querySelector('#teams_button').addEventListener('click', (e) => {
 
 			 fetch('/teams')
 			.then((res) => res.json())
 			.then((data) => {
+
+				console.log(data)
 
 
 				const { images, settings } = data
@@ -944,14 +1035,16 @@
 				`
 
 				images.forEach((image) => {
-					let teamname = encodeURIComponent(image.replace(/\.[^/.]+$/, "")).trim();
+					let teamname = image.replace(/\.[^/.]+$/, "")
+					let teamnameEncoded = encodeURIComponent(image.replace(/\.[^/.]+$/, "")).trim();
+					console.log(teamname)
 
 					let team_player_list = `<span class="team_player_list_noplayers" id="${teamname}">No players</span>`;
 
 					
 
 					if(settings.includes(teamname)){
-						fetch(`/teams/${settings[settings.indexOf(teamname)]}`)
+						fetch(`/teams/${settings[settings.indexOf(teamnameEncoded)]}`)
 						.then((res) => res.json())
 						.then((dataTeam) => {
 							const { img, file, team_name, players } = dataTeam
@@ -1023,10 +1116,11 @@
 							`)
 						})
 					} else {
+						teamname = teamname.split(' ').join('_')
 						let counter = 1;
 						let editList = `<div class="item team">
 										<div class="field">
-											<input type="text" name="teamname" id="teamname_input" placeholder="Team Name" value="${team_name}" onchange="changeTeamName(this.value, '${team_name}.json', '${team_name}')">
+											<input type="text" name="teamname" id="teamname_input" placeholder="Team Name" value="${teamname}" onchange="changeTeamName(this.value, '${teamname}.json', '${teamname}')">
 										</div>
 									</div>`
 						teamslist.insertAdjacentHTML('afterbegin', `
@@ -1083,8 +1177,8 @@
 				})
 			}) 
 		})
-		
+		 */
 
-	</script>
+	</script> -->
 
 </html>

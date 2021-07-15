@@ -391,6 +391,40 @@ input::-webkit-inner-spin-button {
     width: 14rem;
     float: left;
 	position: relative;
+	transition: all 0.4s ease;
+}
+
+.ui.secondary.vertical.pointing.menu {
+    flex-flow: wrap;
+}
+
+.ui.secondary.vertical.pointing.menu .item {
+    border: 0px solid transparent;
+    padding: 8px 13px;
+    border-radius: 7px !important;
+    position: relative;
+    margin: 0px;
+}
+
+.ui.secondary.vertical.pointing.menu .active.item {
+	color: #eee !important;
+    background-color: rgba(40, 38, 40, 1.05);
+    border: 0px solid transparent;
+    padding: 8px 13px;
+    border-radius: 7px !important;
+    position: relative;
+    margin: auto;
+}
+
+.ui.secondary.pointing.menu .dropdown.item:hover, .ui.secondary.pointing.menu .link.item:hover, .ui.secondary.pointing.menu a.item:hover {
+	border-color: transparent;
+	color: #eee !important;
+    background-color: rgb(40 38 40 / 55%);
+    border: 0px solid transparent;
+    padding: 8px 13px;
+    border-radius: 7px !important;
+    position: relative;
+    margin: auto;
 }
 
 .leftmaintab {
@@ -402,12 +436,15 @@ input::-webkit-inner-spin-button {
 }
 
 .ui.secondary.vertical.pointing.menu {
- 	width: 14rem
+	width: 94%;
+    border-right: 0px;
+    margin: auto;
 }
 
 .ui.secondary.vertical.pointing.menu .active.item {
     color: #eee;
     border-color: #eee;
+	margin-bottom: 3px !important;
 }
 
 .ui.secondary.vertical.pointing.menu .item {
@@ -415,16 +452,20 @@ input::-webkit-inner-spin-button {
 	display: flex;
     flex-direction: row;
     align-items: center;
+	margin-bottom: 3px !important;
 }
 
 .ui.secondary.pointing.menu .dropdown.item:hover, .ui.secondary.pointing.menu .link.item:hover, .ui.secondary.pointing.menu a.item:hover {
     color: #ccc;
     border-color: #aaa;
+	margin-bottom: 3px !important;
 }
 
 .item_text {
 	margin-left: 10px;
 }
+
+
 
 .visualizer_settings_fields label{
 	color: #fff;
@@ -904,6 +945,156 @@ input.errPlayer {
 	background: #181818;
 }
 
+
+
+/* GRID VISUALIZER SETTINGS */
+
+/* #displayer-settings_tab {
+    overflow-y: scroll;
+    position: fixed;
+    height: calc(100% - 23px) !important;
+    margin-right: 0px !important;
+    margin-top: 0px !important;
+    margin-left: 56px !important;
+    padding-top: 10px !important;
+    padding-right: 56px !important;
+    width: calc(100% - 252px) !important;
+} */
+
+.displayerVisualization .container {
+	display: grid;
+	grid-template-columns: 50px 400px 50px;
+	grid-template-rows: 30px 130px 30px 30px;
+	gap: 0px 0px;
+	grid-auto-flow: row;
+	grid-template-areas:
+	  "topleft . topright"
+	  ". displayer ."
+	  "bottomleft teamscolors bottomright"
+	  ". teamscolors .";
+	color: #8181ff;
+	transform: scale(1.1);
+    margin-bottom: 10px;
+  }
+
+  .displayerVisualization .container .teamscolors {
+	display: grid; 
+	grid-template-columns: auto auto; 
+	grid-template-rows: auto auto; 
+	gap: 0px 0px; 
+	grid-template-areas: 
+    "team1color team2color"
+    "team1text team2text"; 
+	grid-area: teamscolors;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .displayerVisualization .container .team1color {
+	grid-area: team1color;
+    height: 100%;
+    width: 100%;
+  }
+  .displayerVisualization .container .team1color .content{
+    height: 20px;
+    width: 40px;
+    margin: auto;
+    display: block;
+    margin-top: 15px;
+    border-radius: 20px;
+  }
+
+  .displayerVisualization .container .team2color {
+	grid-area: team2color;
+    height: 100%;
+    width: 100%;
+  }
+  .displayerVisualization .container .team2color .content{
+    height: 20px;
+    width: 40px;
+    margin: auto;
+    display: block;
+    margin-top: 15px;
+    border-radius: 20px;
+  }
+
+  .displayerVisualization .container .team1text, .displayerVisualization .container .team2text {
+	text-align: center;
+  }
+
+.displayerVisualization .container .displayer {
+	display: grid; 
+	grid-template-columns: 1fr 1fr 1fr; 
+	grid-template-rows: 1fr 1fr 1fr; 
+	gap: 0px 0px; 
+	grid-template-areas: 
+    ". . ."
+    ". . height"
+    ". width ."; 
+	grid-area: displayer;
+	border: 2px #8181ff solid;
+    border-radius: 15px 15px 15px 15px;
+    height: 100%;
+    width: 100%;
+	background-color: #e5e5f7;
+	opacity: 0.8;
+	background: repeating-linear-gradient( -45deg, #8181ff57, #8181ff57 3.4px, transparent 2px, transparent 10px );
+  }
+  
+  .displayerVisualization .container .topleft {
+		grid-area: topleft;
+		text-align: right;
+		align-self: end;
+	}
+  
+	.visualizerInputShow {
+		padding: 4px !important;
+		font-family: 'QSVF' !important;
+		font-weight: 600;
+		text-align: center;
+		color: #8181ff !important;
+	}
+
+	.visualizerInputShow:read-only {
+		background-color: transparent !important;
+		border: 0px transparent !important;
+		cursor:default
+	}
+	
+  .displayerVisualization .container .topright {
+	  grid-area: topright;
+	  text-align: left;
+	  align-self: end;
+	}
+  
+  .displayerVisualization .container .bottomright {
+	  grid-area: bottomright;
+	  text-align: left;
+	  align-self: baseline;
+	}
+  
+  .displayerVisualization .container .bottomleft { 
+	  grid-area: bottomleft; 
+	  text-align: right;
+	  align-self: baseline;
+	}
+
+  .displayerVisualization .container .width {
+		grid-area: width;
+		align-self: end;
+		text-align: center;
+		padding-bottom: 1px;
+    }
+
+  .displayerVisualization .container .height {
+		grid-area: height;
+		text-align: right;
+		align-self: center;
+		padding-right: 3px;
+	}
+
+
+
 @supports (font-variation-settings: normal) {
 	@font-face {
 	  font-family: 'QSVF';
@@ -915,5 +1106,16 @@ input.errPlayer {
   }
 
 
+@media only screen and (max-height: 600px) {
+	.visualizer_settings_fields {
+		height: 272px;
+		overflow: auto;
+		padding-right: 15px;
+		padding-left: 0.2px;
+	}
+  }
 
 
+  body ::-webkit-scrollbar-track {
+	  border-radius: 25px !important;
+  }
