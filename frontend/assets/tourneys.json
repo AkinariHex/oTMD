@@ -573,7 +573,7 @@
         }
     },
     "OMS": {
-        "name": "osu! Mercenary Shop 2",
+        "name": "osu! Mercenary Shop 3",
         "modifiers": {
             "HD": {
                 "type": "*",
@@ -592,10 +592,10 @@
                 "value": "1.00"
             }
         },
-        "forumID": "1223604",
+        "forumID": "1341640",
         "date": {
-            "start": "02/20/2021",
-            "end": "03/28/2021"
+            "start": "07/03/2021",
+            "end": "08/15/2021"
         }
     },
     "BDC2": {
@@ -830,32 +830,6 @@
         "date": {
             "start": "04/17/2021",
             "end": "05/30/2021"
-        }
-    },
-    "NCT": {
-        "name": "Neko's Club Tournament",
-        "modifiers": {
-            "HD": {
-                "type": "*",
-                "value": "1.00"
-            },
-            "HR": {
-                "type": "*",
-                "value": "1.00"
-            },
-            "EZ": {
-                "type": "*",
-                "value": "1.00"
-            },
-            "FL": {
-                "type": "*",
-                "value": "1.00"
-            }
-        },
-        "forumID": "1250915",
-        "date": {
-            "start": "03/13/2021",
-            "end": "04/21/2021"
         }
     },
     "o!ET": {
@@ -1398,6 +1372,162 @@
             "end": "08/14/2021"
         }
     },
+    "KB2ST": {
+        "name": "Koro's Back 2 Skool Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1337953",
+        "date": {
+            "start": "07/17/2021",
+            "end": "08/28/2021"
+        }
+    },
+    "ECS": {
+        "name": "Elitiri Cup Summer",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1343263",
+        "date": {
+            "start": "07/24/2021",
+            "end": "09/26/2021"
+        }
+    },
+    "NCT": {
+        "name": "Neko's Club Tournament - Hot Summer 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1370076",
+        "date": {
+            "start": "08/14/2021",
+            "end": "09/26/2021"
+        }
+    },
+    "BOP": {
+        "name": "BubblyQT osu! Party",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "2.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1362858",
+        "date": {
+            "start": "08/07/2021",
+            "end": "09/19/2021"
+        }
+    },
+    "OPM": {
+        "name": "osu! Polish Masters",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1368969",
+        "date": {
+            "start": "08/08/2021",
+            "end": "10/03/2021"
+        }
+    },
+    "GAF": {
+        "name": "Gotta Aim Fast 8",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "2.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1353576",
+        "date": {
+            "start": "07/31/2021",
+            "end": "09/11/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
@@ -1424,5 +1554,5 @@
             "end": ""
         }
     }
-    
+        
 }
