@@ -1528,6 +1528,32 @@
             "end": "09/11/2021"
         }
     },
+    "OMFWC": {
+        "name": "Old Map Fantasy World Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1359817",
+        "date": {
+            "start": "08/14/2021",
+            "end": "10/04/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
