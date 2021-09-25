@@ -1554,6 +1554,114 @@
             "end": "10/04/2021"
         }
     },
+    "JAK": {
+        "name": "Jajaboy & Kaplangirl Tournament 1",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1394576",
+        "date": {
+            "start": "09/17/2021",
+            "end": "10/31/2021"
+        }
+    },
+    "otucup": {
+        "name": "osu! otudou Cup #3",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.75"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1417491",
+        "date": {
+            "start": "10/02/2021",
+            "end": "10/30/2021"
+        }
+    },
+    "STT2": {
+        "name": "Scarlet's Touhou Tournament 2",
+        "modifiers": {
+            "NM": {
+                "type": "*",
+                "value": "0.80"
+            },
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.80"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1407029",
+        "date": {
+            "start": "09/17/2021",
+            "end": "11/13/2021"
+        }
+    },
+    "3CWC": {
+        "name": "osu!catch 3 Digit World Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1413029",
+        "date": {
+            "start": " 09/10/2021",
+            "end": ""
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
@@ -1580,5 +1688,5 @@
             "end": ""
         }
     }
-        
+    
 }
