@@ -1658,8 +1658,34 @@
         },
         "forumID": "1413029",
         "date": {
-            "start": " 09/10/2021",
+            "start": "09/10/2021",
             "end": ""
+        }
+    },
+    "WMT": {
+        "name": "Wojny Magazynowe Tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.50"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1409138",
+        "date": {
+            "start": "10/01/2021",
+            "end": "11/14/2021"
         }
     },
     "": {
