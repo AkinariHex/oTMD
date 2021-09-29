@@ -1688,6 +1688,32 @@
             "end": "11/14/2021"
         }
     },
+    "CPRD": {
+        "name": "Cute People Rapid Draft #1",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.80"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "https://lh3.googleusercontent.com/g93v9NraSqA-8rQBpos_BsNe2xoNT0l7fdBEl-Zg-FtkBetE3WHdXhgVN8c1vLWKN2Xzl_A8NvLe5Vj191QslJiaCZOeMg1ci8NI2hBg7xnp5dA6rSwwyOoqmfbaGYB0NCdHvyubNg=s0",
+        "date": {
+            "start": "10/02/2021",
+            "end": "10/03/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
