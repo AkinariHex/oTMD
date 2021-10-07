@@ -1710,8 +1710,34 @@
         },
         "forumID": "https://lh3.googleusercontent.com/g93v9NraSqA-8rQBpos_BsNe2xoNT0l7fdBEl-Zg-FtkBetE3WHdXhgVN8c1vLWKN2Xzl_A8NvLe5Vj191QslJiaCZOeMg1ci8NI2hBg7xnp5dA6rSwwyOoqmfbaGYB0NCdHvyubNg=s0",
         "date": {
-            "start": "10/02/2021",
-            "end": "10/03/2021"
+            "start": "10/10/2021",
+            "end": "10/11/2021"
+        }
+    },
+    "higecup": {
+        "name": "Hige Cup 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "https://docs.google.com/spreadsheets/d/15fnun0jtwDwv1S4Y1vScZHoR6V6r43XdXA9aF7p3s44/edit#gid=1823160241",
+        "date": {
+            "start": "10/15/2021",
+            "end": "11/28/2021"
         }
     },
     "": {
