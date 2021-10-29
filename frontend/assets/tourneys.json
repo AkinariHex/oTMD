@@ -1740,6 +1740,162 @@
             "end": "11/28/2021"
         }
     },
+    "FHT3": {
+        "name": "Fooooooood's Hangry Tournament 3",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.50"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1448113",
+        "date": {
+            "start": "12/11/2021",
+            "end": "01/23/2021"
+        }
+    },
+    "IPT": {
+        "name": "Italia Pastrmajlija Tournament #1",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1448421",
+        "date": {
+            "start": "11/12/2021",
+            "end": "12/25/2021"
+        }
+    },
+    "KC": {
+        "name": "Kaizo Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1427252",
+        "date": {
+            "start": "10/29/2021",
+            "end": "12/12/2021"
+        }
+    },
+    "BC2021": {
+        "name": "BOOMER CUP 2021",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1445948",
+        "date": {
+            "start": "12/03/2021",
+            "end": "01/23/2022"
+        }
+    },
+    "slot": {
+        "name": "stat lord's official tournament",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1429650",
+        "date": {
+            "start": "10/29/2021",
+            "end": "12/19/2021"
+        }
+    },
+    "DVS": {
+        "name": "VERSION: Δ - Vanilla Solos",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1445788",
+        "date": {
+            "start": "10/29/2021",
+            "end": "12/12/2021"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
