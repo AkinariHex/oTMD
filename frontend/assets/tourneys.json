@@ -1922,6 +1922,58 @@
             "end": "01/30/2022"
         }
     },
+    "CDC": {
+        "name": "CLXXIII's Draft Cup",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.70"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1465092",
+        "date": {
+            "start": "12/17/2021",
+            "end": "02/13/2022"
+        }
+    },
+    "F2P": {
+        "name": "F2 pool",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1468871",
+        "date": {
+            "start": "12/12/2021",
+            "end": "01/30/2022"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
