@@ -1974,6 +1974,32 @@
             "end": "01/30/2022"
         }
     },
+    "MOCC": {
+        "name": "Miggy's osu! Community Cup 2022",
+        "modifiers": {
+            "HD": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "HR": {
+                "type": "*",
+                "value": "1.00"
+            },
+            "EZ": {
+                "type": "*",
+                "value": "1.80"
+            },
+            "FL": {
+                "type": "*",
+                "value": "1.00"
+            }
+        },
+        "forumID": "1468752",
+        "date": {
+            "start": "01/08/2022",
+            "end": "02/26/2022"
+        }
+    },
     "": {
         "name": "",
         "modifiers": {
