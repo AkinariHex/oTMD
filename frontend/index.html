@@ -138,6 +138,7 @@
 					<div class="required field">
 					  <label>APIkey</label>
 					  <input type="text" name="apikey" id="apikey" placeholder="APIkey"/>
+					  <input type="text" name="apikeyStreamer" id="apikeyStreamer" placeholder="Streamer Mode" disabled/>
 					</div>
 					<div class="field">
 					  <label>UserID</label>
@@ -496,8 +497,14 @@
 
 		const socket = io()
 
-		socket.on('test', (text) => {
-			console.log(text)
+		socket.on('obs_active', (status) => {
+			if(status === true){
+				document.getElementById('apikey').style.display = 'none';
+				document.getElementById('apikeyStreamer').style.display = 'block';
+			} else {
+				document.getElementById('apikey').style.display = 'block';
+				document.getElementById('apikeyStreamer').style.display = 'none';
+			}
 		})
 
 		socket.on('update_downloading', (update) => {
@@ -701,8 +708,8 @@
 			document.querySelector('#update_bar').style.width = '84%'
 			document.querySelector('#update_button').style.cssText = 'position: absolute; bottom: 74px; width: 94%; border-right: 0px; margin: auto; fill: #aaa;'
 			document.querySelector('#update_button .item_text').style.display = 'block'
-			document.querySelector('#teams_button').style.width = 'auto'
-			document.querySelector('#teams_button .item_text').style.display = 'block'
+			/* document.querySelector('#teams_button').style.width = 'auto'
+			document.querySelector('#teams_button .item_text').style.display = 'block' */
 			document.querySelector('.ui.secondary.vertical.pointing.menu .active.item').style.cssText = 'width: auto !important'
 			document.querySelector('.ui.secondary.vertical.pointing.menu .item').style.cssText = 'margin: auto'
 			if ($('#compactUI input').is(':checked')) {
@@ -722,8 +729,8 @@
 				document.querySelector('#update_bar').style.width = '15%'
 				document.querySelector('#update_button').style.width = 'auto'
 				document.querySelector('#update_button .item_text').style.display = 'none'
-				document.querySelector('#teams_button').style.width = 'auto'
-				document.querySelector('#teams_button .item_text').style.display = 'none'
+				/* document.querySelector('#teams_button').style.width = 'auto'
+				document.querySelector('#teams_button .item_text').style.display = 'none' */
 				document.querySelector('.ui.secondary.vertical.pointing.menu .item').style.cssText = 'margin: 0px'
 			}
 			socket.emit('compactUIclick', status)

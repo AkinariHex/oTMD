@@ -396,6 +396,7 @@ input::-webkit-inner-spin-button {
 
 .ui.secondary.vertical.pointing.menu {
     flex-flow: wrap;
+	padding-left: 0.7px;
 }
 
 .ui.secondary.vertical.pointing.menu .item {

@@ -1,5 +1,6 @@
 dist/
 node_modules
+build
 settings.json
 
 extract.html

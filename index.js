@@ -6,9 +6,10 @@ const path = require('path')
 const fetch = require('node-fetch')
 const os = require('os')
 
-/* console.log(sock()) */ 
-
 os.setPriority(-20)
+
+const memoryjs = require('memoryjs');
+const processName = "obs64.exe";
 
 const socket = require('socket.io')
 const appexp = express()
@@ -89,6 +90,17 @@ function readSettingsJson() {
 	}
 }
 
+function isOBSactive(process) {
+	var obsProcess = memoryjs.openProcess(process, (error, processObject) => {
+		/* if (error) {
+			return false;
+		} */
+		let data = processObject.szExeFile === process;
+		return data;
+	});
+	console.log(obsProcess)
+	return obsProcess;
+}
 
 appexp.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/index.html'))
@@ -286,11 +298,12 @@ function createWindow() {
 	mainWindow.setMenu(null);
   
 	
-	/* mainWindow.webContents.openDevTools(); */
+	 /* mainWindow.webContents.openDevTools(); 
   
-		/* require('electron-reload')(__dirname, {
+		require('electron-reload')(__dirname, {
 			electron: require(`${__dirname}/node_modules/electron`)
-	  	}); */
+	  	}); */ 
+		  
 	const server = appexp.listen(3000, () => {
 		console.log(`Running on http://localhost:3000`)
 		mainWindow.loadURL(`http://localhost:3000/`)
@@ -423,10 +436,14 @@ function createWindow() {
 		// emit to all
 		// io.emit('event', data)
 		// })
-
-		
-		
-
+		const obsActive = () => {
+			memoryjs.openProcess(processName, (error, processObject) => {
+				let data = processObject.szExeFile === processName;
+				io.sockets.emit('obs_active', data)
+			})
+		}
+		obsActive()
+		setInterval(() => {obsActive()}, 10000)
 
 		socket.on('minimizeapp', () => {
             (!mainWindow.isMinimized()) ? mainWindow.minimize() : '';

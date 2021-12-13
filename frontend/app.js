@@ -29,12 +29,16 @@ let smallvisualizer = null
 let oldcolors = null
 let transpBackground = null
 
+var oldTourneyID = null
+
+var tournament_info_name = '';
+var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
+
 // invoke once on page opening
 function init() {
 	fetch('/settings')
 		.then((res) => res.json())
 		.then((data) => {
-			console.log('first loading', data)
 
 			osuapi = data.apikey
 			matchid = data.matchid
@@ -87,9 +91,6 @@ socket.on('new_settings', (/* parsedData = data */) => {
 })
 
 function checkData() {
-	fetch('https://raw.githubusercontent.com/AkinariHex/oTMD/main/frontend/assets/tourneys.json')
-		.then((res) => res.json())
-		.then((tourneydata) => {
 
 			if(oldcolors == true){
 				visualizer.style.setProperty('--visualizer-background', 'url("/assets/images/blueVSred.png")');
@@ -109,20 +110,27 @@ function checkData() {
 			if (osuapi != 'null' && matchid != 'null' && warmups != 'null' && reverse != 'null' && bestof != 'null' && stage != 'null' && matchtype != 'null') {
 				if (userid != 'null' && matchtype == 'h1v1') {
 					if(stage == 'Qualifiers') {	
-						matchdatasoloQualifiers(osuapi, matchid, warmups, osuinterval, tourneydata, stage, userid, maps)
+						matchdatasoloQualifiers(osuapi, matchid, warmups, osuinterval, stage, userid, maps)
 					} else {
-						matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, tourneydata, stage, userid)
+						matchdatasolo(osuapi, matchid, warmups, osuinterval, bestof, stage, userid)
 					}
 				} else if (matchtype == 'teamvs') {
-					matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, tourneydata, stage)
+					matchdata(osuapi, matchid, warmups, osuinterval, reverse, bestof, countriesjs, stage)
 				} else {
 					textzone.innerHTML = '<span style="color: #e45a5a; font-size: 15px">ERROR, USERID not found!</span>'
 				}
 			}
-		})
+
 }
 
-function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tournament, stage) {
+
+async function getTournamentData(id) {
+	var data = await fetch(`https://otmd.app/api/tournaments/app?t=${id}`)
+	data = await data.json()
+	return data;
+}
+
+function matchdata(api, mpid, warmups, interval, reverse, bestof, country, stage) {
 	var team1score = 0
 	var team2score = 0
 	var team1 = 0
@@ -130,19 +138,19 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 
 	fetch(`https://osu.ppy.sh/api/get_match?k=${api}&mp=${mpid}`)
 		.then((res) => res.json())
-		.then((data) => {
+		.then(async (data) => {
 
-			// Tournament Info
-			var tournamentindex = data.match.name.indexOf(':');
-			var tournamentid = data.match.name.substring(0, tournamentindex);
-		
-			var tournament_info_name = '';
-			var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
-		
-			// CHECK FOR TOURNAMENT
-			if(tournament[tournamentid]){
-			  tournament_info_name = tournament[tournamentid].name;
-			  tournament_modifiers = tournament[tournamentid].modifiers;
+			if (oldTourneyID != mpid) {
+				// Tournament Info
+				var tournamentindex = data.match.name.indexOf(':');
+				var tournamentid = data.match.name.substring(0, tournamentindex);
+
+				// CHECK FOR TOURNAMENT
+				let tourneyData = await getTournamentData(tournamentid);
+				if(!tourneyData.error){
+					tournament_info_name = tourneyData.tournamentName;
+					tournament_modifiers = tourneyData.multipliers;
+				}
 			}
 
 			
@@ -345,6 +353,7 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 					visualizer.style.setProperty('--visualizer-background', 'transparent')
 				}
 			  
+				/* oldTourneyID = mpid; */
 		  
 			  team1 = 0;
 			  team2 = 0;
@@ -361,7 +370,7 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, tourn
 		})
 }
 
-function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, userid) {
+function matchdatasolo(api, mpid, warmups, interval, bestof, stage, userid) {
 	var team1score = 0
 	var team2score = 0
 	var team1 = 0
@@ -375,18 +384,19 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 		.then((data) => {
 			axios
 				.get(`https://osu.ppy.sh/api/get_user?k=${api}&u=${userid}`)
-				.then((dataplayer) => {
-					//Tournament Info
-					var tournamentindex = data.match.name.indexOf(':');
-					var tournamentid = data.match.name.substring(0, tournamentindex);
+				.then(async (dataplayer) => {
 
-					var tournament_info_name = '';
-					var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
-
-					// CHECK FOR TOURNAMENT
-					if(tournament[tournamentid]){
-					tournament_info_name = tournament[tournamentid].name;
-					tournament_modifiers = tournament[tournamentid].modifiers;
+					if (oldTourneyID != mpid) {
+						// Tournament Info
+						var tournamentindex = data.match.name.indexOf(':');
+						var tournamentid = data.match.name.substring(0, tournamentindex);
+		
+						// CHECK FOR TOURNAMENT
+						let tourneyData = await getTournamentData(tournamentid);
+						if(!tourneyData.error){
+							tournament_info_name = tourneyData.tournamentName;
+							tournament_modifiers = tourneyData.multipliers;
+						}
 					}
 
 					//Score system
@@ -511,7 +521,7 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, tournament, stage, 
 		})
 }
 
-function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage, userid, maps) {
+function matchdatasoloQualifiers(api, mpid, warmups, interval, stage, userid, maps) {
 
 	function getNumberWithCommas(number) {
 		return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -553,18 +563,19 @@ function matchdatasoloQualifiers(api, mpid, warmups, interval, tournament, stage
 		.then((data) => {
 			axios
 				.get(`https://osu.ppy.sh/api/get_user?k=${api}&u=${userid}`)
-				.then((dataplayer) => {
-					//Tournament Info
-					var tournamentindex = data.match.name.indexOf(':');
-					var tournamentid = data.match.name.substring(0, tournamentindex);
+				.then(async (dataplayer) => {
 
-					var tournament_info_name = '';
-					var tournament_modifiers = {"NM": {"type": "*", "value": "1.00"}, "HD": {"type": "*", "value": "1.00"}, "HR": {"type": "*", "value": "1.00"}, "EZ": {"type": "*", "value": "1.00"}, "FL": {"type": "*", "value": "1.00"}};
+					if (oldTourneyID != mpid) {
+						// Tournament Info
+						var tournamentindex = data.match.name.indexOf(':');
+						var tournamentid = data.match.name.substring(0, tournamentindex);
 
-					// CHECK FOR TOURNAMENT
-					if(tournament[tournamentid]){
-					tournament_info_name = tournament[tournamentid].name;
-					tournament_modifiers = tournament[tournamentid].modifiers;
+						// CHECK FOR TOURNAMENT
+						let tourneyData = await getTournamentData(tournamentid);
+						if(!tourneyData.error){
+							tournament_info_name = tourneyData.tournamentName;
+							tournament_modifiers = tourneyData.multipliers;
+						}
 					}
 
 					//Score system
