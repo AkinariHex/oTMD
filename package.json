@@ -85,6 +85,7 @@
 	"license": "GPL-3.0",
 	"dependencies": {
 		"adm-zip": "^0.5.5",
+		"bl": ">=1.2.3",
 		"cors": "^2.8.5",
 		"electron-log": "^4.3.2",
 		"electron-reload": "^1.5.0",
