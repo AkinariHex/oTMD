@@ -1,6 +1,5 @@
-## v1.9.5
+## v1.10.0
 ### App
-- **New Streamer Mode that hide your apikey when OBS/SLOBS is open on your pc!**
-  <br><img src="https://akinariosu.s-ul.eu/JwzexWxm">
-- Now the tournaments are stored in the **[osu! Tourney Match Displayer](https://osu.ppy.sh/community/forums/topics/1341640)** website!
-- Fixed the compact design of the left bar!
+- Changed copyright year to 2022 as first release of this new year! 👀
+- Failed score multiplier for SD mod implementation (required for **Scarlet's 1st Anniversary Tournament**)
+- Replaced memoryjs with find-process.

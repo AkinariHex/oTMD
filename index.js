@@ -4,17 +4,23 @@ const fs = require('fs')
 const open = require('open')
 const path = require('path')
 const fetch = require('node-fetch')
-const os = require('os')
 
-os.setPriority(-20)
+var documentsFolder;
 
-const memoryjs = require('memoryjs');
-const processName = "obs64.exe";
+if(process.platform === 'win32'){
+	const os = require('os')
+	os.setPriority(-20)
+	documentsFolder = require("os").userInfo().homedir + '/AppData/Roaming';
+} else if(process.platform === 'linux'){
+	documentsFolder = require("os").userInfo().homedir + '/Documents';
+}
+
+const find = require('find-process');
 
 const socket = require('socket.io')
 const appexp = express()
 
-const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification, ipcMain, protocol } = require('electron');
+const { app, BrowserWindow, Menu, Tray, globalShortcut, Notification } = require('electron');
 require('v8-compile-cache');
 var { autoUpdater } = require("electron-updater")
 
@@ -24,7 +30,6 @@ autoUpdater.logger.transports.file.level = "info"
 appexp.use(express.json())
 appexp.use(cors())
 
-let documentsFolder = require("os").userInfo().homedir + '/AppData/Roaming';
 
 appexp.use('/teamsimg', express.static(documentsFolder + '/otmd/teams'));
 
@@ -88,18 +93,6 @@ function readSettingsJson() {
 		console.log('file settings.json not found, sending default settings')
 		return null
 	}
-}
-
-function isOBSactive(process) {
-	var obsProcess = memoryjs.openProcess(process, (error, processObject) => {
-		/* if (error) {
-			return false;
-		} */
-		let data = processObject.szExeFile === process;
-		return data;
-	});
-	console.log(obsProcess)
-	return obsProcess;
 }
 
 appexp.get('/', (req, res) => {
@@ -437,10 +430,15 @@ function createWindow() {
 		// io.emit('event', data)
 		// })
 		const obsActive = () => {
-			memoryjs.openProcess(processName, (error, processObject) => {
-				let data = processObject.szExeFile === processName;
-				io.sockets.emit('obs_active', data)
-			})
+			find('name', "obs64.exe", true)
+				.then(function (list) {
+					if (list.length > 0) {
+						let data = list[0].name === "obs64.exe";
+						io.sockets.emit('obs_active', data)
+					} else {
+						io.sockets.emit('obs_active', false)
+					}
+				});
 		}
 		obsActive()
 		setInterval(() => {obsActive()}, 10000)

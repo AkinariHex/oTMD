@@ -166,17 +166,17 @@ function matchdata(api, mpid, warmups, interval, reverse, bestof, country, stage
 				  if(gameended == false ){
 					if(data.games[i].scores[x].team == '1'){
 					  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
-						team1score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+						team1score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 					  }
 					  else {
-						team1score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+						team1score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 					  }
 					} else if(data.games[i].scores[x].team == '2'){
 					  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
-						team2score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+						team2score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 					  }
 					  else {
-						team2score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+						team2score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 					  }
 					}
 				  }
@@ -406,18 +406,18 @@ function matchdatasolo(api, mpid, warmups, interval, bestof, stage, userid) {
 						  if(gameended == false ){
 							if(data.games[i].scores[x].user_id == dataplayer.data[0].user_id){
 							  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
-								team1score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+								team1score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 							  }
 							  else {
-								team1score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+								team1score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 							  }
 							} else if(data.games[i].scores[x].user_id != userid && playerslot.includes(data.games[i].scores[x].slot)){
 							  if(data.games[i].mods == 0) {// 0 = FREEMOD - !0 = MODLOCKED
-								team2score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+								team2score+=scoremodification.modsModifiers(data.games[i].scores[x].enabled_mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 								team2id = data.games[i].scores[x].user_id;
 							  }
 							  else {
-								team2score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers)
+								team2score+=scoremodification.modsModifiers(data.games[i].mods, parseInt(data.games[i].scores[x].score), tournament_modifiers, parseInt(data.games[i].scores[x].pass))
 								team2id = data.games[i].scores[x].user_id;
 							  }
 							}

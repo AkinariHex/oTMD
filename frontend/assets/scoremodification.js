@@ -1,4 +1,4 @@
-function modsModifiers(mods, score, modifier){
+function modsModifiers(mods, score, modifier, isPass){
 	const modlist = [
 	  {mod: "NF", pos: 31},
 	  {mod: "EZ", pos: 30},
@@ -60,7 +60,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.NM.type == '/'){
 			scoremod = score / parseFloat(modifier.NM.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
 	}
 	if(modarr.includes('HR') == true){
 		if(modifier.HR.type == '*'){
@@ -68,7 +67,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.HR.type == '/'){
 			scoremod = score / parseFloat(modifier.HR.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
 	}
 	if(modarr.includes('HD') == true){
 		if(modifier.HD.type == '*'){
@@ -76,7 +74,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.HD.type == '/'){
 			scoremod = score / parseFloat(modifier.HD.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
 	}
 	if(modarr.includes('HDHR') == true){
 		if(modifier.HDHR.type == '*'){
@@ -84,7 +81,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.HDHR.type == '/'){
 			scoremod = score / parseFloat(modifier.HDHR.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
 	}
 	if(modarr.includes('HDEZ') == true){
 		if(modifier.HDEZ.type == '*'){
@@ -92,7 +88,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.HDEZ.type == '/'){
 			scoremod = score / parseFloat(modifier.HDEZ.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
 	}
 	if(modarr.includes('EZFL') == true){
 		if(modifier.EZFL.type == '*'){
@@ -100,7 +95,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.EZFL.type == '/'){
 			scoremod = score / parseFloat(modifier.EZFL.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
 	}
 	if(modarr.includes('EZ') == true){
 		if(modifier.EZ.type == '*'){
@@ -108,7 +102,6 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.EZ.type == '/'){
 			scoremod = score / parseFloat(modifier.EZ.value);
 		}
-		//scoremod = score * parseFloat(modifier.EZ);
 	}
 	if(modarr.includes('FL') == true){
 		if(modifier.FL.type == '*'){
@@ -116,7 +109,17 @@ function modsModifiers(mods, score, modifier){
 		} else if (modifier.FL.type == '/'){
 			scoremod = score / parseFloat(modifier.FL.value);
 		}
-		//scoremod = score * parseFloat(modifier.FL);
+	}
+	if(modarr.includes('SD') == true){
+		if(modifier.SD.type == '*'){
+			if(isPass == 0){
+				scoremod = score * parseFloat(modifier.SD.failValue);
+			} else {
+				scoremod = score * parseFloat(modifier.SD.value);
+			}
+		} else if (modifier.SD.type == '/'){
+			scoremod = score / parseFloat(modifier.SD.value);
+		}
 	}
   
 	return scoremod;
