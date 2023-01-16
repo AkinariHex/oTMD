@@ -1,6 +1,27 @@
 .App {
-  text-align: center;
+  display: grid;
+  grid-template-columns: max-content auto;
+  grid-template-areas: "navbar content";
+  padding: 24px 0 0 0;
+  height: calc(100vh - 24px);
 }
+
+.content {
+  border-top-left-radius: 6px;
+  grid-area: content;
+  background-color: #282c34;
+  position: relative;
+}
+
+.container {
+  display: flex;
+  color: #ddd;
+  max-height: calc(100vh - 46px);
+  padding: 11px 16px;
+  overflow: auto;
+}
+
+/* ------------------------------------------------------ */
 
 .App-logo {
   height: 40vmin;
@@ -14,8 +35,9 @@
 }
 
 .App-header {
+  border-top-left-radius: 6px;
   background-color: #282c34;
-  min-height: 100vh;
+  min-height: calc(100vh - 24px);
   display: flex;
   flex-direction: column;
   align-items: center;

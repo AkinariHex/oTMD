@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>osu! Tourney Match Displayer | Visualizer</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/odometer/odometer-theme-minimal.css" />
+  </head>
+  <body>
+    <div id="appNotConnected">
+      <div class="message">Waiting an Account</div>
+    </div>
+    <div id="appNoMatch" style="display: none">
+      <div class="message">Waiting a Match</div>
+    </div>
+    <div id="app" style="display: none">
+      <div id="stageBO"></div>
+      <div class="match" id="match" style="display: none">
+        <div class="team" id="team1"></div>
+        <div class="score">
+          <span id="team1_score" class="odometer">0</span>&nbsp;-&nbsp;<span
+            id="team2_score"
+            class="odometer"
+            >0</span
+          >
+        </div>
+        <div class="team" id="team2"></div>
+      </div>
+      <div class="qualifiers" id="qualifiers" style="display: none"></div>
+      <div class="winner" id="winner" style="display: none"></div>
+      <div id="tournament"></div>
+    </div>
+
+    <script src="/data.js"></script>
+    <script src="/odometer/odometer.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,294 @@
+.containerLogin {
+  display: flex;
+  flex-flow: column;
+  width: 100vw;
+  background-color: var(--secondary-color);
+  color: #ddd;
+}
+
+.logoContainer {
+  display: flex;
+  height: fit-content;
+  flex-flow: column;
+  align-items: center;
+  margin: 15px 0;
+  user-select: none;
+}
+
+.logoContainer .logo {
+  height: 160px;
+  width: 160px;
+  margin: 0 0 5px 0;
+}
+
+.logoContainer .title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #eee;
+}
+
+.logoContainer .subtext {
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: #ddd;
+  margin: -5px 0 0 0;
+}
+
+.logoContainer .subtext span {
+  color: #eee;
+  font-weight: 600;
+}
+
+.accountsContainer {
+  display: flex;
+  height: 260px;
+  overflow-y: auto;
+  flex-flow: row wrap;
+  justify-content: center;
+  margin: 15px 0;
+  gap: 20px;
+}
+
+.accountsContainer .account {
+  height: 250px;
+  width: 180px;
+  border-radius: 15px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+  user-select: none;
+}
+
+.account .info {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  border-radius: 15px;
+  backdrop-filter: blur(3px);
+}
+
+.info .user {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  top: 80px;
+  margin: 0 auto auto auto;
+  transition: all 0.4s ease-out;
+}
+
+.account .userPropic {
+  width: 55px;
+  height: 55px;
+  border-radius: 50vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0px 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.account .username {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #eee;
+  text-align: center;
+  margin: 2px auto;
+}
+
+.account .loginText {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  align-self: center;
+  font-weight: 400;
+  color: #ddd;
+  position: relative;
+  bottom: -2px;
+  filter: opacity(0);
+  transition: all 0.4s ease-out;
+}
+
+.accountsContainer .account .info:hover {
+  cursor: pointer;
+}
+
+.accountsContainer .account .info:hover > .user {
+  top: 60px;
+  transition: all 0.4s ease-in;
+}
+
+.accountsContainer .account .info:hover > .loginText {
+  bottom: 8px;
+  filter: opacity(1);
+  transition: all 0.4s ease-in;
+}
+
+.account .loginText :first-child {
+  margin-bottom: -6px;
+}
+
+.account .create {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color);
+  font-size: 15px;
+  transition: all 0.2s ease-out;
+}
+
+.account .create:hover {
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease-in;
+}
+
+.userCreate {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  top: 30px;
+  margin: 0 auto auto auto;
+}
+
+.info.c {
+  align-items: center;
+}
+
+.info.c:hover {
+  cursor: default !important;
+}
+
+#formNewAccount {
+  display: flex;
+  flex-flow: column;
+  margin: 8px 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  border-radius: 8px;
+  gap: 8px;
+}
+
+#formNewAccount .getApiKey {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-size: 11px;
+  font-weight: 400;
+  color: hsl(224, 80%, 72%);
+  width: 100%;
+  text-align: center;
+  transition: all 0.2s ease-out;
+}
+
+#formNewAccount .getApiKey:hover {
+  cursor: pointer;
+  color: hsl(224, 80%, 80%);
+  font-size: 11.5px;
+  transition: all 0.2s ease-in;
+}
+
+#formNewAccount .error {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-size: 11px;
+  font-weight: 400;
+  color: hsl(357, 80%, 72%);
+  width: 100%;
+  text-align: center;
+}
+
+#formNewAccount .item {
+  display: flex;
+  justify-content: center;
+}
+
+#formNewAccount .item input {
+  width: 100%;
+  height: 28px;
+  border-radius: 5px;
+  border: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  color: #ddd;
+  padding: 2px 10px;
+  font-family: "Poppins";
+}
+
+#formNewAccount .item input:focus-visible {
+  outline: none;
+}
+
+#formNewAccount .confirm {
+  height: 28px;
+  background-color: hsl(192, 45%, 38%, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.8px;
+  font-weight: 400;
+  transition: all 0.1s ease-out;
+}
+
+#formNewAccount .confirm:hover {
+  cursor: pointer;
+  background-color: hsl(192, 45%, 38%, 0.8);
+  color: #eee;
+  transition: all 0.1s ease-in;
+}
+
+.buttonLoader {
+  margin: auto;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top: 2px solid hsl(192, 45%, 70%);
+  width: 12px;
+  height: 12px;
+  animation: spinner 1.2s linear infinite;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* SCROLLBARS */
+.accountsContainer::-webkit-scrollbar {
+  width: 14px;
+}
+
+.accountsContainer::-webkit-scrollbar-track {
+  padding: 0 10px;
+  border-radius: 0 5px 5px 0;
+}
+
+.accountsContainer::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 50vh;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}

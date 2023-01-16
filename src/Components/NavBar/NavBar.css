@@ -1,0 +1,153 @@
+.navbarContainer {
+  background-color: var(--primary-color);
+  height: calc(100vh - 24px);
+  width: 200px;
+  grid-area: navbar;
+  display: flex;
+  flex-flow: column;
+  gap: 6px;
+  transition: all 0.5s ease-out;
+  z-index: 1;
+}
+
+.topRoutes {
+  display: flex;
+  flex-flow: column;
+  padding: 0 6px;
+  gap: 4px;
+  margin: 0 0 auto 0;
+}
+
+.bottomRoutes {
+  display: flex;
+  flex-flow: column;
+  padding: 0 6px;
+  gap: 4px;
+  margin: auto 0 0 0;
+}
+
+.navbarContainer.compact {
+  width: 57px;
+  transition: all 0.5s ease-out;
+}
+
+.navbarContainer.compact > .topRoutes .item,
+.navbarContainer.compact > .bottomRoutes .item {
+  justify-content: center;
+  transition: 0.2s all ease-in;
+}
+
+.navbarContainer.compact > .topRoutes .item.account,
+.navbarContainer.compact > .topRoutes .item,
+.navbarContainer.compact > .bottomRoutes .item {
+  display: flex;
+  transition: 0.2s all ease-in;
+}
+
+.navbarContainer.compact > .topRoutes .item.account .flag,
+.navbarContainer.compact > .topRoutes .item.account .name,
+.navbarContainer.compact > .topRoutes .item .text,
+.navbarContainer.compact > .bottomRoutes .item .text,
+.navbarContainer.compact > .appInfo .copyright {
+  display: none;
+  transition: 0.2s all ease-in;
+}
+
+.navbarContainer .item {
+  height: 35px;
+  display: grid;
+  grid-template-columns: max-content auto;
+  border-radius: 6px;
+  color: #ccc;
+  font-size: 12.5px;
+  font-weight: 400;
+  padding: 0 8px;
+  gap: 7px;
+  align-items: center;
+  background-color: transparent;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease-out;
+}
+
+.bottomRoutes .item {
+  border-top: 1px solid transparent;
+  border-bottom: none;
+}
+
+.navbarContainer .item.active,
+.navbarContainer .item:hover {
+  color: hsl(192, 45%, 80%);
+  /* New Style */
+  background: linear-gradient(0deg, hsl(192, 55%, 48%, 0.1), transparent);
+  /* New Style 2 */
+  /* background: hsl(192, 55%, 48%, 0.08); */
+  /* Old Style */
+  /* background-color: var(--secondary-color); */
+  border-bottom: 1px solid hsl(192, 45%, 58%);
+  transition: all 0.2s ease-in;
+}
+
+.bottomRoutes .item.active,
+.bottomRoutes .item:hover {
+  /* New Style */
+  background: linear-gradient(180deg, hsl(192, 55%, 48%, 0.1), transparent);
+  /* Old Style */
+  /* background-color: var(--secondary-color); */
+  border-top: 1px solid hsl(192, 45%, 58%);
+  border-bottom: none;
+}
+
+.navbarContainer .item.account {
+  display: grid;
+  grid-template-columns: max-content auto max-content;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ddd;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.88);
+  transition: 0.2s all ease-in;
+}
+
+.navbarContainer .item.account:hover,
+.navbarContainer .item.account.active {
+  border-bottom: 1px solid hsl(192, 45%, 58%);
+}
+
+.item.account .name,
+.item .text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: 0.1s all ease-in;
+}
+
+.item.account .flag {
+  width: 1.6em;
+  /* height: 1.6em; */
+  background-size: contain;
+  margin: 0;
+  vertical-align: middle;
+  display: flex;
+  justify-content: center;
+  border: 0;
+  /* filter: saturate(0.7) brightness(1.3); */
+  transition: 0.2s all ease-in;
+}
+
+.appInfo {
+  display: flex;
+  flex-flow: row nowrap;
+  color: #888;
+  font-size: 12px;
+  font-weight: 500;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: rgba(0, 0, 0, 0.18);
+  user-select: none;
+}

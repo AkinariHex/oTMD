@@ -1,0 +1,68 @@
+/* APPBAR */
+
+.headerappbar {
+  height: 24px;
+  width: 100%;
+  background-color: var(--primary-color);
+  border-bottom: 0px solid;
+  -webkit-app-region: drag;
+  z-index: 3001;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  position: fixed;
+}
+
+#applicationName {
+  padding: 0 0 0 8px;
+  color: #ccc;
+  font-family: "Poppins";
+  font-weight: 600;
+  font-size: 9pt;
+  user-select: none;
+  align-self: center;
+}
+
+#applicationName span {
+  font-weight: 400;
+  color: #bbb;
+  padding: 0 0 0 4px;
+}
+
+#applicationButtons {
+  height: 100%;
+  -webkit-app-region: no-drag;
+  cursor: unset !important;
+  position: absolute;
+  right: 0;
+}
+
+#applicationButtons button:hover,
+#applicationButtons button svg:hover {
+  cursor: unset !important;
+}
+
+.headerappbarbutton {
+  height: 24px;
+  padding: 0px 8px !important;
+  padding-top: 0.5px !important;
+  background-color: transparent !important;
+  fill: #fff !important;
+  border-radius: 0px !important;
+  margin: 0px !important;
+  cursor: unset !important;
+  box-shadow: none;
+  border: 0;
+}
+
+.headerappbarbutton:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.headerappbarbutton:focus-visible {
+  outline: none;
+}
+
+.closewinbutton:hover {
+  background-color: rgba(255, 0, 0, 0.3) !important;
+}

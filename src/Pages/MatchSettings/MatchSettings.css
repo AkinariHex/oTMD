@@ -1,0 +1,91 @@
+#formMatchSettings {
+  display: flex;
+  width: 100%;
+  flex-flow: column;
+  gap: 12px;
+}
+
+#formMatchSettings .row {
+  display: flex;
+  width: 100%;
+  flex-flow: row;
+  gap: 16px;
+}
+
+#formMatchSettings .row .item {
+  display: flex;
+  width: 100%;
+  flex-flow: column;
+}
+
+#formMatchSettings .row .item input,
+#formMatchSettings .row .item select {
+  height: 35px;
+  background-color: var(--primary-color);
+  border-radius: 6px;
+  border: 0;
+  color: #ccc;
+  font-size: 13.7px;
+  font-weight: 400;
+  padding: 0 8px;
+  font-family: "Poppins";
+}
+
+#formMatchSettings .row .item input:focus-visible,
+#formMatchSettings .row .item select:focus-visible {
+  outline: none;
+}
+
+.saveButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 35px;
+  background-color: hsl(192, 45%, 28%);
+  border-radius: 6px;
+  border: 0;
+  font-size: 14px;
+  font-family: "Poppins";
+  color: #ddd;
+  font-weight: 500;
+  margin: 12px 0 0 0;
+  cursor: pointer;
+  transition: all 0.15s ease-in;
+}
+
+.saveButton:hover {
+  background-color: hsl(192, 45%, 23%);
+  color: #eee;
+  transition: all 0.15s ease-in;
+}
+
+.popupContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in;
+}
+
+.popupContainer.show {
+  opacity: 1;
+  bottom: 15px;
+  transition: all 0.5s ease-out;
+}
+
+.popup {
+  height: 50px;
+  width: 300px;
+  border-radius: 8px;
+  background-color: hsla(143, 55%, 19%, 0.678);
+  color: hsl(143, 54%, 69%);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

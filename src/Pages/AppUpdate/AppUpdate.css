@@ -1,0 +1,61 @@
+.updateContainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-area: content;
+}
+
+.updateContainer .header {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  margin: -7em 0 7em 0;
+}
+
+.updateContainer .header .title {
+  font-size: 2.5em;
+  font-weight: 300;
+  color: hsla(225, 13%, 70%, 1);
+}
+
+.updateContainer .header .subtitle {
+  font-size: 1em;
+  font-weight: 300;
+  color: hsla(225, 13%, 60%, 1);
+}
+
+.updateContainer .download {
+  display: flex;
+  width: 80%;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.updateContainer .download .text {
+  font-size: 14px;
+  color: hsla(225, 13%, 55%, 1);
+  font-weight: 400;
+}
+
+.updateContainer .download .bar {
+  width: 100%;
+}
+
+.react-sweet-progress-line {
+  height: 7px;
+  background-color: hsla(225, 13%, 16%, 1) !important;
+}
+
+.react-sweet-progress-line-inner {
+  min-height: 7px !important;
+}
+
+.react-sweet-progress-symbol {
+  display: none !important;
+}

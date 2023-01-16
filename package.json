@@ -1,21 +1,137 @@
 {
-  "name": "create-otmd",
-  "version": "0.1.0",
+  "name": "osu-tourney-match-displayer",
+  "version": "2.0.0",
+  "description": "Displayer for osu! Tournament Matches",
+  "author": "Akinari <akinaricoding@outlook.it>",
+  "license": "GPL-3.0",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "5.0.0",
-    "web-vitals": "^2.1.3"
+  "keywords": [
+    "osu",
+    "displayer",
+    "tournament",
+    "match",
+    "lobby",
+    "score",
+    "obs",
+    "slobs",
+    "osugame",
+    "tourney",
+    "tournament-match"
+  ],
+  "homepage": "./",
+  "main": "./public/electron/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AkinariHex/oTMD.git"
+  },
+  "build": {
+    "appId": "com.akinari.osu-tourney-match-displayer",
+    "productName": "osu! Tourney Match Displayer",
+    "copyright": "Copyright © 2023 Akinari",
+    "artifactName": "otmd_v${version}_${arch}.${ext}",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "verifyUpdateCodeSignature": false,
+      "requestedExecutionLevel": "requireAdministrator",
+      "icon": "./public/icons/otmd.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": true,
+      "artifactName": "otmd_v${version}_${arch}_installer.${ext}",
+      "installerIcon": "./public/icons/otmd.ico",
+      "uninstallerIcon": "./public/icons/otmd.ico",
+      "uninstallDisplayName": "${productName}",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "osu! Tourney Match Displayer",
+      "runAfterFinish": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "snap",
+        "deb"
+      ],
+      "maintainer": "Akinari <akinaricoding@outlook.it>",
+      "description": "Displayer for osu! Tournament Matches",
+      "synopsis": "Display easily your osu! Tournament Matches on Twitch!",
+      "category": "Utility",
+      "icon": "./public/icons"
+    },
+    "deb": {
+      "compression": "xz"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "./public"
+    },
+    "fileAssociations": [
+      {
+        "ext": "otmdt",
+        "name": "OTMD Team File",
+        "role": "Editor",
+        "icon": "./public/icons/otmd.ico"
+      }
+    ],
+    "protocols": {
+      "name": "otmd-protocol",
+      "schemes": [
+        "otmd"
+      ]
+    }
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "electron .",
+    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron/main.js",
+    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron/main.js"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.5.0",
+    "@testing-library/user-event": "^7.2.1",
+    "dotenv": "^12.0.4",
+    "electron-log": "^4.4.5",
+    "electron-updater": "^4.6.1",
+    "express": "^4.17.2",
+    "find-process": "^1.4.7",
+    "formik": "^2.2.9",
+    "fs": "^0.0.1-security",
+    "html": "^1.0.0",
+    "iconsax-react": "^0.0.8",
+    "node-fetch": "^2.6.1",
+    "open": "^8.4.0",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-icons": "^4.3.1",
+    "react-markdown": "^8.0.0",
+    "react-router-dom": "^6.2.1",
+    "react-scripts": "5.0.0",
+    "react-sweet-progress": "^1.1.2",
+    "react-tooltip": "^4.2.21",
+    "url": "^0.11.0",
+    "v8-compile-cache": "^2.3.0",
+    "web-vitals": "^2.1.3",
+    "ws": "^8.4.2"
+  },
+  "devDependencies": {
+    "electron": "^16.0.7",
+    "electron-builder": "^22.14.5",
+    "electron-reload": "^2.0.0-alpha.1",
+    "mini-css-extract-plugin": "2.4.5"
   },
   "eslintConfig": {
     "extends": [
@@ -25,14 +141,13 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "last 1 electron version"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "last 1 electron version"
     ]
+  },
+  "overrides": {
+    "mini-css-extract-plugin": "2.4.5"
   }
 }

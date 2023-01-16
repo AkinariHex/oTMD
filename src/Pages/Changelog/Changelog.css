@@ -1,0 +1,24 @@
+.container.markdown {
+  flex-flow: column;
+  font-family: "Poppins";
+  gap: 5px;
+}
+
+.container.markdown h2 {
+  margin: 0 0 0 0;
+}
+
+.container.markdown h3 {
+  margin: 0 0 0 0;
+}
+
+.container.markdown ul {
+  margin: 0.1em 0;
+  padding: 0 0 0 1.2em;
+  font-size: 15px;
+}
+
+.container.markdown img {
+  max-width: 60vw;
+  height: auto;
+}
