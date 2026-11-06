@@ -59,6 +59,44 @@ per session, and do not start a phase until the previous one meets its acceptanc
 12. Export to otmd.app runs inside every overlay (duplicate posts/webhooks with 2 OBS scenes).
     → move export to the Rust core, once per match.
 
+## 2a. Auth change: one account, osu! API v2 OAuth (decided after Phase 1, overrides the rest of this file)
+
+Drop `accounts[]`, `ActiveAccount`, account switching and every osu! API v1 key. One logged-in
+account via OAuth. Legacy import takes match/displayer/app settings only; never read or copy v1 keys.
+The website `ExportMatches.apikey` is separate and stays.
+
+- **Secret:** lives on otmd.app, see `docs/OTMD_APP_OAUTH_BROKER.md`. **Phase 3 login needs that
+  broker deployed first.** The app holds only the public client ID and the broker base URL.
+- **Login:** `/oauth/authorize` in the system browser with random `state`, scope `public identify`,
+  redirect `http://localhost:21086/oauth/callback`. Reject a mismatched `state`.
+- **Data:** the app calls osu! v2 directly with the access token, `GET /matches/{id}`, not v1
+  `get_match`. Events are paged (`before`/`after`/`limit`, max 101), so poll with `after=` the last
+  seen event id. Check the shape against https://osu.ppy.sh/docs/openapi.yaml; not yet verified.
+- **Storage:** `auth.json` in the data dir, atomic writes, separate from `settingsApp.json`. Tokens
+  never reach React or overlay payloads. Holds a `public identify` token only, in plain text like
+  the old keys; move to the OS keychain if the scope ever grows.
+
+### Auto-refresh (must never interrupt a stream)
+
+- Runs in the Rust core, independent of window state, so it works in tray. No second task: the
+  poller sleeps until the earlier of next poll or refresh due, keeping goal #1. The refresh timer
+  still runs when the poller is idle with no MatchID, so long idle periods can't lapse the session.
+- Refresh when half the lifetime has passed (from `expires_in`, about 12 h remaining), which rides
+  out a broker outage. Also check on startup and after system wake, and refresh once on a 401.
+- Refresh tokens rotate: one refresh at a time, and write the new tokens to disk before using them.
+- Network errors, 429 and 5xx: keep tokens, retry with backoff (1 min → max 15 min), keep polling
+  with the still-valid access token.
+- Only broker `invalid_grant` ends the session: mark logged out, keep the overlay showing its last
+  data, show a tray notification and a re-login prompt. Never show a login screen for a temporary
+  failure.
+
+### Consequences
+
+- `obs_active` only hid the API key on Profile, so `obs.rs` and `sysinfo` are dropped unless
+  something else needs them.
+- Login page becomes one "Login with osu!" button. Profile gets Logout and loses the key field.
+- Remove the React `fetch` to `osu.ppy.sh` and its `connect-src` CSP entry in Phase 3.
+
 ## 3. Target architecture
 
 ```
@@ -129,26 +167,28 @@ Custom title bar uses `data-tauri-drag-region`.
 
 ### Phase 2 — Scoring in Rust with tests
 Port `score.js` + `scoremodification.js` into `scoring.rs` as pure functions over typed
-structs. Fix bugs 3, 4. Add fixtures in `src-tauri/tests/fixtures/` (real `get_match` JSONs:
-1v1, teamVS, qualifiers, with warmups). Where the new result intentionally differs from
+structs. Fix bugs 3, 4. Add fixtures in `src-tauri/tests/fixtures/` (real v2 `GET /matches/{id}`
+JSONs, see section 2a: 1v1, teamVS, qualifiers, with warmups). Where the new result intentionally differs from
 the old JS, document it in a test comment.
 **Accept:** `cargo test` green; every bug fix has a test.
 
 ### Phase 3 — Settings + commands
 `settings.rs` with typed Settings, portable/installed dir resolution, first-run legacy
 import from the old path, atomic writes (write temp + rename). Implement all commands
-and wire `api.ts` to them. Validate API keys in Rust (keys never round-trip to React
-except when the user types them).
-**Accept:** login, create account, edit match/displayer/app settings all persist.
+and wire `api.ts` to them. Add OAuth login, `auth.json` and auto-refresh per section 2a, with
+`server.rs` starting as just the callback route.
+**Accept:** OAuth login survives restart; logout works; match/displayer/app settings persist;
+refresh tested with a forced near-expiry token; a broker outage keeps the session, `invalid_grant`
+ends it.
 
 ### Phase 4 — Server + poller + overlay
 `server.rs`, `poller.rs`, `osu.rs`, `tournament.rs`, `export.rs`. Broadcast to N overlays.
 Fix bugs 1, 2, 5–9, 12. Update overlay JS as in section 3.
 **Accept:** two OBS browser sources update simultaneously from a real lobby; payload has
-no API keys; switching account doesn't crash; poller idles when no MatchID.
+no tokens or API keys; logging out and back in doesn't crash; poller idles when no MatchID.
 
-### Phase 5 — Tray, power, OBS detection, updater
-Everything in "Tray / zero-cost rules". `obs.rs` via sysinfo. Updater plugin wired to
+### Phase 5 — Tray, power, updater
+Everything in "Tray / zero-cost rules". Updater plugin wired to
 the AppUpdate page (progress events).
 **Accept:** in tray, Task Manager shows no `msedgewebview2.exe` children of oTMD,
 `otmd.exe` ~0% CPU, Efficiency mode leaf visible, OBS overlay still updating.
