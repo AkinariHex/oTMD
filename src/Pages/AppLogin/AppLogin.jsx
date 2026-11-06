@@ -4,7 +4,7 @@ import Logo from "../../Images/otmd.ico";
 import { ArrowDown2, Add } from "iconsax-react";
 import { NavLink } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function AppLogin() {
   /* True if user clicked on "Create New Account" */
@@ -20,7 +20,7 @@ function AppLogin() {
   const [accountsArray, setAccountsArray] = useState([]);
 
   const changeActiveAccount = (userID) => {
-    ipcRenderer.send("changeActiveAccount", userID);
+    api.changeActiveAccount(userID);
   };
 
   const createNewAccount = (userID, apikey) => {
@@ -36,7 +36,7 @@ function AppLogin() {
             apikey: apikey,
             id: accountsArray.length + 1,
           };
-          ipcRenderer.send("createNewAccount", data);
+          api.createNewAccount(data);
           setIsCreating(false);
           setIsError(false);
           setCreatingUserID("");
@@ -53,10 +53,10 @@ function AppLogin() {
   };
 
   useEffect(() => {
-    ipcRenderer.send("getLoginAccounts");
-    ipcRenderer.once("loginAccountDataReturn", (event, array) => {
-      setAccountsArray(array);
-    });
+    const load = async () => {
+      setAccountsArray(await api.getLoginAccounts());
+    };
+    load();
   }, []);
 
   return (
@@ -77,13 +77,13 @@ function AppLogin() {
               key={index}
               onClick={() => changeActiveAccount(account.userID)}
               style={{
-                backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5)), url(https://s.ppy.sh/a/${account.userID})`,
+                backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5)), url(https://a.ppy.sh/${account.userID})`,
               }}
             >
               <div className="info">
                 <div className="user">
                   <img
-                    src={`https://s.ppy.sh/a/${account.userID}`}
+                    src={`https://a.ppy.sh/${account.userID}`}
                     alt={account.userID}
                     className="userPropic"
                   />
@@ -100,14 +100,14 @@ function AppLogin() {
         <div
           className="account"
           style={{
-            backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5)), url(https://s.ppy.sh/a/${creatingUserID})`,
+            backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5)), url(https://a.ppy.sh/${creatingUserID})`,
           }}
         >
           {isCreating ? (
             <div className="info c">
               <div className="userCreate">
                 <img
-                  src={`https://s.ppy.sh/a/${creatingUserID}`}
+                  src={`https://a.ppy.sh/${creatingUserID}`}
                   alt={creatingUserID}
                   className="userPropic"
                 />
@@ -119,8 +119,10 @@ function AppLogin() {
                   ) : (
                     <a
                       href="https://osu.ppy.sh/p/api"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        api.openExternal("https://osu.ppy.sh/p/api");
+                      }}
                       className="getApiKey"
                     >
                       Get the APIkey here!

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./AppSettings.css";
 import { Formik, Field, Form } from "formik";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function AppSettings() {
   const [ui, setUi] = useState(false);
@@ -23,7 +23,7 @@ function AppSettings() {
       SystemTray,
       ExportMatches: { status: ExportMatchesStatus, apikey: ExportMatchesAPI },
     };
-    ipcRenderer.send("saveAppSettings", settings);
+    api.saveAppSettings(settings);
   };
 
   const validateAPI = async (apikey) => {
@@ -36,8 +36,8 @@ function AppSettings() {
   };
 
   useEffect(() => {
-    ipcRenderer.send("getAppSettings");
-    ipcRenderer.once("appSettingsReturn", (event, appSettings) => {
+    const load = async () => {
+      const appSettings = await api.getAppSettings();
       setUi(appSettings.CompactUI);
       setSystemTray(appSettings.SystemTray);
       setExportMatchesStatus(appSettings.ExportMatches.status);
@@ -45,7 +45,8 @@ function AppSettings() {
       if (appSettings.ExportMatches.apikey !== "") {
         validateAPI(appSettings.ExportMatches.apikey);
       }
-    });
+    };
+    load();
   }, []);
 
   return (
@@ -182,7 +183,13 @@ function AppSettings() {
               </div>
               <div className="description">
                 Get the Apikey by logging into your account from the{" "}
-                <a href="https://otmd.app" rel="noreferrer" target={"_blank"}>
+                <a
+                  href="https://otmd.app"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    api.openExternal("https://otmd.app");
+                  }}
+                >
                   Website
                 </a>{" "}
                 and head to the settings page to get it!

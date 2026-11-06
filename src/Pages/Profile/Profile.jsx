@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import { Formik, Field, Form } from "formik";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function Profile() {
   const [username, setUsername] = useState("");
@@ -13,28 +13,25 @@ function Profile() {
 
   const saveSettings = (apikey, number) => {
     let settings = { apikey, number };
-    ipcRenderer.send("saveAccountSettings", settings);
+    api.saveAccountSettings(settings);
   };
 
   useEffect(() => {
-    ipcRenderer.send("obs_active");
-    ipcRenderer.once("obs_active_return", (event, arg) => {
-      setIsOBSactive(arg);
-    });
-    ipcRenderer.send("getAccountData");
-    ipcRenderer.once("accountDataReturn", (event, arg) => {
-      const { account } = arg;
+    const load = async () => {
+      setIsOBSactive(await api.isObsActive());
+      const { account } = await api.getAccountData();
       setUsername(account.username);
       setUserID(account.userID);
       setApikey(account.apikey);
       setNumberAccount(account.id - 1);
-    });
+    };
+    load();
   }, []);
 
   return (
     <div className="container profile">
       <div className="userInfoContainer">
-        <img src={`https://s.ppy.sh/a/${userID}`} alt="4001304" />
+        <img src={`https://a.ppy.sh/${userID}`} alt="4001304" />
         <div className="info">
           <div className="name">{username}</div>
           <Formik>

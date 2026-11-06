@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import "./AppUpdate.css";
 import { Progress } from "react-sweet-progress";
 import "react-sweet-progress/lib/style.css";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function AppUpdate() {
   const [downloadSpeed, setDownloadSpeed] = useState(0);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    ipcRenderer.on("downloadProgress", (event, arg) => {
+    return api.onDownloadProgress((arg) => {
       setDownloadSpeed(arg.speed);
       setProgress(arg.percent);
     });

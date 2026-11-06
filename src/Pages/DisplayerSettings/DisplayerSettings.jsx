@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./DisplayerSettings.css";
 import { Formik, Field, Form } from "formik";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function DisplayerSettings() {
   const [displayerHeight, setDisplayerHeight] = useState("130px");
@@ -21,19 +21,19 @@ function DisplayerSettings() {
     TransparentBackground
   ) => {
     const settings = { VisualizerStyle, SmallDisplayer, TransparentBackground };
-    ipcRenderer.send("saveDisplayerSettings", settings);
+    api.saveDisplayerSettings(settings);
   };
 
   useEffect(() => {
-    ipcRenderer.send("getDisplayerSettings");
-    ipcRenderer.once("displayerSettingsReturn", (event, displayerSettings) => {
+    const load = async () => {
       let { VisualizerStyle, SmallDisplayer, TransparentBackground } =
-        displayerSettings;
+        await api.getDisplayerSettings();
       SmallDisplayer && setDisplayerHeight("90px");
       setDisplayerRadius(VisualizerStyle);
       setDisplayerRadiusSizes(VisualizerStyle.split(" "));
       setDisplayerTranspBackground(TransparentBackground);
-    });
+    };
+    load();
   }, []);
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./MatchSettings.css";
 import { Formik, Field, Form } from "formik";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function MatchSettings() {
   const [activeAccount, setActiveAccount] = useState("");
@@ -36,12 +36,11 @@ function MatchSettings() {
       ScoreReverse,
       isFinished: false,
     };
-    ipcRenderer.send("saveMatchSettings", settings);
+    api.saveMatchSettings(settings);
   };
 
   useEffect(() => {
-    ipcRenderer.send("getMatchSettings");
-    ipcRenderer.once("matchSettingsReturn", (event, matchSettings) => {
+    const load = async () => {
       let {
         ActiveAccount,
         MatchID,
@@ -51,7 +50,7 @@ function MatchSettings() {
         MapsNqualifiers,
         Warmups,
         ScoreReverse,
-      } = matchSettings;
+      } = await api.getMatchSettings();
 
       setActiveAccount(ActiveAccount);
       setMatchID(MatchID);
@@ -61,7 +60,8 @@ function MatchSettings() {
       setNMapsQualif(MapsNqualifiers);
       setWarmups(Warmups);
       setScoreReverse(ScoreReverse);
-    });
+    };
+    load();
   }, []);
 
   return (

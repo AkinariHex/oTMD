@@ -8,7 +8,7 @@ import {
   UserOctagon,
   DocumentText,
 } from "iconsax-react";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function NavBar() {
   const [account, setAccount] = useState({});
@@ -16,13 +16,16 @@ function NavBar() {
   const [appInfo, setAppInfo] = useState({});
 
   useEffect(() => {
-    ipcRenderer.send("getNavBarData");
-    ipcRenderer.on("navbarDataReturn", (event, arg) => {
-      const { account, navbar, appInfo } = arg;
+    const apply = ({ account, navbar, appInfo }) => {
       setAccount(account);
       navbar ? setUi("compact") : setUi("");
       setAppInfo(appInfo);
-    });
+    };
+    const load = async () => {
+      apply(await api.getNavBarData());
+    };
+    load();
+    return api.onNavBarData(apply);
   }, []);
 
   return (
@@ -33,7 +36,7 @@ function NavBar() {
           className="item account"
           activeClassName="active"
           style={{
-            backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.88), rgba(0,0,0,0.2)), url(http://s.ppy.sh/a/${account.userID})`,
+            backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.88), rgba(0,0,0,0.2)), url(https://a.ppy.sh/${account.userID})`,
           }}
         >
           <UserOctagon size="25" />

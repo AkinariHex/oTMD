@@ -1,16 +1,18 @@
 import React from "react";
 import "./AppBar.css";
-const { ipcRenderer } = window.require("electron");
+import * as api from "@/lib/api";
 
 function AppBar() {
   return (
-    <div className="headerappbar">
-      <div id="applicationName">osu! Tourney Match Displayer</div>
+    <div className="headerappbar" data-tauri-drag-region>
+      <div id="applicationName" data-tauri-drag-region>
+        osu! Tourney Match Displayer
+      </div>
       <div id="applicationButtons">
         <button
           className="ui icon button headerappbarbutton"
           id="minimizebutton"
-          onClick={() => ipcRenderer.send("minimizeApp", "")}
+          onClick={api.minimizeApp}
         >
           <svg
             viewBox="-12 -12 48 48"
@@ -26,7 +28,7 @@ function AppBar() {
         <button
           className="ui icon button headerappbarbutton"
           id="maximizebutton"
-          onClick={() => ipcRenderer.send("maximizeApp", "")}
+          onClick={api.maximizeApp}
         >
           <svg
             viewBox="-12 -12 48 48"
@@ -42,7 +44,7 @@ function AppBar() {
         <button
           className="ui icon button headerappbarbutton closewinbutton"
           id="closewinbutton"
-          onClick={() => ipcRenderer.send("closeApp", "")}
+          onClick={api.closeApp}
         >
           <svg
             viewBox="-12 -12 48 48"
