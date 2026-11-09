@@ -28,11 +28,13 @@ function AppSettings() {
 
   const validateAPI = async (apikey) => {
     setApiLoading(true);
-    let data = await fetch(`https://otmd.app/api/validate?api=${apikey}`).then(
-      (res) => res.json()
-    );
-    setValidate(data.user ? true : false);
-    setApiLoading(false);
+    try {
+      setValidate(await api.validateExportKey(apikey));
+    } catch {
+      setValidate(false);
+    } finally {
+      setApiLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -4,7 +4,6 @@ import { Formik, Field, Form } from "formik";
 import * as api from "@/lib/api";
 
 function MatchSettings() {
-  const [activeAccount, setActiveAccount] = useState("");
   const [matchID, setMatchID] = useState("");
   const [matchType, setMatchType] = useState("teamVS");
   const [stage, setStage] = useState("");
@@ -16,7 +15,6 @@ function MatchSettings() {
   const [popupClass, setPopupClass] = useState("");
 
   const saveSettings = (
-    ActiveAccount,
     MatchID,
     MatchType,
     Stage,
@@ -26,7 +24,6 @@ function MatchSettings() {
     ScoreReverse
   ) => {
     const settings = {
-      ActiveAccount,
       MatchID,
       MatchType,
       Stage,
@@ -42,7 +39,6 @@ function MatchSettings() {
   useEffect(() => {
     const load = async () => {
       let {
-        ActiveAccount,
         MatchID,
         MatchType,
         Stage,
@@ -52,7 +48,6 @@ function MatchSettings() {
         ScoreReverse,
       } = await api.getMatchSettings();
 
-      setActiveAccount(ActiveAccount);
       setMatchID(MatchID);
       setMatchType(MatchType);
       setStage(Stage);
@@ -228,7 +223,6 @@ function MatchSettings() {
                 className="saveButton"
                 onClick={() => {
                   saveSettings(
-                    activeAccount,
                     matchID,
                     matchType,
                     stage,

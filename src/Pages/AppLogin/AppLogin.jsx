@@ -1,62 +1,47 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./AppLogin.css";
 import Logo from "../../Images/otmd.ico";
-import { ArrowDown2, Add } from "iconsax-react";
-import { NavLink } from "react-router-dom";
-import { Formik, Field, Form } from "formik";
 import * as api from "@/lib/api";
 
+const LOGIN_FAILURES = {
+  denied: "Login cancelled.",
+  failed: "Login failed. Please try again.",
+};
+
 function AppLogin() {
-  /* True if user clicked on "Create New Account" */
-  const [isCreating, setIsCreating] = useState(false);
-  /* If true shows a loading when fetching user data from osu! */
-  const [isLoading, setIsLoading] = useState(false);
-  /* If true the user gave incorrect userID or apikey */
-  const [isError, setIsError] = useState(false);
-  /* UserID and APIKEY when editing the input data */
-  const [creatingUserID, setCreatingUserID] = useState("");
-  const [creatingApikey, setCreatingApikey] = useState("");
-  /* Array of all users */
-  const [accountsArray, setAccountsArray] = useState([]);
+  const navigate = useNavigate();
+  const { state: routeState } = useLocation();
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [error, setError] = useState(routeState?.message ?? "");
 
-  const changeActiveAccount = (userID) => {
-    api.changeActiveAccount(userID);
-  };
-
-  const createNewAccount = (userID, apikey) => {
-    fetch(`https://osu.ppy.sh/api/get_user?k=${apikey}&u=${userID}`)
-      .then(async (user) => {
-        setIsLoading(false);
-        if (user.status === 200) {
-          let userData = await user.json();
-          let data = {
-            userID: userData[0].user_id,
-            username: userData[0].username,
-            country: userData[0].country,
-            apikey: apikey,
-            id: accountsArray.length + 1,
-          };
-          api.createNewAccount(data);
-          setIsCreating(false);
-          setIsError(false);
-          setCreatingUserID("");
-          setCreatingApikey("");
-          setAccountsArray([...accountsArray, data]);
-        } else {
-          setIsError(true);
-        }
-      })
-      .catch((err) => {
-        setIsError(true);
-        setIsLoading(false);
-      });
+  const startLogin = async () => {
+    setError("");
+    setIsWaiting(true);
+    try {
+      await api.login();
+    } catch (message) {
+      setIsWaiting(false);
+      setError(String(message));
+    }
   };
 
   useEffect(() => {
+    const openApp = () => navigate("/app/match", { replace: true });
     const load = async () => {
-      setAccountsArray(await api.getLoginAccounts());
+      if (await api.getSession()) openApp();
     };
     load();
+
+    const stopSession = api.onSessionChanged(openApp);
+    const stopFailure = api.onLoginFailed((reason) => {
+      setIsWaiting(false);
+      setError(LOGIN_FAILURES[reason]);
+    });
+    return () => {
+      stopSession();
+      stopFailure();
+    };
   }, []);
 
   return (
@@ -65,115 +50,24 @@ function AppLogin() {
         <img src={Logo} alt="Logo" className="logo" />
         <div className="title">Welcome to o!TMD</div>
         <div className="subtext">
-          <span>Select</span> or <span>Create</span> an account to continue!
+          <span>Log in</span> with your osu! account to continue!
         </div>
       </div>
-      <div className="accountsContainer">
-        {accountsArray.map((account, index) => {
-          return (
-            <NavLink
-              to="/app/match"
-              className="account"
-              key={index}
-              onClick={() => changeActiveAccount(account.userID)}
-              style={{
-                backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5)), url(https://a.ppy.sh/${account.userID})`,
-              }}
-            >
-              <div className="info">
-                <div className="user">
-                  <img
-                    src={`https://a.ppy.sh/${account.userID}`}
-                    alt={account.userID}
-                    className="userPropic"
-                  />
-                  <div className="username">{account.username}</div>
-                </div>
-                <div className="loginText">
-                  <span>Login</span>
-                  <ArrowDown2 size="22" />
-                </div>
-              </div>
-            </NavLink>
-          );
-        })}
-        <div
-          className="account"
-          style={{
-            backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5)), url(https://a.ppy.sh/${creatingUserID})`,
-          }}
-        >
-          {isCreating ? (
-            <div className="info c">
-              <div className="userCreate">
-                <img
-                  src={`https://a.ppy.sh/${creatingUserID}`}
-                  alt={creatingUserID}
-                  className="userPropic"
-                />
-              </div>
-              <Formik>
-                <Form id="formNewAccount">
-                  {isError ? (
-                    <div className="error">Invalid UserID or APIkey!</div>
-                  ) : (
-                    <a
-                      href="https://osu.ppy.sh/p/api"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        api.openExternal("https://osu.ppy.sh/p/api");
-                      }}
-                      className="getApiKey"
-                    >
-                      Get the APIkey here!
-                    </a>
-                  )}
-                  <div className="item">
-                    <Field
-                      id="userIDNew"
-                      name="userIDNew"
-                      value={creatingUserID}
-                      onChange={(e) => {
-                        setCreatingUserID(e.target.value);
-                      }}
-                      placeholder="userID"
-                    />
-                  </div>
-                  <div className="item">
-                    <Field
-                      id="apikeyNew"
-                      name="apikeyNew"
-                      value={creatingApikey}
-                      placeholder="APIkey"
-                      onChange={(e) => {
-                        setCreatingApikey(e.target.value);
-                      }}
-                      spellCheck={false}
-                    />
-                  </div>
-                  <div
-                    className="confirm"
-                    onClick={() => {
-                      createNewAccount(creatingUserID, creatingApikey);
-                      setIsLoading(true);
-                    }}
-                  >
-                    {isLoading ? (
-                      <div className="buttonLoader"></div>
-                    ) : (
-                      "Create"
-                    )}
-                  </div>
-                </Form>
-              </Formik>
-            </div>
-          ) : (
-            <div className="create" onClick={() => setIsCreating(true)}>
-              <Add size="24" />
-              Create New Account
-            </div>
-          )}
-        </div>
+      <div className="loginActions">
+        <button type="button" className="loginButton" onClick={startLogin}>
+          {isWaiting ? "Open browser again" : "Login with osu!"}
+        </button>
+        {isWaiting && (
+          <div className="loginStatus">
+            <div className="buttonLoader"></div>
+            Complete the login in your browser
+          </div>
+        )}
+        {error && (
+          <div className="loginError" role="alert">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

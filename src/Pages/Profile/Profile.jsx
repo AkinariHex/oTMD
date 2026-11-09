@@ -1,29 +1,29 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 import { Formik, Field, Form } from "formik";
 import * as api from "@/lib/api";
 
 function Profile() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [userID, setUserID] = useState("");
-  const [apikey, setApikey] = useState("");
-  const [numberAccount, setNumberAccount] = useState(0);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const [isOBSactive, setIsOBSactive] = useState(true);
-
-  const saveSettings = (apikey, number) => {
-    let settings = { apikey, number };
-    api.saveAccountSettings(settings);
+  const logout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await api.logout();
+    } finally {
+      navigate("/login", { replace: true });
+    }
   };
 
   useEffect(() => {
     const load = async () => {
-      setIsOBSactive(await api.isObsActive());
       const { account } = await api.getAccountData();
       setUsername(account.username);
       setUserID(account.userID);
-      setApikey(account.apikey);
-      setNumberAccount(account.id - 1);
     };
     load();
   }, []);
@@ -31,7 +31,7 @@ function Profile() {
   return (
     <div className="container profile">
       <div className="userInfoContainer">
-        <img src={`https://a.ppy.sh/${userID}`} alt="4001304" />
+        <img src={`https://a.ppy.sh/${userID}`} alt={username} />
         <div className="info">
           <div className="name">{username}</div>
           <Formik>
@@ -43,30 +43,14 @@ function Profile() {
                 <Field id="userID" name="userID" value={userID} disabled />
               </div>
               <div className="item">
-                <label className="nameField" htmlFor="apikey">
-                  APIkey
-                </label>
-                {isOBSactive ? (
-                  <Field
-                    id="apikey"
-                    name="apikey"
-                    value="Streamer Mode Enabled"
-                    spellCheck={false}
-                    style={{ color: "#bbb" }}
-                    disabled
-                  />
-                ) : (
-                  <Field
-                    id="apikey"
-                    name="apikey"
-                    value={apikey}
-                    onChange={(e) => {
-                      setApikey(e.target.value);
-                      saveSettings(e.target.value, numberAccount);
-                    }}
-                    spellCheck={false}
-                  />
-                )}
+                <button
+                  type="button"
+                  className="logoutButton"
+                  onClick={logout}
+                  disabled={isLoggingOut}
+                >
+                  Logout
+                </button>
               </div>
             </Form>
           </Formik>

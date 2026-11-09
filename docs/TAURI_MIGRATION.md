@@ -66,9 +66,21 @@ account via OAuth. Legacy import takes match/displayer/app settings only; never 
 The website `ExportMatches.apikey` is separate and stays.
 
 - **Secret:** lives on otmd.app, see `docs/OTMD_APP_OAUTH_BROKER.md`. **Phase 3 login needs that
-  broker deployed first.** The app holds only the public client ID and the broker base URL.
-- **Login:** `/oauth/authorize` in the system browser with random `state`, scope `public identify`,
-  redirect `http://localhost:21086/oauth/callback`. Reject a mismatched `state`.
+  broker deployed first.** The app holds only the broker base URL, no client ID or secret.
+- **Login:** through the website, not osu! directly. Open
+  `https://otmd.app/api/auth/desktop/login?state=<S>&code_challenge=<C>` in the system browser. The
+  site returns to `http://127.0.0.1:21086/oauth/callback`. Reject a mismatched `state`, then POST
+  `code`, `code_binding` and the PKCE verifier to `/api/osu/oauth/token`.
+- **Website API key check:** `GET /api/validate` now takes `Authorization: Bearer <key>`, never `?api=`.
+- **Match export (Phase 4):** `POST https://otmd.app/api/match`, JSON, `Authorization: Bearer <key>`, once
+  per finished match. The owner comes from the key. Saves the match and posts to the user's Discord channels.
+  Fields: `matchID`, `matchType` (`1vs1`/`teamVS`), `stage`, `tournament{name,acronym}`, `matchStart`, and
+  - versus: `bestOF`, `warmups`, `scores{winner}` (1 or 2) with `player1`/`player2` and `players[2]{userid,username}`
+    for 1vs1, or `team1`/`team2` and `teams[2]` for teamVS; optional `matchCost[]{id,username,side,cost}`, `side` is
+    `red`/`blue`, computed by the app.
+  - `stage: "Qualifiers"`: `player{userid,username}`, `totalMaps`, `scores{list[]{score,mods[]},average}`.
+
+  Responses: 201 `{message:"saved",discord:"sent"|"skipped"|"failed"}`, 200 `already saved`, 400, 401, 429, 500.
 - **Data:** the app calls osu! v2 directly with the access token, `GET /matches/{id}`, not v1
   `get_match`. Events are paged (`before`/`after`/`limit`, max 101), so poll with `after=` the last
   seen event id. Check the shape against https://osu.ppy.sh/docs/openapi.yaml; not yet verified.

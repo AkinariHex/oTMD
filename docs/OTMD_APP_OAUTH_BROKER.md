@@ -1,104 +1,73 @@
-# otmd.app: osu! OAuth broker handoff
+# otmd.app: desktop login broker
 
-For the session that works on the otmd.app website. That repo was not available when this was written, so its stack, routing and deploy setup are unknown: read them first and adapt the shape below to its conventions.
+Implemented in the website repo, branch `feat/osu-oauth-broker`, logic in `lib/osuOAuthBroker.js`.
 
 ## Why
 
-The oTMD desktop app (v3, Tauri) is moving from osu! API v1 keys to osu! API v2 OAuth, with a single account. The osu! docs show `client_secret` in both code exchange and token refresh, and document no PKCE or public-client option. A desktop binary can't keep a secret, so otmd.app holds it and adds it to those two calls.
+The oTMD desktop app (v3, Tauri) uses osu! API v2 OAuth with a single account. The osu! docs show `client_secret` in both code exchange and token refresh and document no PKCE or public-client option. A desktop binary can't keep a secret, so otmd.app holds it. osu! only ever sees the HTTPS callback on otmd.app, and the site hands the result to the app on loopback.
 
-The broker is **stateless**: it stores no tokens and has no user accounts or sessions. It is unrelated to the existing `ExportMatches` website API key, and existing routes (`/api/tournaments/app`, `/api/validate`) don't change.
+The broker is **stateless**: it stores no tokens and has no accounts or sessions. Each desktop login gets its own token pair, separate from the website's NextAuth session. It is unrelated to the `ExportMatches` website API key.
 
 ## Flow
 
 ```
-Desktop app                     osu.ppy.sh                  otmd.app
-  | open browser: /oauth/authorize  |                          |
-  |  client_id, redirect_uri,       |                          |
-  |  response_type=code,            |                          |
-  |  scope="public identify", state |                          |
-  |<-- localhost:21086/oauth/callback?code&state               |
-  |  (app validates state)                                     |
-  |-- POST /api/osu/oauth/token {code, redirect_uri} --------->|
-  |                                 |<-- code + client_secret -|
-  |<----------------- tokens ----------------------------------|
+Desktop app                         otmd.app                         osu.ppy.sh
+  | browser: GET /api/auth/desktop/login?state&code_challenge          |
+  |--------------------------------->|-- /oauth/authorize ------------>|
+  |                                  |<-- /api/auth/desktop/callback --|
+  |<-- 127.0.0.1:21086/oauth/callback?state&code&code_binding          |
+  |  (app validates state)                                             |
+  |-- POST /api/osu/oauth/token {code, code_binding, code_verifier} -->|
+  |                                  |-- code + client_secret -------->|
+  |<----------------- tokens --------|                                 |
   |
   | every refresh, unattended, possibly while the user is streaming:
-  |-- POST /api/osu/oauth/refresh {refresh_token} ------------>|
-  |                                 |<-- token + client_secret-|
-  |<----------------- new tokens ------------------------------|
+  |-- POST /api/osu/oauth/refresh {refresh_token} --->|-- token + secret -->|
+  |<----------------- new tokens ---------------------|
 ```
 
 The desktop app calls osu! directly with the access token for all data. The broker never sees match traffic.
 
+Browser routes live under `/api/auth/` on purpose: next-pwa's service worker caches every other GET `/api/*` URL for 24 h, which would store the code.
+
 ## Setup
 
-1. Register an OAuth application in osu! account settings, callback URL exactly `http://localhost:21086/oauth/callback`. The docs' examples use localhost but don't explicitly say it's allowed at registration, so confirm this first. If osu! refuses it, stop and rethink the redirect: the desktop design depends on it.
-2. Store `OSU_CLIENT_ID` and `OSU_CLIENT_SECRET` as server environment variables. Never commit them or send the secret to any client.
-3. The client ID is public and gets compiled into the desktop app.
+1. In the website's existing osu! OAuth application, **add** `https://otmd.app/api/auth/desktop/callback` to Application Callback URLs, comma-separated. Keep the NextAuth callback `https://otmd.app/api/auth/callback/osu`.
+2. The broker reuses the site's `OSU_CLIENT_ID` and `OSU_CLIENT_SECRET`. Never commit them or send the secret to any client.
+3. The desktop app needs only the site base URL. It never holds the client ID or secret.
+
+## Desktop side
+
+`state` and the PKCE verifier are 32 random bytes each, base64url without padding (43 chars). `code_challenge` is the base64url SHA-256 of the verifier, S256 only. The callback carries `state` and either `code` + `code_binding`, or `error` (`access_denied` or `server_error`). Reject a mismatched `state` before anything else.
 
 ## Endpoints
 
-Both: `POST`, JSON body, HTTPS only, no auth, no cookies. No CORS headers: the caller is Rust, not a browser.
+JSON body, HTTPS only, no cookies, no CORS. `Content-Type: application/json` is required.
 
-### `POST /api/osu/oauth/token`
+- `POST /api/osu/oauth/token`: `{ "code", "code_binding", "code_verifier" }`
+- `POST /api/osu/oauth/refresh`: `{ "refresh_token" }`
 
-Request: `{ "code": "...", "redirect_uri": "http://localhost:21086/oauth/callback" }`
-
-Reject any other `redirect_uri` with 400. Forward to `POST https://osu.ppy.sh/oauth/token`, form-encoded: `client_id`, `client_secret`, `code`, `grant_type=authorization_code`, `redirect_uri`.
-
-### `POST /api/osu/oauth/refresh`
-
-Request: `{ "refresh_token": "..." }`
-
-Forward to the same URL: `client_id`, `client_secret`, `refresh_token`, `grant_type=refresh_token`.
-
-### Success response (both): 200
-
-```json
-{ "access_token": "...", "refresh_token": "...", "expires_in": 86400, "token_type": "Bearer" }
-```
-
-Pass osu!'s values through. `expires_in` varies in principle, so don't hardcode 86400.
+Success, both, 200: `{ "access_token", "refresh_token", "expires_in", "token_type" }`. Don't assume `expires_in` is 86400.
 
 ### Errors: the desktop app depends on this distinction
 
 | Situation | Status | Body | Desktop app does |
 |---|---|---|---|
-| osu! rejects the code or refresh token (revoked, expired, reused) | 400 | `{ "error": "invalid_grant" }` | Asks the user to log in again |
-| Malformed body, wrong `redirect_uri` | 400 | `{ "error": "invalid_request" }` | Treats as a bug, keeps tokens |
+| osu! rejects the code or refresh token | 400 | `{ "error": "invalid_grant" }` | Asks the user to log in again |
+| Malformed body, wrong binding or verifier | 400 | `{ "error": "invalid_request" }` | Treats as a bug, keeps tokens |
 | Broker rate limit hit | 429 | `{ "error": "rate_limited" }`, `Retry-After` | Retries later, keeps tokens |
-| osu! 5xx, timeout, network failure, or osu! rejecting our client credentials | 502 | `{ "error": "upstream_unavailable" }` | Retries with backoff, keeps tokens |
+| osu! 5xx, timeout, network failure, or bad client credentials | 502 | `{ "error": "upstream_unavailable" }` | Retries with backoff, keeps tokens |
 
-**Never return `invalid_grant` for a temporary or server-side failure.** That would log a streamer out mid-match. If it's ambiguous, return 502. Check what osu! actually returns for a bad token and for bad client credentials before writing the mapping, since the docs don't list error bodies here.
+Upstream mapping, from osu-web's `league/oauth2-server` 9.4.1 source: a bad refresh token is 400 `invalid_grant`; a garbage or foreign code is 400 `invalid_request`, so `/token` maps it to `invalid_grant`; expired or revoked codes are 400 `invalid_grant`; bad client credentials are 401 `invalid_client`, mapped to 502. On `/refresh`, only upstream 400 `invalid_grant` ends a session.
 
-## Security requirements
+## Security notes
 
-- Never log request bodies, response bodies, tokens or codes. Check framework and proxy logging too, not just application code.
-- Don't store tokens anywhere: no database, no cache.
-- Hardcode `grant_type` per endpoint; never accept it from the caller.
-- Set a small body limit (about 8 KB) and a 10 s upstream timeout.
-- Rate limit per IP, generous enough for tournament LANs sharing one IP (start around 30 requests per minute).
-- Don't use the secret for anything else.
-- **Resetting the secret disables all access tokens issued for the application**, logging out every user. Treat a reset as an incident action.
-
-## Availability
-
-The desktop app refreshes well before expiry, so it survives a broker outage of up to about 12 hours without interrupting a stream. Beyond that, polling stops until the broker returns. Use whatever uptime monitoring the site already has. No new infrastructure is needed.
-
-## Facts to re-check
-
-From https://osu.ppy.sh/docs/index.html, read 2026-11-06:
-
-- Refresh tokens rotate: each refresh returns a new one. Refresh token lifetime is not documented.
-- The docs ask for no more than 60 requests per minute. Broker traffic is tiny, about one refresh per user per 12 hours.
-- PKCE is not documented. If osu! adds a public-client option, this broker can be retired.
+- **Resetting the secret disables all access tokens issued for the application**, logging out every website and desktop user, and invalidates in-flight code bindings. Treat a reset as an incident action.
+- Rate limiting is per serverless instance. Add a WAF rule if the routes get abused.
 
 ## Done when
 
-- [ ] OAuth application registered with the localhost callback
-- [ ] A real code exchanges through `/token`, and the returned refresh token works through `/refresh`
+- [ ] Desktop callback added to the existing OAuth application
+- [ ] Branch deployed
+- [ ] A real login reaches the app and the returned refresh token works through `/refresh`
 - [ ] A garbage refresh token returns 400 `invalid_grant`
-- [ ] With osu! unreachable (simulated) or a wrong client secret, the endpoint returns 502, not `invalid_grant`
-- [ ] A wrong `redirect_uri` returns 400 and never reaches osu!
-- [ ] Logs from a full run contain no tokens or codes
-- [ ] Deployed; tell the desktop session the base URL and client ID

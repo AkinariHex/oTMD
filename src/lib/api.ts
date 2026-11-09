@@ -1,18 +1,23 @@
 // Single boundary between the React UI and the Rust core.
-// Data calls are in-memory stubs until the phase named beside them (docs/TAURI_MIGRATION.md).
+// Calls still stubbed name their phase beside them (docs/TAURI_MIGRATION.md).
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
+
+export interface User {
+  id: number;
+  username: string;
+  country: string;
+}
 
 export interface Account {
   userID: string;
   username: string;
   country: string;
-  apikey: string;
-  id: number;
 }
 
 export interface MatchSettings {
-  ActiveAccount: string;
   MatchID: string;
   MatchType: string;
   Stage: string;
@@ -35,13 +40,6 @@ export interface AppSettings {
   ExportMatches: { status: boolean; apikey: string };
 }
 
-export interface Settings {
-  accounts: Account[];
-  matchSettings: MatchSettings;
-  displayerSettings: DisplayerSettings;
-  appSettings: AppSettings;
-}
-
 export interface NavBarData {
   account: Account;
   navbar: boolean;
@@ -53,111 +51,75 @@ export interface DownloadProgress {
   percent: number;
 }
 
-const PLACEHOLDER_ACCOUNT: Account = {
-  userID: "2",
-  username: "Stub Account",
-  country: "AU",
-  apikey: "",
-  id: 1,
-};
+export type LoginFailure = "denied" | "failed";
 
-// Defaults from the former public/electron/fileCheck.js, plus one account so /app/* renders.
-const settings: Settings = {
-  accounts: [PLACEHOLDER_ACCOUNT],
-  matchSettings: {
-    ActiveAccount: PLACEHOLDER_ACCOUNT.userID,
-    MatchID: "",
-    MatchType: "1vs1",
-    Stage: "Friendly",
-    BestOF: "9",
-    MapsNqualifiers: "0",
-    Warmups: "0",
-    ScoreReverse: false,
-    isFinished: false,
-  },
-  displayerSettings: {
-    VisualizerStyle: "0px 0px 0px 0px",
-    SmallDisplayer: false,
-    TransparentBackground: false,
-  },
-  appSettings: {
-    CompactUI: false,
-    SystemTray: false,
-    ExportMatches: { status: false, apikey: "" },
-  },
-};
-
-const navBarListeners = new Set<(data: NavBarData) => void>();
-
-function buildNavBarData(): NavBarData {
-  const active = settings.accounts.find(
-    (account) => account.userID === settings.matchSettings.ActiveAccount
-  );
-  return {
-    account: active ?? PLACEHOLDER_ACCOUNT,
-    navbar: settings.appSettings.CompactUI,
-    appInfo: {
-      version: "2.0.0",
-      copyright: `© ${new Date().getFullYear()} Akinari`,
-    },
+function subscribe<T>(event: string, listener: (payload: T) => void): () => void {
+  const unlisten = listen<T>(event, ({ payload }) => listener(payload));
+  return () => {
+    void (async () => (await unlisten)())();
   };
 }
 
-// Phase 5: obs.rs
-export const isObsActive = async (): Promise<boolean> => false;
+const navBarListeners = new Set<(data: NavBarData) => void>();
 
-// Phase 3: commands.rs + settings.rs, everything down to saveAppSettings
-export const getLoginAccounts = async (): Promise<Account[]> => [
-  ...settings.accounts,
-];
+export const getSession = (): Promise<User | null> => invoke("get_session");
 
-export const getAccountData = async (): Promise<NavBarData> =>
-  buildNavBarData();
+export const login = (): Promise<void> => invoke("login");
 
-export const getNavBarData = async (): Promise<NavBarData> => buildNavBarData();
+export const logout = (): Promise<void> => invoke("logout");
 
-export const getMatchSettings = async (): Promise<MatchSettings> => ({
-  ...settings.matchSettings,
-});
+export const onSessionChanged = (listener: (user: User) => void): (() => void) =>
+  subscribe("session-changed", listener);
 
-export const getDisplayerSettings = async (): Promise<DisplayerSettings> => ({
-  ...settings.displayerSettings,
-});
+export const onSessionExpired = (listener: () => void): (() => void) =>
+  subscribe("session-expired", listener);
 
-export const getAppSettings = async (): Promise<AppSettings> => ({
-  ...settings.appSettings,
-});
+export const onLoginFailed = (
+  listener: (reason: LoginFailure) => void
+): (() => void) => subscribe("login-failed", listener);
 
-export const createNewAccount = async (account: Account): Promise<void> => {
-  settings.accounts.push(account);
+export const getMatchSettings = (): Promise<MatchSettings> =>
+  invoke("get_match_settings");
+
+export const getDisplayerSettings = (): Promise<DisplayerSettings> =>
+  invoke("get_displayer_settings");
+
+export const getAppSettings = (): Promise<AppSettings> =>
+  invoke("get_app_settings");
+
+export const saveMatchSettings = (settings: MatchSettings): Promise<void> =>
+  invoke("save_match_settings", { settings });
+
+export const saveDisplayerSettings = (
+  settings: DisplayerSettings
+): Promise<void> => invoke("save_displayer_settings", { settings });
+
+export const validateExportKey = (apikey: string): Promise<boolean> =>
+  invoke("validate_export_key", { apikey });
+
+export const getNavBarData = async (): Promise<NavBarData> => {
+  const [user, appSettings, { version }] = await Promise.all([
+    getSession(),
+    getAppSettings(),
+    invoke<{ version: string }>("get_app_info"),
+  ]);
+
+  return {
+    account: {
+      userID: user ? String(user.id) : "",
+      username: user?.username ?? "",
+      country: user?.country ?? "",
+    },
+    navbar: appSettings.CompactUI,
+    appInfo: { version, copyright: `© ${new Date().getFullYear()} Akinari` },
+  };
 };
 
-export const changeActiveAccount = async (userID: string): Promise<void> => {
-  settings.matchSettings.ActiveAccount = userID;
-};
+export const getAccountData = getNavBarData;
 
-export const saveAccountSettings = async (arg: {
-  apikey: string;
-  number: number;
-}): Promise<void> => {
-  settings.accounts[arg.number].apikey = arg.apikey;
-};
-
-export const saveMatchSettings = async (
-  next: MatchSettings
-): Promise<void> => {
-  settings.matchSettings = next;
-};
-
-export const saveDisplayerSettings = async (
-  next: DisplayerSettings
-): Promise<void> => {
-  settings.displayerSettings = next;
-};
-
-export const saveAppSettings = async (next: AppSettings): Promise<void> => {
-  settings.appSettings = next;
-  const data = buildNavBarData();
+export const saveAppSettings = async (settings: AppSettings): Promise<void> => {
+  await invoke("save_app_settings", { settings });
+  const data = await getNavBarData();
   navBarListeners.forEach((listener) => listener(data));
 };
 
@@ -187,10 +149,7 @@ export const maximizeApp = async (): Promise<void> => {
   await getCurrentWindow().toggleMaximize();
 };
 
-// Phase 3: also clear MatchID and isFinished before closing, as Electron's closeApp did.
-export const closeApp = async (): Promise<void> => {
-  await getCurrentWindow().close();
-};
+export const closeApp = (): Promise<void> => invoke("close_app");
 
 export const openExternal = async (url: string): Promise<void> => {
   await openUrl(url);

@@ -72,3 +72,25 @@
 .tooltip {
     box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.15) , 0px 1px 2px 0px rgba(0,0,0,0.06) ;
 }
+
+.logoutButton {
+    height: 32px;
+    padding: 0 18px;
+    align-self: flex-end;
+    border: 0;
+    border-radius: 6px;
+    background-color: hsl(357, 45%, 42%);
+    color: #eee;
+    font-family: "Poppins";
+    cursor: pointer;
+    transition: opacity 0.15s ease-out;
+}
+
+.logoutButton:hover {
+    opacity: 0.85;
+}
+
+.logoutButton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

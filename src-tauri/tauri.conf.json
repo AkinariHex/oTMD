@@ -22,7 +22,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://osu.ppy.sh https://otmd.app https://raw.githubusercontent.com; img-src 'self' data: https://a.ppy.sh https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com",
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://raw.githubusercontent.com; img-src 'self' data: https://a.ppy.sh https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com",
       "devCsp": null
     }
   },
