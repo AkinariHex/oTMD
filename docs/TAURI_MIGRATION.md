@@ -226,8 +226,8 @@ Last Electron 2.x release whose update screen links to the v3 download. README u
 ## 6. Progress checklist
 
 - [x] Phase 1 — Scaffold
-- [ ] Phase 2 — Scoring + tests
-- [ ] Phase 3 — Settings + commands
+- [x] Phase 2 — Scoring + tests (done after Phase 3: real fixtures need a login)
+- [x] Phase 3 — Settings + commands
 - [ ] Phase 4 — Server + poller + overlay
 - [ ] Phase 5 — Tray, power, OBS, updater
 - [ ] Phase 6 — Packaging + CI

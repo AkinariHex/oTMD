@@ -1,0 +1,58 @@
+{
+  "rules": {
+    "kind": "teamVs",
+    "warmups": 0,
+    "bestOf": 9
+  },
+  "multipliers": {},
+  "outcome": {
+    "first": 5,
+    "second": 2,
+    "isFinished": true,
+    "winner": 1,
+    "maps": [
+      {
+        "beatmapId": 5550729,
+        "firstScore": 2963172,
+        "secondScore": 2129871,
+        "point": 1
+      },
+      {
+        "beatmapId": 5964023,
+        "firstScore": 2557005,
+        "secondScore": 2124105,
+        "point": 1
+      },
+      {
+        "beatmapId": 3205479,
+        "firstScore": 4206260,
+        "secondScore": 3183631,
+        "point": 1
+      },
+      {
+        "beatmapId": 5963955,
+        "firstScore": 2410210,
+        "secondScore": 2612056,
+        "point": 2
+      },
+      {
+        "beatmapId": 1114754,
+        "firstScore": 3507903,
+        "secondScore": 3054043,
+        "point": 1
+      },
+      {
+        "beatmapId": 5963972,
+        "firstScore": 2007422,
+        "secondScore": 2457612,
+        "point": 2
+      },
+      {
+        "beatmapId": 5515555,
+        "firstScore": 2267946,
+        "secondScore": 2075952,
+        "point": 1
+      }
+    ]
+  }
+}

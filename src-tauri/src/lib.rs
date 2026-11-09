@@ -1,5 +1,6 @@
 mod auth;
 mod commands;
+pub mod scoring;
 mod server;
 mod settings;
 
