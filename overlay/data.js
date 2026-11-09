@@ -39,6 +39,33 @@ const RECONNECT_MAX_MS = 10000;
 var ws = null;
 var reconnectDelay = RECONNECT_MIN_MS;
 
+/* The app's preview: real displayer settings, placeholder match */
+var showSample = new URLSearchParams(location.search).has("sample");
+var SAMPLE_MATCH_AVATAR =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23373b46'/%3E%3Ccircle cx='20' cy='15' r='7' fill='%23a9afbc'/%3E%3Cellipse cx='20' cy='34' rx='13' ry='9' fill='%23a9afbc'/%3E%3C/svg%3E";
+
+function avatarOf(player) {
+  return showSample ? SAMPLE_MATCH_AVATAR : `http://s.ppy.sh/a/${player.userid}`;
+}
+
+function applySampleMatch(settings) {
+  Object.assign(settings.matchSettings, {
+    MatchID: "1",
+    MatchType: "1vs1",
+    Stage: "Quarterfinals",
+    BestOF: "9",
+    ScoreReverse: false,
+  });
+  settings.matchData = {
+    tournament: { tournamentName: "Sample Cup", acronym: "SC" },
+    players: [
+      { userid: 0, username: "Red Player" },
+      { userid: 0, username: "Blue Player" },
+    ],
+    scores: { player1: 3, player2: 2, isFinished: false, winner: null },
+  };
+}
+
 window.addEventListener("load", initializeWebsocket);
 
 function initializeWebsocket() {
@@ -59,6 +86,8 @@ function initializeWebsocket() {
 
   ws.onmessage = function (message) {
     var data = JSON.parse(message.data);
+    if (data.type === "rankedState") return;
+    if (showSample) applySampleMatch(data.settings);
     let isMatch = false;
 
     /* When the page is loaded */
@@ -80,14 +109,15 @@ function initializeWebsocket() {
 
     /* When the user changes the displayer settings */
     if (data.type === "displayerSettings" || data.type === "initLoad") {
-      if (data.settings.displayerSettings.SmallDisplayer) {
-        app.classList.add("small");
-      } else {
-        app.classList.remove("small");
+      var displayer = data.settings.displayerSettings;
+      for (var panel of [app, appNoMatch]) {
+        panel.classList.toggle("small", displayer.SmallDisplayer);
+        panel.style.borderRadius = displayer.VisualizerStyle;
       }
+      appNoMatch.style.backgroundImage = displayer.TransparentBackground ? "none" : "";
 
       if (data.settings.displayerSettings.TransparentBackground) {
-        app.style.background = "transparent";
+        app.style.backgroundImage = "none";
       } else {
         app.style.backgroundPosition = "bottom";
         if (isFinished && isWinner !== null) {
@@ -99,7 +129,6 @@ function initializeWebsocket() {
           app.style.backgroundImage = "url('img/redVSblue.png')";
         }
       }
-      app.style.borderRadius = data.settings.displayerSettings.VisualizerStyle;
     }
 
     /* When the user changes the match settings */
@@ -336,11 +365,11 @@ function initializeWebsocket() {
             : `<div class="name" id="name2">${escapeHtml(data.settings.matchData.players[1].username)}</div>`;
 
         team1.innerHTML = `
-        <img class="propic" alt="" id="propic1" src="http://s.ppy.sh/a/${data.settings.matchData.players[0].userid}" />
+        <img class="propic" alt="" id="propic1" src="${avatarOf(data.settings.matchData.players[0])}" />
         ${playerOne}
         `;
         team2.innerHTML = `
-        <img class="propic" alt="" id="propic2" src="http://s.ppy.sh/a/${data.settings.matchData.players[1].userid}" />
+        <img class="propic" alt="" id="propic2" src="${avatarOf(data.settings.matchData.players[1])}" />
         ${playerTwo}
         `;
 
@@ -398,7 +427,7 @@ function initializeWebsocket() {
       ) {
         isFinished = false;
         data.settings.displayerSettings.TransparentBackground
-          ? (app.style.background = "transparent")
+          ? (app.style.backgroundImage = "none")
           : (app.style.backgroundImage = "url('img/redVSblue.png')");
         app.style.backgroundPosition = "bottom";
         match.style.display = "grid";

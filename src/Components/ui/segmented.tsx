@@ -8,13 +8,14 @@ interface SegmentedProps {
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
+  small?: boolean;
 }
 
-function Segmented({ label, value, onChange, options }: SegmentedProps) {
+function Segmented({ label, value, onChange, options, small = false }: SegmentedProps) {
   const id = useId();
 
   return (
-    <div role="radiogroup" aria-label={label} className="flex h-8 w-full rounded-md bg-black/25 p-0.5 ring-1 ring-line">
+    <div role="radiogroup" aria-label={label} className={cn("flex w-full rounded-md bg-black/25 p-0.5 ring-1 ring-line", small ? "h-6" : "h-8")}>
       {options.map((option) => (
         <button
           key={option.value}
@@ -23,7 +24,8 @@ function Segmented({ label, value, onChange, options }: SegmentedProps) {
           aria-checked={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "relative flex-1 rounded px-3 text-[13px] font-medium whitespace-nowrap transition-colors duration-150",
+            "relative flex-1 rounded font-medium whitespace-nowrap transition-colors duration-150",
+            small ? "px-2 text-xs" : "px-3 text-[13px]",
             value === option.value ? "text-ink" : "text-ink-3 hover:text-ink-2"
           )}
         >

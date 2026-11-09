@@ -74,8 +74,17 @@ pub fn build_payload(input: &ExportInput<'_>, outcome: &ScoreOutcome) -> Value {
 }
 
 pub async fn send(http: &Client, site_url: &str, api_key: &str, payload: &Value) -> ExportResult {
+    post(http, format!("{site_url}/api/match"), api_key, payload).await
+}
+
+// A room already saved answers 400 through the unique room_id, which counts as finished here.
+pub async fn send_room(http: &Client, site_url: &str, api_key: &str, payload: &Value) -> ExportResult {
+    post(http, format!("{site_url}/api/rooms"), api_key, payload).await
+}
+
+async fn post(http: &Client, url: String, api_key: &str, payload: &Value) -> ExportResult {
     let response = http
-        .post(format!("{site_url}/api/match"))
+        .post(url)
         .bearer_auth(api_key)
         .json(payload)
         .send()

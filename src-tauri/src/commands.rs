@@ -1,10 +1,12 @@
 use crate::{
     AppState,
     auth::{User, now_seconds},
-    settings::{AppSettings, DisplayerSettings, MatchSettings},
+    server::OverlaySources,
+    settings::{AppMode, AppSettings, DisplayerSettings, MatchSettings, RankedSettings},
     window,
 };
 use serde::Serialize;
+use serde_json::Value;
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_opener::OpenerExt;
@@ -64,6 +66,10 @@ pub fn save_match_settings(settings: MatchSettings, state: State<'_, AppState>) 
     state
         .settings
         .update(|current| {
+            // Only one source is polled, and starting a match means leaving ranked.
+            if !settings.MatchID.is_empty() {
+                current.appSettings.Mode = AppMode::Tournament;
+            }
             current.matchSettings = settings;
             current.matchSettings.isFinished = false;
         })
@@ -109,8 +115,60 @@ pub async fn validate_export_key(apikey: String, state: State<'_, AppState>) -> 
 }
 
 #[tauri::command]
-pub fn get_overlay_sources(state: State<'_, AppState>) -> usize {
+pub fn get_overlay_sources(state: State<'_, AppState>) -> OverlaySources {
     state.overlay.sources()
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RankedStatus {
+    enabled: bool,
+    view: Option<Value>,
+    rules_outdated: bool,
+}
+
+#[tauri::command]
+pub fn get_ranked_status(state: State<'_, AppState>) -> RankedStatus {
+    RankedStatus {
+        enabled: state.settings.read(|settings| settings.appSettings.Mode == AppMode::Ranked),
+        view: state.overlay.ranked_view(),
+        rules_outdated: state.overlay.ranked_rules_outdated(),
+    }
+}
+
+#[tauri::command]
+pub fn set_ranked_enabled(enabled: bool, state: State<'_, AppState>) -> Result<(), String> {
+    state
+        .settings
+        .update(|current| {
+            current.appSettings.Mode = if enabled { AppMode::Ranked } else { AppMode::Tournament };
+            if enabled {
+                current.matchSettings.MatchID.clear();
+                current.matchSettings.isFinished = false;
+            }
+        })
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.overlay.publish("matchSettings", &state.settings);
+    state.wake.notify_one();
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_ranked_settings(state: State<'_, AppState>) -> RankedSettings {
+    state.settings.read(|settings| settings.rankedSettings.clone())
+}
+
+#[tauri::command]
+pub fn save_ranked_settings(settings: RankedSettings, state: State<'_, AppState>) -> Result<(), String> {
+    state
+        .settings
+        .update(|current| current.rankedSettings = settings)
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.overlay.publish("rankedState", &state.settings);
+    state.wake.notify_one();
+    Ok(())
 }
 
 #[tauri::command]

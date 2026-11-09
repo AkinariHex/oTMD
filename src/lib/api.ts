@@ -6,6 +6,9 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 export const OVERLAY_URL = "http://localhost:21086/visualizer";
+export const RANKED_OVERLAY_URL = "http://localhost:21086/ranked";
+export const MATCH_PREVIEW_URL = "http://127.0.0.1:21086/visualizer?preview=1";
+export const RANKED_PREVIEW_URL = "http://127.0.0.1:21086/ranked?preview=1";
 
 export interface User {
   id: number;
@@ -28,12 +31,65 @@ export interface DisplayerSettings {
   VisualizerStyle: string;
   SmallDisplayer: boolean;
   TransparentBackground: boolean;
+  MapsStyle: OverlayStyle;
+}
+
+export interface OverlaySources {
+  match: number;
+  ranked: number;
+}
+
+export interface OverlayStyle {
+  backgroundColor: string;
+  backgroundOpacity: number;
+  borderRadius: number;
+  padding: number;
+  fontFamily: string;
+}
+
+export interface RankedSettings {
+  RoomID: string;
+  Health: OverlayStyle;
+  Maps: OverlayStyle;
+  Ratio: OverlayStyle;
+}
+
+export interface RankedPlayer {
+  id: number;
+  username: string;
+  life: number;
+  maxLife: number;
+  roundsWon: number;
+  overflow: number;
+}
+
+export interface RankedRound {
+  round: number;
+  title: string;
+  winner: number | null;
+  damage: number;
+}
+
+export interface RankedView {
+  roomId: number;
+  status: "live" | "ended";
+  round: number;
+  players: RankedPlayer[];
+  rounds: RankedRound[];
+  winner: number | null;
+}
+
+export interface RankedStatus {
+  enabled: boolean;
+  view: RankedView | null;
+  rulesOutdated: boolean;
 }
 
 export type Layout = "sidebar" | "tabs";
 export type PreviewBackground = "checker" | "black";
 
 export interface AppSettings {
+  Mode: "tournament" | "ranked";
   Layout: Layout;
   PreviewBackground: PreviewBackground;
   TrayBehavior: "closeToTray" | "minimizeToTray";
@@ -108,10 +164,19 @@ export const saveAppSettings = (settings: AppSettings): Promise<void> =>
 export const getAppVersion = async (): Promise<string> =>
   (await invoke<{ version: string }>("get_app_info")).version;
 
-export const getOverlaySources = (): Promise<number> => invoke("get_overlay_sources");
+export const getOverlaySources = (): Promise<OverlaySources> => invoke("get_overlay_sources");
 
-export const onOverlayChanged = (listener: (sources: number) => void): (() => void) =>
+export const onOverlayChanged = (listener: (sources: OverlaySources) => void): (() => void) =>
   subscribe("overlay-changed", listener);
+
+export const getRankedStatus = (): Promise<RankedStatus> => invoke("get_ranked_status");
+
+export const setRankedEnabled = (enabled: boolean): Promise<void> => invoke("set_ranked_enabled", { enabled });
+
+export const getRankedSettings = (): Promise<RankedSettings> => invoke("get_ranked_settings");
+
+export const saveRankedSettings = (settings: RankedSettings): Promise<void> =>
+  invoke("save_ranked_settings", { settings });
 
 export const isUpdateAvailable = (): Promise<boolean> => invoke("check_update");
 

@@ -1,10 +1,12 @@
 use crate::{
     auth::{AuthManager, RefreshOutcome, RefreshSchedule, now_seconds},
     export::{self, ExportInput, ExportResult},
+    maps::{BeatmapCache, MapEntry, MapSide, avatar_url},
     osu::{OsuClient, OsuError},
+    ranked_watch::{self, RankedContext, RankedWatch},
     scoring::{Game, MatchRules, QualifierResult, ScoreOutcome, match_cost},
     server::Overlay,
-    settings::{MatchSettings, SettingsStore},
+    settings::{AppMode, MatchSettings, SettingsStore},
     tournament::{Tournament, TournamentCache},
 };
 use reqwest::{Client, Url};
@@ -74,6 +76,8 @@ struct MatchView {
     #[serde(skip_serializing_if = "Option::is_none")]
     total_maps: Option<u32>,
     tournament_start: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    maps: Option<Vec<MapEntry>>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -222,9 +226,16 @@ fn find_team_images(directory: &PathBuf, teams: &[String]) -> [Option<TeamImage>
     [image_for(&teams[0]), image_for(&teams[1])]
 }
 
+struct MapParties<'a> {
+    players: Option<&'a [Player; 2]>,
+    teams: Option<&'a [String]>,
+    images: Option<&'a [Option<TeamImage>; 2]>,
+}
+
 pub struct Endpoints {
     pub osu_api: String,
     pub site: String,
+    pub github_raw: String,
 }
 
 pub struct Poller {
@@ -239,6 +250,10 @@ pub struct Poller {
     tournaments: TournamentCache,
     tracker: Option<Tracker>,
     next_poll: u64,
+    ranked: RankedWatch,
+    beatmaps: BeatmapCache,
+    github_raw: String,
+    last_source: (bool, String),
 }
 
 impl Poller {
@@ -247,6 +262,7 @@ impl Poller {
         settings: Arc<SettingsStore>,
         overlay: Arc<Overlay>,
         teams_dir: PathBuf,
+        data_dir: &std::path::Path,
         wake: Arc<Notify>,
         endpoints: &Endpoints,
     ) -> reqwest::Result<Self> {
@@ -268,6 +284,10 @@ impl Poller {
             site_url: endpoints.site.clone(),
             tracker: None,
             next_poll: 0,
+            ranked: RankedWatch::new(data_dir),
+            beatmaps: BeatmapCache::default(),
+            github_raw: endpoints.github_raw.clone(),
+            last_source: (false, String::new()),
         })
     }
 
@@ -281,8 +301,8 @@ impl Poller {
 
             let poll_wait = if self.has_work() {
                 if now_seconds() >= self.next_poll {
-                    self.poll(&on_expired).await;
-                    self.next_poll = now_seconds() + POLL_SECONDS;
+                    let wait = self.poll(&on_expired).await;
+                    self.next_poll = now_seconds() + wait;
                 }
                 Some(self.next_poll.saturating_sub(now_seconds()).max(1))
             } else {
@@ -302,12 +322,17 @@ impl Poller {
         }
     }
 
+    fn is_ranked(&self) -> bool {
+        self.settings.read(|settings| settings.appSettings.Mode == AppMode::Ranked)
+    }
+
     fn has_work(&self) -> bool {
         self.auth.user().is_some()
-            && self
-                .tracker
-                .as_ref()
-                .is_some_and(|tracker| !tracker.finished || tracker.export.is_some())
+            && (self.is_ranked()
+                || self
+                    .tracker
+                    .as_ref()
+                    .is_some_and(|tracker| !tracker.finished || tracker.export.is_some()))
     }
 
     // Logged out keeps the tracker, so the overlay holds its last data as the spec requires.
@@ -315,6 +340,15 @@ impl Poller {
         let Some(user) = self.auth.user() else {
             return;
         };
+
+        let source = (self.is_ranked(), self.settings.read(|settings| settings.rankedSettings.RoomID.clone()));
+        if source != self.last_source {
+            self.last_source = source.clone();
+            self.next_poll = 0;
+        }
+        if !source.0 && !self.ranked.is_idle() {
+            self.ranked.reset(&self.overlay, &self.settings);
+        }
 
         let settings = self.settings.read(|settings| settings.matchSettings.clone());
         let config = MatchConfig::from_settings(&settings, user.id);
@@ -335,9 +369,39 @@ impl Poller {
         }
     }
 
-    async fn poll(&mut self, on_expired: &impl Fn()) {
+    async fn poll_ranked(&mut self, on_expired: &impl Fn()) -> u64 {
+        let (Some(token), Some(user)) = (self.auth.access_token(), self.auth.user()) else {
+            return ranked_watch::IDLE_SECONDS;
+        };
+
+        let context = RankedContext {
+            osu: &self.osu,
+            http: &self.http,
+            site_url: &self.site_url,
+            github_raw: &self.github_raw,
+            settings: &self.settings,
+            overlay: &self.overlay,
+        };
+
+        match self.ranked.poll(&context, &token, user.id).await {
+            Ok(wait) => wait,
+            Err(OsuError::Unauthorized) => {
+                if self.auth.refresh_rejected(&token, now_seconds()).await == RefreshOutcome::Ended {
+                    on_expired();
+                }
+                ranked_watch::IDLE_SECONDS
+            }
+            Err(OsuError::Unavailable) => ranked_watch::IDLE_SECONDS,
+        }
+    }
+
+    async fn poll(&mut self, on_expired: &impl Fn()) -> u64 {
+        if self.is_ranked() {
+            return self.poll_ranked(on_expired).await;
+        }
+
         let Some(mut tracker) = self.tracker.take() else {
-            return;
+            return POLL_SECONDS;
         };
 
         if tracker.finished {
@@ -355,6 +419,7 @@ impl Poller {
         }
 
         self.tracker = Some(tracker);
+        POLL_SECONDS
     }
 
     async fn fetch_events(&self, tracker: &mut Tracker, token: &str) -> Result<(), OsuError> {
@@ -418,6 +483,70 @@ impl Poller {
         players
     }
 
+    // Scored maps after the warmups, plus the map being played as a LIVE card.
+    async fn build_maps(
+        &mut self,
+        tracker: &Tracker,
+        token: &str,
+        outcome: &ScoreOutcome,
+        parties: MapParties<'_>,
+        reversed: bool,
+    ) -> Option<Vec<MapEntry>> {
+        let ScoreOutcome::Versus(result) = outcome else {
+            return None;
+        };
+        let warmups = match tracker.config.rules {
+            MatchRules::OneVOne { warmups, .. } | MatchRules::TeamVs { warmups, .. } => warmups,
+            MatchRules::Qualifiers { .. } => return None,
+        };
+
+        let events: Vec<(u64, &Game)> = tracker.events.iter().filter_map(|(id, game)| game.as_ref().map(|game| (*id, game))).skip(warmups).collect();
+        let scored: Vec<_> = events.iter().filter(|(_, game)| game.end_time.is_some()).zip(&result.maps).collect();
+        let live = (!result.is_finished).then(|| events.iter().find(|(_, game)| game.end_time.is_none())).flatten();
+
+        for beatmap in scored.iter().map(|((_, game), _)| game.beatmap_id).chain(live.iter().map(|(_, game)| game.beatmap_id)) {
+            if self.beatmaps.load(&self.osu, token, beatmap).await.is_err() {
+                return None;
+            }
+        }
+
+        let MapParties { players, teams, images } = parties;
+        let side = |index: usize, game: &Game, score: u64, won: bool| match (players, teams) {
+            (Some(players), _) => MapSide {
+                user_id: players[index].userid,
+                avatar: avatar_url(players[index].userid),
+                name: players[index].username.clone(),
+                score,
+                grade: game.scores.iter().find(|entry| entry.user_id == players[index].userid).and_then(|entry| entry.rank.clone()),
+                won,
+            },
+            (None, teams) => MapSide {
+                user_id: 0,
+                avatar: images.and_then(|images| images[index].as_ref().map(|image| image.path.clone())),
+                name: teams.and_then(|teams| teams.get(index).cloned()).unwrap_or_default(),
+                score,
+                grade: None,
+                won,
+            },
+        };
+        let arrange = |first: MapSide, second: MapSide| if reversed { [second, first] } else { [first, second] };
+
+        let mut maps: Vec<MapEntry> = scored
+            .iter()
+            .enumerate()
+            .map(|(index, ((id, game), map))| {
+                let sides = arrange(side(0, game, map.first_score, map.point == Some(1)), side(1, game, map.second_score, map.point == Some(2)));
+                MapEntry::new(*id, index + 1, game.beatmap_id, self.beatmaps.get(game.beatmap_id), None, false, sides)
+            })
+            .collect();
+
+        if let Some((id, game)) = live {
+            let sides = arrange(side(0, game, 0, false), side(1, game, 0, false));
+            maps.push(MapEntry::new(*id, maps.len() + 1, game.beatmap_id, self.beatmaps.get(game.beatmap_id), None, true, sides));
+        }
+        Some(maps)
+    }
+
     async fn update_view(&mut self, tracker: &mut Tracker, token: &str) {
         let (tournament, tournament_resolved) = self.tournaments.get(acronym_of(&tracker.title)).await;
         let games = tracker.games();
@@ -459,7 +588,15 @@ impl Poller {
             (ScoreOutcome::Qualifier(result), _) => ScoresView::Qualifier(result.clone()),
         };
 
+        let parties = MapParties {
+            players: players.as_ref(),
+            teams: teams.as_deref(),
+            images: team_images.as_ref(),
+        };
+        let maps = self.build_maps(tracker, token, &outcome, parties, settings.ScoreReverse).await;
+
         let view = MatchView {
+            maps,
             tournament: tournament.clone(),
             players: players.clone(),
             teams: teams.clone(),
@@ -674,9 +811,10 @@ mod tests {
         let overlay = Arc::new(Overlay::new());
         let endpoints = Endpoints {
             osu_api: format!("{base}/api/v2"),
+            github_raw: base.clone(),
             site: base,
         };
-        let poller = Poller::new(auth, settings.clone(), overlay.clone(), temp_dir(), wake, &endpoints).unwrap();
+        let poller = Poller::new(auth, settings.clone(), overlay.clone(), temp_dir(), &temp_dir(), wake, &endpoints).unwrap();
 
         Harness { poller, mock, overlay, settings }
     }

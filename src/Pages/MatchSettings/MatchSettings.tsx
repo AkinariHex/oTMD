@@ -101,9 +101,11 @@ function MatchSettings() {
       return;
     }
     try {
+      const wasRanked = !tracking && (await api.getRankedStatus()).enabled;
       await api.saveMatchSettings({ ...form, MatchID: tracking ? "" : matchId, isFinished: false });
       setTracking(!tracking);
       setFinished(false);
+      if (wasRanked) toast.info("Ranked tracking stopped.");
     } catch {
       toast.error(SAVE_FAILED);
     }

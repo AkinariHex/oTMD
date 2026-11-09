@@ -211,6 +211,7 @@ pub fn send_to_tray(app: &AppHandle) {
 pub fn quit(app: &AppHandle) {
     let cleared = app.state::<AppState>().settings.update(|current| {
         current.matchSettings.MatchID.clear();
+        current.rankedSettings.RoomID.clear();
         current.matchSettings.isFinished = false;
     });
     if cleared.is_err() {

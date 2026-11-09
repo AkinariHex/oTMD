@@ -67,6 +67,8 @@ pub struct GameScore {
     // osu! already merges the game's mods into each score, so freemod needs no special case.
     #[serde(default)]
     pub mods: Vec<String>,
+    #[serde(default)]
+    pub rank: Option<String>,
     #[serde(rename = "match")]
     pub slot_info: ScoreSlot,
 }
@@ -435,6 +437,7 @@ mod tests {
 
     fn score(user_id: u64, slot: u32, team: &str, points: u64, mods: &[&str], pass: bool) -> GameScore {
         GameScore {
+            rank: None,
             user_id,
             score: points,
             mods: mods.iter().map(|name| (*name).to_string()).collect(),

@@ -17,7 +17,7 @@ use axum::{
     routing::get,
 };
 use rust_embed::RustEmbed;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
     path::Path,
@@ -44,25 +44,44 @@ struct OverlayFiles;
 pub struct Overlay {
     sender: Sender<String>,
     match_data: Mutex<Option<Value>>,
-    sources: AtomicUsize,
-    on_change: OnceLock<Box<dyn Fn(usize) + Send + Sync>>,
+    ranked: Mutex<RankedState>,
+    match_sources: AtomicUsize,
+    ranked_sources: AtomicUsize,
+    on_change: OnceLock<Box<dyn Fn(OverlaySources) + Send + Sync>>,
+}
+
+#[derive(Default)]
+struct RankedState {
+    view: Option<Value>,
+    user: Option<Value>,
+    rules_outdated: bool,
+}
+
+#[derive(Clone, Copy, Serialize)]
+pub struct OverlaySources {
+    #[serde(rename = "match")]
+    pub match_overlay: usize,
+    pub ranked: usize,
 }
 
 // Dropping it counts the disconnect, however the session ended.
-struct SourceConnection(Arc<Overlay>);
+struct SourceConnection {
+    overlay: Arc<Overlay>,
+    ranked: bool,
+}
 
 impl SourceConnection {
-    fn open(overlay: Arc<Overlay>) -> Self {
-        overlay.sources.fetch_add(1, Ordering::Relaxed);
+    fn open(overlay: Arc<Overlay>, ranked: bool) -> Self {
+        overlay.counter(ranked).fetch_add(1, Ordering::Relaxed);
         overlay.notify();
-        Self(overlay)
+        Self { overlay, ranked }
     }
 }
 
 impl Drop for SourceConnection {
     fn drop(&mut self) {
-        self.0.sources.fetch_sub(1, Ordering::Relaxed);
-        self.0.notify();
+        self.overlay.counter(self.ranked).fetch_sub(1, Ordering::Relaxed);
+        self.overlay.notify();
     }
 }
 
@@ -71,23 +90,55 @@ impl Overlay {
         Self {
             sender: broadcast::channel(OVERLAY_BACKLOG).0,
             match_data: Mutex::new(None),
-            sources: AtomicUsize::new(0),
+            ranked: Mutex::default(),
+            match_sources: AtomicUsize::new(0),
+            ranked_sources: AtomicUsize::new(0),
             on_change: OnceLock::new(),
         }
     }
 
-    pub fn set_on_change(&self, listener: impl Fn(usize) + Send + Sync + 'static) {
+    fn counter(&self, ranked: bool) -> &AtomicUsize {
+        if ranked { &self.ranked_sources } else { &self.match_sources }
+    }
+
+    pub fn set_on_change(&self, listener: impl Fn(OverlaySources) + Send + Sync + 'static) {
         let _ = self.on_change.set(Box::new(listener));
     }
 
-    pub fn sources(&self) -> usize {
-        self.sources.load(Ordering::Relaxed)
+    pub fn sources(&self) -> OverlaySources {
+        OverlaySources {
+            match_overlay: self.match_sources.load(Ordering::Relaxed),
+            ranked: self.ranked_sources.load(Ordering::Relaxed),
+        }
     }
 
     pub fn notify(&self) {
         if let Some(listener) = self.on_change.get() {
             listener(self.sources());
         }
+    }
+
+    pub fn set_ranked(&self, view: Option<Value>, rules_outdated: bool) {
+        let mut state = self.ranked.lock().unwrap_or_else(PoisonError::into_inner);
+        state.view = view;
+        state.rules_outdated = rules_outdated;
+    }
+
+    pub fn set_ranked_user(&self, user: Option<Value>) {
+        self.ranked.lock().unwrap_or_else(PoisonError::into_inner).user = user;
+    }
+
+    pub fn ranked_view(&self) -> Option<Value> {
+        self.ranked.lock().unwrap_or_else(PoisonError::into_inner).view.clone()
+    }
+
+    pub fn set_ranked_rules_outdated(&self, rules_outdated: bool) {
+        self.ranked.lock().unwrap_or_else(PoisonError::into_inner).rules_outdated = rules_outdated;
+        self.notify();
+    }
+
+    pub fn ranked_rules_outdated(&self) -> bool {
+        self.ranked.lock().unwrap_or_else(PoisonError::into_inner).rules_outdated
     }
 
     pub fn subscribe(&self) -> Receiver<String> {
@@ -100,13 +151,31 @@ impl Overlay {
 
     // Built field by field: app settings hold the website API key and must never be included.
     pub fn message(&self, kind: &str, settings: &SettingsStore) -> String {
-        let (match_settings, displayer_settings) =
-            settings.read(|settings| (settings.matchSettings.clone(), settings.displayerSettings.clone()));
+        let (match_settings, displayer_settings, ranked_settings) = settings.read(|settings| {
+            (settings.matchSettings.clone(), settings.displayerSettings.clone(), settings.rankedSettings.clone())
+        });
 
         let mut message = json!({
             "type": kind,
-            "settings": { "matchSettings": match_settings, "displayerSettings": displayer_settings },
+            "settings": {
+                "matchSettings": match_settings,
+                "displayerSettings": displayer_settings,
+                "rankedStyles": {
+                    "Health": ranked_settings.Health,
+                    "Maps": ranked_settings.Maps,
+                    "Ratio": ranked_settings.Ratio,
+                },
+            },
         });
+
+        let ranked = self.ranked.lock().unwrap_or_else(PoisonError::into_inner);
+        if let Some(view) = &ranked.view {
+            message["settings"]["rankedData"] = view.clone();
+        }
+        if let Some(user) = &ranked.user {
+            message["settings"]["rankedUser"] = user.clone();
+        }
+        drop(ranked);
 
         if let Some(data) = self.match_data.lock().unwrap_or_else(PoisonError::into_inner).clone() {
             message["settings"]["matchData"] = data;
@@ -137,6 +206,7 @@ fn is_allowed_origin(headers: &HeaderMap) -> bool {
 #[derive(Deserialize)]
 struct SocketParams {
     preview: Option<String>,
+    source: Option<String>,
 }
 
 async fn overlay_socket(
@@ -155,7 +225,8 @@ async fn overlay_socket(
     let overlay = state.overlay.clone();
     ws.on_upgrade(move |socket| async move {
         // The app's own preview is not an OBS source.
-        let _connection = params.preview.is_none().then(|| SourceConnection::open(overlay));
+        let ranked = params.source.as_deref() == Some("ranked");
+        let _connection = params.preview.is_none().then(|| SourceConnection::open(overlay, ranked));
         run_overlay_session(socket, initial, receiver).await;
     })
 }
@@ -198,6 +269,18 @@ async fn visualizer() -> Response {
     embedded_file("visualizer.html")
 }
 
+async fn ranked_page() -> Response {
+    embedded_file("ranked.html")
+}
+
+async fn ranked_ratio_page() -> Response {
+    embedded_file("ranked-ratio.html")
+}
+
+async fn maps_page() -> Response {
+    embedded_file("maps.html")
+}
+
 async fn overlay_asset(uri: Uri) -> Response {
     embedded_file(uri.path().trim_start_matches('/'))
 }
@@ -205,6 +288,10 @@ async fn overlay_asset(uri: Uri) -> Response {
 fn overlay_routes(overlay: Arc<Overlay>, settings: Arc<SettingsStore>, teams_dir: &Path) -> Router {
     Router::new()
         .route("/visualizer", get(visualizer))
+        .route("/visualizer/maps", get(maps_page))
+        .route("/ranked", get(ranked_page))
+        .route("/ranked/maps", get(maps_page))
+        .route("/ranked/ratio", get(ranked_ratio_page))
         .route("/ws", get(overlay_socket))
         .nest_service("/teams", ServeDir::new(teams_dir))
         .fallback(overlay_asset)
@@ -333,12 +420,12 @@ mod tests {
 
     async fn wait_for_sources(overlay: &Overlay, expected: usize) {
         for _ in 0..200 {
-            if overlay.sources() == expected {
+            if overlay.sources().match_overlay == expected {
                 return;
             }
             tokio::time::sleep(std::time::Duration::from_millis(10)).await;
         }
-        assert_eq!(overlay.sources(), expected);
+        assert_eq!(overlay.sources().match_overlay, expected);
     }
 
     #[tokio::test]
@@ -355,7 +442,18 @@ mod tests {
 
         let preview = open_socket(&base, "?preview=1").await;
         tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        assert_eq!(overlay.sources(), 1);
+        assert_eq!(overlay.sources().match_overlay, 1);
+
+        let ranked = open_socket(&base, "?source=ranked").await;
+        for _ in 0..200 {
+            if overlay.sources().ranked == 1 {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+        assert_eq!(overlay.sources().ranked, 1);
+        assert_eq!(overlay.sources().match_overlay, 1);
+        drop(ranked);
 
         drop(preview);
         drop(source);

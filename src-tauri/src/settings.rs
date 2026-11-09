@@ -45,6 +45,7 @@ pub struct DisplayerSettings {
     pub VisualizerStyle: String,
     pub SmallDisplayer: bool,
     pub TransparentBackground: bool,
+    pub MapsStyle: OverlayStyle,
 }
 
 impl Default for DisplayerSettings {
@@ -53,6 +54,7 @@ impl Default for DisplayerSettings {
             VisualizerStyle: "0px 0px 0px 0px".into(),
             SmallDisplayer: false,
             TransparentBackground: false,
+            MapsStyle: OverlayStyle::maps(),
         }
     }
 }
@@ -82,6 +84,67 @@ pub enum Layout {
 
 #[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub enum AppMode {
+    #[default]
+    Tournament,
+    Ranked,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct OverlayStyle {
+    pub background_color: String,
+    pub background_opacity: f64,
+    pub border_radius: u32,
+    pub padding: u32,
+    pub font_family: String,
+}
+
+impl OverlayStyle {
+    fn new(background_color: &str, background_opacity: f64, border_radius: u32, padding: u32) -> Self {
+        Self {
+            background_color: background_color.into(),
+            background_opacity,
+            border_radius,
+            padding,
+            font_family: "Nunito, Inter, sans-serif".into(),
+        }
+    }
+
+    fn maps() -> Self {
+        Self::new("10, 10, 20", 0.9, 8, 8)
+    }
+}
+
+impl Default for OverlayStyle {
+    fn default() -> Self {
+        Self::new("8, 8, 20", 0.8, 0, 0)
+    }
+}
+
+#[allow(non_snake_case)]
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct RankedSettings {
+    pub RoomID: String,
+    pub Health: OverlayStyle,
+    pub Maps: OverlayStyle,
+    pub Ratio: OverlayStyle,
+}
+
+impl Default for RankedSettings {
+    fn default() -> Self {
+        Self {
+            RoomID: String::new(),
+            Health: OverlayStyle::default(),
+            Maps: OverlayStyle::maps(),
+            Ratio: OverlayStyle::new("8, 8, 20", 0.85, 12, 16),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum PreviewBackground {
     #[default]
     Checker,
@@ -92,6 +155,7 @@ pub enum PreviewBackground {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppSettings {
+    pub Mode: AppMode,
     pub Layout: Layout,
     pub PreviewBackground: PreviewBackground,
     pub TrayBehavior: TrayBehavior,
@@ -103,6 +167,7 @@ pub struct AppSettings {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
+            Mode: AppMode::default(),
             Layout: Layout::default(),
             PreviewBackground: PreviewBackground::default(),
             TrayBehavior: TrayBehavior::default(),
@@ -121,6 +186,7 @@ pub struct Settings {
     pub matchSettings: MatchSettings,
     pub displayerSettings: DisplayerSettings,
     pub appSettings: AppSettings,
+    pub rankedSettings: RankedSettings,
 }
 
 pub struct SettingsStore {
@@ -257,6 +323,10 @@ pub mod tests {
         assert!(existing.appSettings.Animations);
         assert!(existing.appSettings.HardwareAcceleration);
         assert!(existing.appSettings.Layout == Layout::Sidebar);
+        assert!(existing.appSettings.Mode == AppMode::Tournament);
+        assert_eq!(existing.rankedSettings.Maps.border_radius, 8);
+        assert_eq!(existing.rankedSettings.Ratio.padding, 16);
+        assert_eq!(existing.displayerSettings.MapsStyle.padding, 8);
         assert!(existing.appSettings.PreviewBackground == PreviewBackground::Checker);
 
         let dir = temp_dir();

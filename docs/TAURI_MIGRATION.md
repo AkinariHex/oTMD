@@ -303,9 +303,12 @@ in `played_at` order. A player with no score counts as 0.
 both players alive shows "match ended" and never invents a winner. `master` can briefly run ahead of
 what is deployed.
 
-**Output:** overlays `overlay/ranked/` (HP bars, ratio, history) at `/ranked`, rebuilt as plain JS on the
-embedded server and the existing `/ws`, `escapeHtml` on every API string. Finished matches are saved once to the
+**Output:** the oTMD_v3 overlay designs in plain JS on the embedded server and the existing `/ws`, one URL per
+view so several can run as separate OBS sources: `/ranked` (health), `/ranked/maps`, `/ranked/ratio`,
+`/visualizer/maps`, `escapeHtml` on every API string. Finished matches are saved once to the
 existing `POST /api/rooms` from Rust, through the export retry path and only with a valid export key.
+
+Room responses use the current API format: only `GET /matches` pins `x-api-version`.
 
 **Accept:** tests cover first-hit survival at 1 life, ceiling, tie, personal multiplier growth,
 unmultiplied base damage, malformed upstream files and a changed constant. A real ranked match matches
@@ -381,7 +384,7 @@ Delete the legacy `public/electron` and `public/osu` sources.
 - [x] Phase 5 — Tray, power, updater
 - [x] Phase 6 - UI foundation
 - [x] Phase 7 - Redesign, login, animations
-- [ ] Phase 8 - osu!lazer Ranked Play
+- [x] Phase 8 - osu!lazer Ranked Play
 - [ ] Phase 9 - Tournament broadcast mode
 - [ ] Phase 10 - Home dashboard
 - [ ] Phase 11 - Packaging + CI

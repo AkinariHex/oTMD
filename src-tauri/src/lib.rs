@@ -1,9 +1,12 @@
 mod auth;
+mod maps;
 mod commands;
 mod export;
 mod osu;
 mod poller;
 mod power;
+mod ranked;
+mod ranked_watch;
 pub mod scoring;
 mod server;
 mod settings;
@@ -27,6 +30,7 @@ use tauri_plugin_notification::NotificationExt;
 use tokio::{net::TcpListener, sync::Notify};
 
 const SITE_URL: &str = "https://otmd.app";
+const GITHUB_RAW_URL: &str = "https://raw.githubusercontent.com";
 const TRAY_OPEN: &str = "open";
 const TRAY_QUIT: &str = "quit";
 
@@ -166,8 +170,9 @@ pub fn run() {
             let endpoints = Endpoints {
                 osu_api: osu::OSU_API_URL.into(),
                 site: SITE_URL.into(),
+                github_raw: GITHUB_RAW_URL.into(),
             };
-            let poller = Poller::new(auth, settings_store, overlay, teams_dir, wake, &endpoints)?;
+            let poller = Poller::new(auth, settings_store, overlay, teams_dir, &data_dir, wake, &endpoints)?;
             tauri::async_runtime::spawn(poller.run(move || on_session_expired(&handle)));
 
             Ok(())
@@ -185,6 +190,10 @@ pub fn run() {
             commands::save_app_settings,
             commands::validate_export_key,
             commands::get_overlay_sources,
+            commands::get_ranked_status,
+            commands::set_ranked_enabled,
+            commands::get_ranked_settings,
+            commands::save_ranked_settings,
             commands::check_update,
             commands::close_app,
             commands::get_start_route,

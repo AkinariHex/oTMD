@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>osu! Tourney Match Displayer | Ranked ratio</title>
+    <link rel="stylesheet" href="/ranked.css" />
+  </head>
+  <body>
+    <main id="ratio" class="frame" hidden>
+      <div class="ratio-user">
+        <img class="ratio-avatar" id="avatar" alt="" />
+        <div>
+          <div class="ratio-name" id="username"></div>
+          <div class="ratio-rank-row" id="rankRow">
+            <span class="ratio-rank" id="rank"></span>
+            <span class="ratio-change" id="change"></span>
+          </div>
+        </div>
+      </div>
+      <div class="ratio-summary">
+        <div>
+          <span class="ratio-label">Win Ratio</span>
+          <span class="ratio-percent" id="percent"></span>
+        </div>
+        <div class="ratio-counts">
+          <span class="wins" id="wins"></span>
+          <span class="losses" id="losses"></span>
+        </div>
+      </div>
+      <div class="ratio-recent" id="recent"></div>
+      <div class="ratio-history" id="history">
+        <span class="ratio-label">Ranked History</span>
+        <span class="ratio-record" id="record"></span>
+      </div>
+    </main>
+    <script src="/common.js"></script>
+    <script src="/ranked-ratio.js"></script>
+  </body>
+</html>
