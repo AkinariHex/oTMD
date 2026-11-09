@@ -20,6 +20,16 @@ pub struct MatchResponse {
     #[serde(rename = "match")]
     pub info: MatchInfo,
     pub events: Vec<MatchEvent>,
+    #[serde(default)]
+    pub users: Vec<MatchUser>,
+    #[serde(default)]
+    pub latest_event_id: Option<u64>,
+}
+
+#[derive(Clone, Deserialize)]
+pub struct MatchUser {
+    pub id: u64,
+    pub username: String,
 }
 
 impl MatchResponse {
@@ -32,6 +42,8 @@ impl MatchResponse {
 #[derive(Deserialize)]
 pub struct MatchInfo {
     pub name: String,
+    #[serde(default)]
+    pub start_time: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -213,27 +225,109 @@ fn score_versus(
     result
 }
 
+fn one_v_one_side(score: &GameScore, me: u64) -> Option<Side> {
+    let slot = score.slot_info.slot;
+    if score.user_id != me && slot > 1 {
+        None
+    } else if slot == 0 {
+        Some(Side::First)
+    } else {
+        Some(Side::Second)
+    }
+}
+
+fn team_side(score: &GameScore) -> Option<Side> {
+    match score.slot_info.team.as_str() {
+        "red" => Some(Side::First),
+        "blue" => Some(Side::Second),
+        _ => None,
+    }
+}
+
 pub fn one_v_one(games: &[Game], me: u64, warmups: usize, best_of: u32, multipliers: &Multipliers) -> VersusResult {
-    score_versus(games, warmups, best_of, multipliers, |score| {
-        let slot = score.slot_info.slot;
-        if score.user_id != me && slot > 1 {
-            None
-        } else if slot == 0 {
-            Some(Side::First)
-        } else {
-            Some(Side::Second)
-        }
-    })
+    score_versus(games, warmups, best_of, multipliers, |score| one_v_one_side(score, me))
 }
 
 pub fn team_vs(games: &[Game], warmups: usize, best_of: u32, multipliers: &Multipliers) -> VersusResult {
-    score_versus(games, warmups, best_of, multipliers, |score| {
-        match score.slot_info.team.as_str() {
-            "red" => Some(Side::First),
-            "blue" => Some(Side::Second),
-            _ => None,
+    score_versus(games, warmups, best_of, multipliers, team_side)
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct MatchCostRow {
+    pub id: u64,
+    pub username: String,
+    pub side: &'static str,
+    pub cost: f64,
+}
+
+fn median(values: &[f64]) -> f64 {
+    let mut sorted = values.to_vec();
+    sorted.sort_by(f64::total_cmp);
+    let middle = sorted.len() / 2;
+    if sorted.len().is_multiple_of(2) {
+        (sorted[middle - 1] + sorted[middle]) / 2.0
+    } else {
+        sorted[middle]
+    }
+}
+
+fn collect_match_cost(
+    games: &[Game],
+    warmups: usize,
+    usernames: &HashMap<u64, String>,
+    side_of: impl Fn(&GameScore) -> Option<Side>,
+) -> Vec<MatchCostRow> {
+    let mut map_scores: HashMap<u64, Vec<f64>> = HashMap::new();
+    let mut players: HashMap<u64, (Side, HashMap<u64, f64>)> = HashMap::new();
+
+    for game in games.iter().skip(warmups).filter(|game| game.end_time.is_some()) {
+        for score in &game.scores {
+            if let Some(side) = side_of(score) {
+                let points = score.score as f64;
+                map_scores.entry(game.beatmap_id).or_default().push(points);
+                let player = players.entry(score.user_id).or_insert_with(|| (side, HashMap::new()));
+                player.1.insert(game.beatmap_id, points);
+            }
         }
-    })
+    }
+
+    let maps_played: Vec<f64> = players.values().map(|(_, maps)| maps.len() as f64).collect();
+    if maps_played.is_empty() {
+        return Vec::new();
+    }
+    let median_maps = median(&maps_played);
+
+    let mut rows: Vec<MatchCostRow> = players
+        .iter()
+        .filter_map(|(id, (side, maps))| {
+            let total: f64 = maps
+                .iter()
+                .map(|(beatmap, points)| points / median(&map_scores[beatmap]))
+                .sum();
+            let played = maps.len() as f64;
+            let cost = total / played * (played / median_maps).cbrt();
+            let username = usernames.get(id)?.clone();
+            (cost.is_finite() && cost >= 0.0).then_some(MatchCostRow {
+                id: *id,
+                username,
+                side: if *side == Side::First { "red" } else { "blue" },
+                cost,
+            })
+        })
+        .collect();
+
+    rows.sort_by(|a, b| b.cost.total_cmp(&a.cost).then(a.id.cmp(&b.id)));
+    rows
+}
+
+pub fn match_cost(games: &[Game], rules: &MatchRules, usernames: &HashMap<u64, String>) -> Vec<MatchCostRow> {
+    match *rules {
+        MatchRules::OneVOne { me, warmups, .. } => {
+            collect_match_cost(games, warmups, usernames, |score| one_v_one_side(score, me))
+        }
+        MatchRules::TeamVs { warmups, .. } => collect_match_cost(games, warmups, usernames, team_side),
+        MatchRules::Qualifiers { .. } => Vec::new(),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -295,7 +389,7 @@ pub fn qualifiers(games: &[Game], me: u64, maps: u32) -> QualifierResult {
     result
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum MatchRules {
     OneVOne { me: u64, warmups: usize, best_of: u32 },
@@ -633,6 +727,63 @@ mod tests {
         assert_eq!(games.iter().map(|g| g.beatmap_id).collect::<Vec<_>>(), [11, 22]);
         assert_eq!(games[0].scores[0].slot_info.team, "red");
         assert!(!games[0].scores[0].slot_info.pass);
+    }
+
+    #[test]
+    fn match_cost_matches_a_hand_calculation() {
+        // Map 1 scores 200/100: median 150. Map 2 scores 100/300: median 200.
+        // ME: (200/150 + 100/200) / 2 = 0.91667. RIVAL: (100/150 + 300/200) / 2 = 1.08333.
+        let mut first = duel(200, 100);
+        first.beatmap_id = 1;
+        let mut second = duel(100, 300);
+        second.beatmap_id = 2;
+        let usernames = HashMap::from([(ME, "me".to_string()), (RIVAL, "rival".to_string())]);
+        let rules = MatchRules::OneVOne { me: ME, warmups: 0, best_of: 3 };
+
+        let rows = match_cost(&[first, second], &rules, &usernames);
+
+        assert_eq!(rows.len(), 2);
+        assert_eq!((rows[0].id, rows[0].side), (RIVAL, "blue"));
+        assert_close(rows[0].cost, 13.0 / 12.0);
+        assert_eq!((rows[1].id, rows[1].side), (ME, "red"));
+        assert_close(rows[1].cost, 11.0 / 12.0);
+    }
+
+    #[test]
+    fn match_cost_penalizes_fewer_maps_and_skips_warmups() {
+        let two_players = |beatmap_id: u64, with_rival: bool| {
+            let mut scores = vec![score(ME, 0, "red", 100, &[], true), score(300, 1, "red", 100, &[], true)];
+            if with_rival {
+                scores.push(score(RIVAL, 2, "blue", 100, &[], true));
+            }
+            Game { beatmap_id, ..game(scores) }
+        };
+        let games = [two_players(9, true), two_players(1, true), two_players(2, false), two_players(3, false)];
+        let usernames = HashMap::from([
+            (ME, "me".to_string()),
+            (300, "mate".to_string()),
+            (RIVAL, "rival".to_string()),
+        ]);
+
+        let rows = match_cost(&games, &MatchRules::TeamVs { warmups: 1, best_of: 3 }, &usernames);
+
+        let rival = rows.iter().find(|row| row.id == RIVAL).unwrap();
+        let me = rows.iter().find(|row| row.id == ME).unwrap();
+        assert_close(me.cost, 1.0);
+        assert_close(rival.cost, (1.0_f64 / 3.0).cbrt());
+    }
+
+    #[test]
+    fn match_cost_skips_unknown_players_zero_maps_and_qualifiers() {
+        let usernames = HashMap::from([(ME, "me".to_string())]);
+        let rules = MatchRules::OneVOne { me: ME, warmups: 0, best_of: 1 };
+
+        let rows = match_cost(&[duel(0, 0), duel(10, 10)], &rules, &usernames);
+        assert!(rows.iter().all(|row| row.id == ME));
+
+        assert!(match_cost(&[], &rules, &usernames).is_empty());
+        let qualifier = MatchRules::Qualifiers { me: ME, maps: 1 };
+        assert!(match_cost(&[duel(1, 1)], &qualifier, &usernames).is_empty());
     }
 
     #[test]

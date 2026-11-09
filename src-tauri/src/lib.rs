@@ -1,18 +1,28 @@
 mod auth;
 mod commands;
+mod export;
+mod osu;
+mod poller;
 pub mod scoring;
 mod server;
 mod settings;
+mod tournament;
 
 use auth::AuthManager;
+use poller::{Endpoints, Poller};
+use server::Overlay;
 use settings::SettingsStore;
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
-use tokio::net::TcpListener;
+use tokio::{net::TcpListener, sync::Notify};
+
+const SITE_URL: &str = "https://otmd.app";
 
 pub struct AppState {
-    settings: SettingsStore,
+    settings: Arc<SettingsStore>,
     auth: Arc<AuthManager>,
+    overlay: Arc<Overlay>,
+    wake: Arc<Notify>,
     callback_ready: bool,
 }
 
@@ -36,27 +46,42 @@ pub fn run() {
             let handle = app.handle().clone();
             let data_dir = settings::resolve_data_dir(&handle)?;
             let legacy = settings::legacy_settings_path(&handle);
+            let teams_dir = data_dir.join("teams");
             let listener = tauri::async_runtime::block_on(TcpListener::bind(server::ADDRESS)).ok();
-            let auth = Arc::new(AuthManager::open(&data_dir)?);
+
+            let wake = Arc::new(Notify::new());
+            let auth = Arc::new(AuthManager::open(&data_dir, wake.clone())?);
+            let settings_store = Arc::new(SettingsStore::open(&data_dir, legacy.as_deref()));
+            let overlay = Arc::new(Overlay::new());
 
             app.manage(AppState {
-                settings: SettingsStore::open(&data_dir, legacy.as_deref()),
+                settings: settings_store.clone(),
                 auth: auth.clone(),
+                overlay: overlay.clone(),
+                wake: wake.clone(),
                 callback_ready: listener.is_some(),
             });
 
             if let Some(listener) = listener {
-                tauri::async_runtime::spawn(server::serve(listener, handle.clone()));
+                let overlay = overlay.clone();
+                let settings_store = settings_store.clone();
+                let teams_dir = teams_dir.clone();
+                let handle = handle.clone();
+                tauri::async_runtime::spawn(async move {
+                    server::serve(listener, handle, overlay, settings_store, &teams_dir).await;
+                });
             } else {
                 eprintln!("Port 21086 is already in use");
             }
 
-            tauri::async_runtime::spawn(async move {
-                auth.run_session_loop(|| {
-                    let _ = handle.emit("session-expired", ());
-                })
-                .await;
-            });
+            let endpoints = Endpoints {
+                osu_api: osu::OSU_API_URL.into(),
+                site: SITE_URL.into(),
+            };
+            let poller = Poller::new(auth, settings_store, overlay, teams_dir, wake, &endpoints)?;
+            tauri::async_runtime::spawn(poller.run(move || {
+                let _ = handle.emit("session-expired", ());
+            }));
 
             Ok(())
         })

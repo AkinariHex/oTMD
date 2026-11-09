@@ -82,8 +82,9 @@ The website `ExportMatches.apikey` is separate and stays.
 
   Responses: 201 `{message:"saved",discord:"sent"|"skipped"|"failed"}`, 200 `already saved`, 400, 401, 429, 500.
 - **Data:** the app calls osu! v2 directly with the access token, `GET /matches/{id}`, not v1
-  `get_match`. Events are paged (`before`/`after`/`limit`, max 101), so poll with `after=` the last
-  seen event id. Check the shape against https://osu.ppy.sh/docs/openapi.yaml; not yet verified.
+  `get_match`. Events are paged (`before`/`after`/`limit`, max 101), so poll with `after=` the event
+  before the first unfinished game, or the last seen event id if none: osu! finishes a game by updating
+  its existing event. Pin `x-api-version: 20220704`, newer versions change the score shape.
 - **Storage:** `auth.json` in the data dir, atomic writes, separate from `settingsApp.json`. Tokens
   never reach React or overlay payloads. Holds a `public identify` token only, in plain text like
   the old keys; move to the OS keychain if the scope ever grows.

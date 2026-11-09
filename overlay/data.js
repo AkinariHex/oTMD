@@ -32,69 +32,20 @@ qualifiers.appendChild(scoresDiv);
 
 var qualifiersScoresAlreadyDone = [];
 
-async function sendMatchToWebsite(data) {
-  var settings = {
-    webapikey: data.webapikey.apikey,
-    me: data.matchSettings.ActiveAccount,
-    matchID: data.matchSettings.MatchID,
-    matchType: data.matchSettings.MatchType,
-    stage: data.matchSettings.Stage || "",
-    bestOF: data.matchSettings.BestOF || "",
-    warmups: data.matchSettings.Warmups || "",
-    tournament: !data.matchData.tournament.error
-      ? {
-          name: data.matchData.tournament.tournamentName,
-          acronym: data.matchData.tournament.acronym,
-        }
-      : { name: "", acronym: data.matchData.tournament.acronym },
-    players:
-      data.matchSettings.ScoreReverse && data.matchData.players
-        ? [data.matchData?.players[1], data.matchData?.players[0]]
-        : data.matchData.players || "",
-    player: data.matchData.player || "",
-    teams:
-      data.matchSettings.ScoreReverse && data.matchData.teams
-        ? [data.matchData?.teams[1], data.matchData?.teams[0]]
-        : data.matchData.teams || "",
-    scores: data.matchData.scores || "",
-    totalMaps: data.matchData.totalMaps || "",
-    matchStart: data.matchData.tournamentStart || "",
-    matchJSON: JSON.stringify(data.matchData.matchJSON),
-  };
-
-  /* https://otmd.app */ /* http://localhost:4000 */
-  let response = await fetch("https://otmd.app/api/match?m=db", {
-    method: "POST",
-    body: JSON.stringify(settings),
-  }).then((res) => res.json());
-  if (response.message === "saved in DB") {
-    let res = await fetch("https://otmd.app/api/match?m=discordWebhook", {
-      method: "POST",
-      body: JSON.stringify(settings),
-    });
-    res = await res.json();
-  }
-  return;
-}
-
 /* WEBSOCKET */
+const RECONNECT_MIN_MS = 1000;
+const RECONNECT_MAX_MS = 10000;
+
 var ws = null;
+var reconnectDelay = RECONNECT_MIN_MS;
 
-function checkWebsocket() {
-  if (!ws || ws.readyState === WebSocket.CLOSED) initializeWebsocket();
-}
-
-window.addEventListener("load", function () {
-  checkWebsocket();
-});
-
-setInterval(checkWebsocket, 1000);
+window.addEventListener("load", initializeWebsocket);
 
 function initializeWebsocket() {
-  ws = new WebSocket("ws://127.0.0.1:9052/");
+  ws = new WebSocket(`ws://${location.host}/ws`);
 
   ws.onopen = function () {
-    ws.send("Visualizer Connected");
+    reconnectDelay = RECONNECT_MIN_MS;
     appNotConnected.style.display = "none";
     winner.style.display = "none";
     team1.innerHTML = "";
@@ -110,7 +61,9 @@ function initializeWebsocket() {
     let isMatch = false;
 
     /* When the page is loaded */
-    isMatch = data.settings?.matchSettings?.MatchID !== "";
+    isMatch =
+      data.settings?.matchSettings?.MatchID !== "" &&
+      data.settings?.matchData !== undefined;
 
     if (!isMatch) {
       appNoMatch.style.display = "grid";
@@ -149,7 +102,7 @@ function initializeWebsocket() {
     }
 
     /* When the user changes the match settings */
-    if (data.type === "matchSettings" || isMatch === true) {
+    if (isMatch === true) {
       /* General Settings */
       stageBO.innerHTML =
         data.settings.matchSettings.MatchID !== ""
@@ -159,9 +112,11 @@ function initializeWebsocket() {
         /* Check for match data and if the tournament is into the database */
         data.settings.matchData !== undefined &&
         !data.settings.matchData.tournament.error
-          ? data.settings.matchData.tournament.tournamentName.length >= 22
-            ? data.settings.matchData.tournament.acronym
-            : data.settings.matchData.tournament.tournamentName
+          ? escapeHtml(
+              data.settings.matchData.tournament.tournamentName.length >= 22
+                ? data.settings.matchData.tournament.acronym
+                : data.settings.matchData.tournament.tournamentName
+            )
           : "";
 
       /* When the match is Qualifiers */
@@ -176,11 +131,11 @@ function initializeWebsocket() {
 
         let name =
           data.settings.matchData.player.username.length > 12
-            ? `<span>${data.settings.matchData.player.username}</span>`
-            : data.settings.matchData.player.username;
+            ? `<span>${escapeHtml(data.settings.matchData.player.username)}</span>`
+            : escapeHtml(data.settings.matchData.player.username);
 
         userDiv.innerHTML = `
-        <img src="http://s.ppy.sh/a/${data.settings.matchData.player.userid}" alt="${data.settings.matchData.player.username}" />
+        <img src="http://s.ppy.sh/a/${data.settings.matchData.player.userid}" alt="${escapeHtml(data.settings.matchData.player.username)}" />
         <div class="name">${name}</div>
         `;
 
@@ -191,7 +146,7 @@ function initializeWebsocket() {
         </div>
         <div class="item" id="average">
           <div class="title">Average</div>
-          <div class="number odometer">${data.settings.matchData.scores.average}</div>
+          <div class="number odometer">${formatNumber(data.settings.matchData.scores.average)}</div>
         </div>
         `;
 
@@ -215,12 +170,12 @@ function initializeWebsocket() {
                   ? `<div class="mods">
               <span>${mods}</span>
           </div>
-            <div class="number">${sc.score}</div>`
+            <div class="number">${formatNumber(sc.score)}</div>`
                   : `
               <div class="mods">
                   ${mods}
               </div>
-                <div class="number">${sc.score}</div>`;
+                <div class="number">${formatNumber(sc.score)}</div>`;
 
               item.classList.add("show");
               scoresDiv.appendChild(item);
@@ -306,16 +261,16 @@ function initializeWebsocket() {
         let teamOne =
           data.settings.matchData.teams[0].length > 12
             ? `<div class="name" id="name1">
-        <span>${data.settings.matchData.teams[0]}</span>
+        <span>${escapeHtml(data.settings.matchData.teams[0])}</span>
       </div>`
-            : `<div class="name" id="name1">${data.settings.matchData.teams[0]}
+            : `<div class="name" id="name1">${escapeHtml(data.settings.matchData.teams[0])}
     </div>`;
         let teamTwo =
           data.settings.matchData.teams[1].length > 12
             ? `<div class="name" id="name2">
-        <span>${data.settings.matchData.teams[1]}</span>
+        <span>${escapeHtml(data.settings.matchData.teams[1])}</span>
       </div>`
-            : `<div class="name" id="name2">${data.settings.matchData.teams[1]}
+            : `<div class="name" id="name2">${escapeHtml(data.settings.matchData.teams[1])}
       </div>`;
 
         if (data.settings.matchSettings.ScoreReverse) {
@@ -368,16 +323,16 @@ function initializeWebsocket() {
         let playerOne =
           data.settings.matchData.players[0].username.length > 12
             ? `<div class="name" id="name1">
-        <span>${data.settings.matchData.players[0].username}</span>
+        <span>${escapeHtml(data.settings.matchData.players[0].username)}</span>
       </div>`
-            : `<div class="name" id="name1">${data.settings.matchData.players[0].username}</div>`;
+            : `<div class="name" id="name1">${escapeHtml(data.settings.matchData.players[0].username)}</div>`;
 
         let playerTwo =
           data.settings.matchData.players[1].username.length > 12
             ? `<div class="name" id="name2">
-        <span>${data.settings.matchData.players[1].username}</span>
+        <span>${escapeHtml(data.settings.matchData.players[1].username)}</span>
       </div>`
-            : `<div class="name" id="name2">${data.settings.matchData.players[1].username}</div>`;
+            : `<div class="name" id="name2">${escapeHtml(data.settings.matchData.players[1].username)}</div>`;
 
         team1.innerHTML = `
         <img class="propic" alt="" id="propic1" src="http://s.ppy.sh/a/${data.settings.matchData.players[0].userid}" />
@@ -418,26 +373,22 @@ function initializeWebsocket() {
           let dataHTML =
             data.settings.matchSettings.MatchType === "1vs1"
               ? `
-          <span>${
+          <span>${escapeHtml(
             data.settings.matchData.players[
               data.settings.matchData.scores.winner - 1
             ].username
-          }</span> won the match!
+          )}</span> won the match!
         `
               : `
-            <span>${
+            <span>${escapeHtml(
               data.settings.matchData.teams[
                 data.settings.matchData.scores.winner - 1
               ]
-            }</span> won the match!
+            )}</span> won the match!
           `;
           winner.innerHTML = dataHTML;
         }
 
-        /* Send Match to website */
-        if (data.settings.webapikey.status === true) {
-          sendMatchToWebsite(data.settings);
-        }
         return;
       }
       if (
@@ -456,7 +407,19 @@ function initializeWebsocket() {
     }
   };
 
-  ws.onclose = function () {};
+  ws.onclose = function () {
+    setTimeout(initializeWebsocket, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
+  };
+}
+
+function escapeHtml(value) {
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(value).replace(/[&<>"']/g, (character) => entities[character]);
+}
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("en-US");
 }
 
 function isCountry(name) {

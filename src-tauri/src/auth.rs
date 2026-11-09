@@ -7,7 +7,7 @@ use sha2::{Digest, Sha256};
 use std::{
     fs, io,
     path::PathBuf,
-    sync::{Mutex, MutexGuard, PoisonError},
+    sync::{Arc, Mutex, MutexGuard, PoisonError},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::Notify;
@@ -18,7 +18,6 @@ const AUTH_FILE: &str = "auth.json";
 const LOGIN_WINDOW_SECONDS: u64 = 600;
 const HTTP_TIMEOUT: Duration = Duration::from_secs(15);
 const REVOKE_TIMEOUT: Duration = Duration::from_secs(5);
-const MAX_SLEEP_SECONDS: u64 = 300;
 const FIRST_BACKOFF_SECONDS: u64 = 60;
 const MAX_BACKOFF_SECONDS: u64 = 900;
 
@@ -92,8 +91,14 @@ enum BrokerOutcome {
     Retry(Option<u64>),
 }
 
+#[derive(Default)]
+pub struct RefreshSchedule {
+    failures: u32,
+    retry_at: u64,
+}
+
 #[derive(Debug, PartialEq)]
-enum RefreshOutcome {
+pub enum RefreshOutcome {
     NoSession,
     NotDue,
     Refreshed,
@@ -160,7 +165,7 @@ pub struct AuthManager {
     pending: Mutex<Option<PendingLogin>>,
     // Serializes refresh, login and logout: refresh tokens rotate, so two writers would lose one.
     gate: tokio::sync::Mutex<()>,
-    wake: Notify,
+    wake: Arc<Notify>,
 }
 
 fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
@@ -168,11 +173,16 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 }
 
 impl AuthManager {
-    pub fn open(data_dir: &std::path::Path) -> reqwest::Result<Self> {
-        Self::with_endpoints(data_dir, SITE_URL, OSU_API_URL)
+    pub fn open(data_dir: &std::path::Path, wake: Arc<Notify>) -> reqwest::Result<Self> {
+        Self::with_endpoints(data_dir, SITE_URL, OSU_API_URL, wake)
     }
 
-    fn with_endpoints(data_dir: &std::path::Path, site_url: &str, osu_api_url: &str) -> reqwest::Result<Self> {
+    pub(crate) fn with_endpoints(
+        data_dir: &std::path::Path,
+        site_url: &str,
+        osu_api_url: &str,
+        wake: Arc<Notify>,
+    ) -> reqwest::Result<Self> {
         let path = data_dir.join(AUTH_FILE);
         let session = fs::read(&path)
             .ok()
@@ -191,7 +201,7 @@ impl AuthManager {
             session: Mutex::new(session),
             pending: Mutex::new(None),
             gate: tokio::sync::Mutex::new(()),
-            wake: Notify::new(),
+            wake,
         })
     }
 
@@ -339,6 +349,21 @@ impl AuthManager {
             return RefreshOutcome::NotDue;
         }
 
+        self.rotate_tokens(current, now).await
+    }
+
+    // A token that changed meanwhile was already rotated: refreshing again would waste a rotation.
+    pub async fn refresh_rejected(&self, rejected_token: &str, now: u64) -> RefreshOutcome {
+        let _gate = self.gate.lock().await;
+
+        match self.snapshot() {
+            Some(current) if current.access_token == rejected_token => self.rotate_tokens(current, now).await,
+            Some(_) => RefreshOutcome::NotDue,
+            None => RefreshOutcome::NoSession,
+        }
+    }
+
+    async fn rotate_tokens(&self, current: StoredSession, now: u64) -> RefreshOutcome {
         let body = json!({ "refresh_token": current.refresh_token });
         match self.post_broker("/api/osu/oauth/refresh", body).await {
             BrokerOutcome::Tokens(tokens) => {
@@ -393,41 +418,54 @@ impl AuthManager {
             .is_ok_and(|response| response.status().is_success())
     }
 
-    // Short sleeps against the wall clock also cover PC sleep, where monotonic timers can stall.
-    pub async fn run_session_loop(&self, on_expired: impl Fn()) {
-        let mut failures = 0;
-        let mut retry_at = 0;
+    // Returns seconds until the next refresh attempt, or None when logged out.
+    pub async fn refresh_step(
+        &self,
+        schedule: &mut RefreshSchedule,
+        now: u64,
+        on_expired: &impl Fn(),
+    ) -> Option<u64> {
+        let Some(session) = self.snapshot() else {
+            *schedule = RefreshSchedule::default();
+            return None;
+        };
 
-        loop {
-            let Some(session) = self.snapshot() else {
-                failures = 0;
-                retry_at = 0;
-                self.wake.notified().await;
-                continue;
-            };
-
-            let now = now_seconds();
-            let wait = session.refresh_due_at().max(retry_at).saturating_sub(now);
-            if wait > 0 {
-                tokio::select! {
-                    () = tokio::time::sleep(Duration::from_secs(wait.min(MAX_SLEEP_SECONDS))) => {}
-                    () = self.wake.notified() => {}
-                }
-                continue;
-            }
-
+        if session.refresh_due_at().max(schedule.retry_at) <= now {
             match self.refresh_if_due(now).await {
                 RefreshOutcome::Refreshed | RefreshOutcome::NotDue | RefreshOutcome::NoSession => {
-                    failures = 0;
-                    retry_at = 0;
+                    *schedule = RefreshSchedule::default();
                 }
                 RefreshOutcome::Retry(retry_after) => {
-                    failures += 1;
-                    retry_at = now + retry_delay(failures, retry_after);
+                    schedule.failures += 1;
+                    schedule.retry_at = now + retry_delay(schedule.failures, retry_after);
                 }
                 RefreshOutcome::Ended => on_expired(),
             }
         }
+
+        self.snapshot()
+            .map(|session| session.refresh_due_at().max(schedule.retry_at).saturating_sub(now).max(1))
+    }
+
+    pub fn access_token(&self) -> Option<String> {
+        locked(&self.session).as_ref().map(|session| session.access_token.clone())
+    }
+
+    #[cfg(test)]
+    pub(crate) fn seed_test_session(&self, issued_at: u64) {
+        let session = StoredSession {
+            user: User {
+                id: 7,
+                username: "tester".into(),
+                country: "IT".into(),
+            },
+            access_token: "old-access".into(),
+            refresh_token: "old-refresh".into(),
+            issued_at,
+            expires_at: issued_at + 86_400,
+        };
+        self.persist(&session).unwrap();
+        *locked(&self.session) = Some(session);
     }
 }
 
@@ -441,10 +479,7 @@ mod tests {
         http::{HeaderMap, StatusCode},
         routing::{delete, get, post},
     };
-    use std::sync::{
-        Arc,
-        atomic::{AtomicUsize, Ordering},
-    };
+    use std::sync::atomic::{AtomicUsize, Ordering};
 
     const NOW: u64 = 1_000_000;
     const VALID_TOKENS: &str =
@@ -514,23 +549,51 @@ mod tests {
     }
 
     fn manager(base: &str) -> AuthManager {
-        AuthManager::with_endpoints(&temp_dir(), base, &format!("{base}/api/v2")).unwrap()
+        AuthManager::with_endpoints(&temp_dir(), base, &format!("{base}/api/v2"), Arc::default()).unwrap()
     }
 
     fn seed_session(auth: &AuthManager, issued_at: u64) {
-        let session = StoredSession {
-            user: User {
-                id: 7,
-                username: "tester".into(),
-                country: "IT".into(),
-            },
-            access_token: "old-access".into(),
-            refresh_token: "old-refresh".into(),
-            issued_at,
-            expires_at: issued_at + 86_400,
+        auth.seed_test_session(issued_at);
+    }
+
+    #[tokio::test]
+    async fn rejected_token_rotates_once_and_a_stale_rejection_does_not() {
+        let (base, mock) = start_mock(StatusCode::OK, VALID_TOKENS).await;
+        let auth = manager(&base);
+        seed_session(&auth, NOW);
+
+        assert_eq!(auth.refresh_rejected("old-access", NOW).await, RefreshOutcome::Refreshed);
+        assert_eq!(auth.refresh_rejected("old-access", NOW).await, RefreshOutcome::NotDue);
+        assert_eq!(mock.refreshes.load(Ordering::SeqCst), 1);
+        assert_eq!(auth.access_token().unwrap(), "new-access");
+    }
+
+    #[tokio::test]
+    async fn refresh_step_schedules_backoff_and_reports_expiry() {
+        let (base, _mock) = start_mock(StatusCode::BAD_GATEWAY, "{}").await;
+        let auth = manager(&base);
+        seed_session(&auth, NOW);
+        let mut schedule = RefreshSchedule::default();
+        let expired = AtomicUsize::new(0);
+        let on_expired = || {
+            expired.fetch_add(1, Ordering::SeqCst);
         };
-        auth.persist(&session).unwrap();
-        *locked(&auth.session) = Some(session);
+
+        assert_eq!(auth.refresh_step(&mut schedule, NOW, &on_expired).await, Some(43_200));
+
+        let due = NOW + 43_200;
+        assert_eq!(auth.refresh_step(&mut schedule, due, &on_expired).await, Some(60));
+        assert_eq!(auth.refresh_step(&mut schedule, due + 1, &on_expired).await, Some(59));
+        assert_eq!(auth.refresh_step(&mut schedule, due + 60, &on_expired).await, Some(120));
+        assert_eq!(expired.load(Ordering::SeqCst), 0);
+        assert!(auth.user().is_some());
+
+        let (base, _mock) = start_mock(StatusCode::BAD_REQUEST, r#"{"error":"invalid_grant"}"#).await;
+        let auth = manager(&base);
+        seed_session(&auth, NOW);
+        assert_eq!(auth.refresh_step(&mut schedule, due + 1_000, &on_expired).await, None);
+        assert_eq!(expired.load(Ordering::SeqCst), 1);
+        assert_eq!(auth.refresh_step(&mut schedule, due + 2_000, &on_expired).await, None);
     }
 
     fn params(state: Option<&str>, code: Option<&str>, error: Option<&str>) -> CallbackParams {
@@ -629,7 +692,7 @@ mod tests {
         assert_eq!(on_disk.refresh_token, "new-refresh");
 
         let dir = auth.path.parent().unwrap();
-        let reopened = AuthManager::with_endpoints(dir, &base, &base).unwrap();
+        let reopened = AuthManager::with_endpoints(dir, &base, &base, Arc::default()).unwrap();
         assert_eq!(reopened.user().unwrap().username, "tester");
     }
 

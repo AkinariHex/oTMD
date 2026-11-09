@@ -53,8 +53,15 @@ pub fn get_match_settings(state: State<'_, AppState>) -> MatchSettings {
 pub fn save_match_settings(settings: MatchSettings, state: State<'_, AppState>) -> Result<(), String> {
     state
         .settings
-        .update(|current| current.matchSettings = settings)
-        .map_err(|_| SAVE_FAILED.to_string())
+        .update(|current| {
+            current.matchSettings = settings;
+            current.matchSettings.isFinished = false;
+        })
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.overlay.publish("matchSettings", &state.settings);
+    state.wake.notify_one();
+    Ok(())
 }
 
 #[tauri::command]
@@ -67,7 +74,10 @@ pub fn save_displayer_settings(settings: DisplayerSettings, state: State<'_, App
     state
         .settings
         .update(|current| current.displayerSettings = settings)
-        .map_err(|_| SAVE_FAILED.to_string())
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.overlay.publish("displayerSettings", &state.settings);
+    Ok(())
 }
 
 #[tauri::command]
