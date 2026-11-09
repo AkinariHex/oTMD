@@ -5,14 +5,10 @@ import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
+export const OVERLAY_URL = "http://localhost:21086/visualizer";
+
 export interface User {
   id: number;
-  username: string;
-  country: string;
-}
-
-export interface Account {
-  userID: string;
   username: string;
   country: string;
 }
@@ -34,18 +30,14 @@ export interface DisplayerSettings {
   TransparentBackground: boolean;
 }
 
+export type Layout = "sidebar" | "tabs";
+
 export interface AppSettings {
-  CompactUI: boolean;
+  Layout: Layout;
   TrayBehavior: "closeToTray" | "minimizeToTray";
   ExportMatches: { status: boolean; apikey: string };
   Animations: boolean;
   HardwareAcceleration: boolean;
-}
-
-export interface NavBarData {
-  account: Account;
-  navbar: boolean;
-  appInfo: { version: string; copyright: string };
 }
 
 export interface DownloadProgress {
@@ -61,8 +53,6 @@ function subscribe<T>(event: string, listener: (payload: T) => void): () => void
     void (async () => (await unlisten)())();
   };
 }
-
-const navBarListeners = new Set<(data: NavBarData) => void>();
 
 export const getSession = (): Promise<User | null> => invoke("get_session");
 
@@ -110,40 +100,16 @@ export const saveDisplayerSettings = (
 export const validateExportKey = (apikey: string): Promise<boolean> =>
   invoke("validate_export_key", { apikey });
 
-export const getNavBarData = async (): Promise<NavBarData> => {
-  const [user, appSettings, { version }] = await Promise.all([
-    getSession(),
-    getAppSettings(),
-    invoke<{ version: string }>("get_app_info"),
-  ]);
+export const saveAppSettings = (settings: AppSettings): Promise<void> =>
+  invoke("save_app_settings", { settings });
 
-  return {
-    account: {
-      userID: user ? String(user.id) : "",
-      username: user?.username ?? "",
-      country: user?.country ?? "",
-    },
-    navbar: appSettings.CompactUI,
-    appInfo: { version, copyright: `© ${new Date().getFullYear()} Akinari` },
-  };
-};
+export const getAppVersion = async (): Promise<string> =>
+  (await invoke<{ version: string }>("get_app_info")).version;
 
-export const getAccountData = getNavBarData;
+export const getOverlaySources = (): Promise<number> => invoke("get_overlay_sources");
 
-export const saveAppSettings = async (settings: AppSettings): Promise<void> => {
-  await invoke("save_app_settings", { settings });
-  const data = await getNavBarData();
-  navBarListeners.forEach((listener) => listener(data));
-};
-
-export const onNavBarData = (
-  listener: (data: NavBarData) => void
-): (() => void) => {
-  navBarListeners.add(listener);
-  return () => {
-    navBarListeners.delete(listener);
-  };
-};
+export const onOverlayChanged = (listener: (sources: number) => void): (() => void) =>
+  subscribe("overlay-changed", listener);
 
 export const isUpdateAvailable = (): Promise<boolean> => invoke("check_update");
 
@@ -156,10 +122,6 @@ export const onUpdateFailed = (listener: () => void): (() => void) =>
 
 export const minimizeApp = async (): Promise<void> => {
   await getCurrentWindow().minimize();
-};
-
-export const maximizeApp = async (): Promise<void> => {
-  await getCurrentWindow().toggleMaximize();
 };
 
 export const closeApp = (): Promise<void> => invoke("close_app");

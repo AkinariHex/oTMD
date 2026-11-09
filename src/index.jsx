@@ -3,10 +3,9 @@ import { createRoot } from "react-dom/client";
 import { Toaster } from "sonner";
 import "./index.css";
 import App from "./App";
-import AppBar from "./Components/AppBar/AppBar";
 import MotionProvider from "./Components/MotionProvider/MotionProvider";
 import * as api from "@/lib/api";
-import { setAnimationsEnabled } from "@/lib/animations";
+import { applyPreferences } from "@/lib/preferences";
 
 const start = async () => {
   try {
@@ -17,16 +16,14 @@ const start = async () => {
   }
 
   try {
-    const { Animations } = await api.getAppSettings();
-    setAnimationsEnabled(Animations);
+    applyPreferences(await api.getAppSettings());
   } catch {
-    setAnimationsEnabled(true);
+    applyPreferences({ Animations: true, Layout: "sidebar" });
   }
 
   createRoot(document.getElementById("root")).render(
     <React.StrictMode>
       <MotionProvider>
-        <AppBar />
         <App />
         <Toaster richColors position="bottom-right" theme="dark" />
       </MotionProvider>

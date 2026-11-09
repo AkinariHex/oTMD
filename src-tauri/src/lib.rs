@@ -143,6 +143,11 @@ pub fn run() {
                 window_memory: Mutex::default(),
             });
 
+            let emitter = handle.clone();
+            overlay.set_on_change(move |sources| {
+                let _ = emitter.emit("overlay-changed", sources);
+            });
+
             build_tray(&handle)?;
             window::open_main(&handle);
 
@@ -179,6 +184,7 @@ pub fn run() {
             commands::get_app_settings,
             commands::save_app_settings,
             commands::validate_export_key,
+            commands::get_overlay_sources,
             commands::check_update,
             commands::close_app,
             commands::get_start_route,

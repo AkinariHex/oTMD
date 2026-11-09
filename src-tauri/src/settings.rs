@@ -72,11 +72,19 @@ pub enum TrayBehavior {
     MinimizeToTray,
 }
 
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Layout {
+    #[default]
+    Sidebar,
+    Tabs,
+}
+
 #[allow(non_snake_case)]
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppSettings {
-    pub CompactUI: bool,
+    pub Layout: Layout,
     pub TrayBehavior: TrayBehavior,
     pub ExportMatches: ExportMatches,
     pub Animations: bool,
@@ -86,7 +94,7 @@ pub struct AppSettings {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            CompactUI: false,
+            Layout: Layout::default(),
             TrayBehavior: TrayBehavior::default(),
             ExportMatches: ExportMatches::default(),
             Animations: true,
@@ -238,6 +246,7 @@ pub mod tests {
         let existing: Settings = serde_json::from_str(r#"{"appSettings":{"CompactUI":true}}"#).unwrap();
         assert!(existing.appSettings.Animations);
         assert!(existing.appSettings.HardwareAcceleration);
+        assert!(existing.appSettings.Layout == Layout::Sidebar);
 
         let dir = temp_dir();
         SettingsStore::open(&dir, None)

@@ -13,7 +13,7 @@
   "app": {
     "windows": [],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://raw.githubusercontent.com; img-src 'self' data: https://a.ppy.sh https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com",
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://raw.githubusercontent.com; img-src 'self' data: https://a.ppy.sh https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src http://127.0.0.1:21086",
       "devCsp": null
     }
   },

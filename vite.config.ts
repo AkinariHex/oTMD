@@ -8,6 +8,8 @@ export default defineConfig({
   // public/ still holds the Electron sources for later phases; none of it may ship.
   publicDir: false,
   clearScreen: false,
+  // The CSP allows fonts from 'self' only, so small font files must not become data: URIs.
+  build: { assetsInlineLimit: 0 },
   server: { port: 1420, strictPort: true },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },

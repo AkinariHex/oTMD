@@ -109,6 +109,11 @@ pub async fn validate_export_key(apikey: String, state: State<'_, AppState>) -> 
 }
 
 #[tauri::command]
+pub fn get_overlay_sources(state: State<'_, AppState>) -> usize {
+    state.overlay.sources()
+}
+
+#[tauri::command]
 pub fn get_start_route(app: AppHandle) -> String {
     window::start_route(&app)
 }

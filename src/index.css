@@ -1,56 +1,63 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-/* No Tailwind preflight, and only shadcn sources: the app's plain CSS classes (.container...) must stay untouched. */
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities) source(none);
-@source "./Components/ui";
-
-/* The app has a single dark theme, whatever the OS preference is. */
-@custom-variant dark (&:where(:root, :root *));
+@import "tailwindcss" source(".");
+@import "@fontsource-variable/plus-jakarta-sans/wght.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-destructive: var(--destructive);
-  --radius-md: 6px;
+  --color-app: var(--app);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-teal: var(--teal);
+  --color-win: var(--win);
+  --color-loss: var(--loss);
+  --font-sans: "Plus Jakarta Sans Variable", "Segoe UI", sans-serif;
 }
 
 :root {
-  --background: oklch(0.2 0.012 265);
-  --primary: oklch(0.72 0.08 215);
-  --primary-foreground: oklch(0.2 0.012 265);
-  --switch-thumb-checked: oklch(0.39 0.06 215);
-  --foreground: oklch(0.89 0 0);
-  --muted: oklch(0.32 0.014 265);
-  --input: oklch(0.32 0.014 265);
-  --ring: oklch(0.7 0.075 215);
-  --destructive: oklch(0.65 0.2 25);
-  --teal-blue: hsla(196, 24%, 46%, 1);
-  --turquoise-green: hsla(139, 36%, 78%, 1);
-  --puce: hsla(352, 36%, 65%, 1);
-  --primary-color: hsla(225, 13%, 12%, 1);
-  --secondary-color: hsla(220, 13%, 18%, 1);
-  --tertiary-color: hsl(192, 45%, 58%);
+  --app: oklch(0.2 0.012 265);
+  --panel: oklch(0.26 0.014 262);
+  --raised: oklch(0.31 0.014 262);
+  --line: oklch(1 0 0 / 0.08);
+  --ink: oklch(0.95 0.003 262);
+  --ink-2: oklch(0.78 0.01 262);
+  --ink-3: oklch(0.64 0.012 262);
+  --accent: oklch(0.72 0.08 215);
+  --on-accent: oklch(0.2 0.012 265);
+  --teal: oklch(0.57 0.05 225);
+  --win: oklch(0.86 0.06 155);
+  --loss: oklch(0.68 0.09 10);
 }
 
 html,
-body {
-  margin: 0;
-  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-    "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--primary-color);
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
 }
 
-a {
-  text-decoration: none;
-  cursor: default;
+body {
+  margin: 0;
+  background: var(--app);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+input,
+textarea {
+  user-select: text;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Durations go to zero instead of `animation: none`, so elements still reach their end state. */
@@ -64,14 +71,47 @@ a {
   animation-iteration-count: 1 !important;
 }
 
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0s !important;
+  }
 }
 
-/* Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
+.markdown {
+  color: var(--ink-2);
+  line-height: 1.6;
+  user-select: text;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  margin: 16px 0 6px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.markdown h1 {
+  font-size: 16px;
+}
+
+.markdown h2 {
+  font-size: 14px;
+}
+
+.markdown h3 {
+  font-size: 13px;
+}
+
+.markdown ul {
+  list-style: disc;
+  padding-left: 18px;
+}
+
+.markdown p {
+  margin: 6px 0;
+}
+
+.markdown strong {
+  color: var(--ink);
 }

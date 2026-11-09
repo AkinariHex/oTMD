@@ -1,27 +1,23 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Switch as SwitchPrimitive } from "radix-ui"
+import type { ComponentProps } from "react";
+import { Switch as SwitchPrimitive } from "radix-ui";
+import { cn } from "@/lib/utils";
 
-// Same size and colors as the legacy .switch, so both look identical until Phase 7 replaces it.
-function Switch({
-  className,
-  ...props
-}: React.ComponentProps<typeof SwitchPrimitive.Root>) {
+function Switch({ className, ...props }: ComponentProps<typeof SwitchPrimitive.Root>) {
   return (
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "relative inline-flex h-[22.4px] w-10 shrink-0 cursor-pointer items-center rounded-full border-0 p-0 outline-none transition-colors duration-[400ms] focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-(--primary-color) data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50",
+        "relative h-5 w-9 shrink-0 rounded-full bg-white/12 outline-none transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-accent/60 data-[state=checked]:bg-accent",
         className
       )}
       {...props}
     >
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
-        className="pointer-events-none block size-[15px] rounded-full transition duration-[400ms] data-[state=checked]:translate-x-[21.5px] data-[state=checked]:bg-(--switch-thumb-checked) data-[state=unchecked]:translate-x-[3.5px] data-[state=unchecked]:bg-(--secondary-color)"
+        className="block size-4 translate-x-0.5 rounded-full bg-ink transition-transform duration-150 ease-out data-[state=checked]:translate-x-[18px] data-[state=checked]:bg-on-accent"
       />
     </SwitchPrimitive.Root>
-  )
+  );
 }
 
-export { Switch }
+export { Switch };

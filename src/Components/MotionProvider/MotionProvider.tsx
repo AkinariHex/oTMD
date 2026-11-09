@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { MotionConfig } from "motion/react";
-import { useAnimationsEnabled } from "@/lib/animations";
+import { useAnimationsEnabled } from "@/lib/preferences";
 
 function MotionProvider({ children }: { children: ReactNode }) {
   const enabled = useAnimationsEnabled();

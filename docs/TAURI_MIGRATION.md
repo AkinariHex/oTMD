@@ -232,10 +232,16 @@ stays near 0 after a restart (the GPU process still exists, rendering in softwar
 from Phase 5.
 
 ### Phase 7 - Redesign, login, animations
-Agree a visual direction on one screen first; no bulk restyling before that. Window stays 1000x600,
-not resizable, and hidden until the first screen is ready.
-- Rebuild on shadcn: shell and NavBar, Match, Displayer, App Settings, Profile, Changelog, Update.
+Window stays 1000x600, not resizable, and hidden until the first screen is ready. Direction chosen
+through prototypes: Plus Jakarta Sans bundled with the app, no Maximize button, two layouts selectable
+from Settings (`appSettings.Layout`: Sidebar by default, or Tabs).
+- Rebuild on shadcn: shell, Match, Overlay, Settings, Profile, Changelog, Update.
   Forms keep their current fields and validation. Delete each legacy CSS file as its screen moves.
+- Match and Overlay show the real overlay in a frame (`/visualizer?preview=1`), so the preview always
+  matches OBS. Preview connections are not counted as sources.
+- Overlay page: one card per overlay with its own URL and SVG thumbnail. Ranked and Broadcast stay
+  disabled until Phases 8 and 9 add them.
+- Match, Ranked and Broadcast fields accept the full osu! link as well as the ID.
 - **Login page:** one "Login with osu!" action, a visible waiting-for-browser state with cancel and
   retry, clear messages for port 21086 in use and expired session. Tokens still never reach React.
 - **Animations:** route transitions, staggered entrances on first paint of a list, press feedback,
@@ -297,8 +303,8 @@ in `played_at` order. A player with no score counts as 0.
 both players alive shows "match ended" and never invents a winner. `master` can briefly run ahead of
 what is deployed.
 
-**Output:** overlays `overlay/ranked/` (HP bars, ratio, history) rebuilt as plain JS on the embedded
-server and the existing `/ws`, `escapeHtml` on every API string. Finished matches are saved once to the
+**Output:** overlays `overlay/ranked/` (HP bars, ratio, history) at `/ranked`, rebuilt as plain JS on the
+embedded server and the existing `/ws`, `escapeHtml` on every API string. Finished matches are saved once to the
 existing `POST /api/rooms` from Rust, through the export retry path and only with a valid export key.
 
 **Accept:** tests cover first-hit survival at 1 life, ceiling, tie, personal multiplier growth,
@@ -313,7 +319,7 @@ For streamers of someone else's tournament. New `Broadcast` value for `Mode`.
   (10 s divided by the number of matches, minimum 1.25 s), so 8 matches stay under 60 requests a minute
   including player lookups. Back off on 429.
 - With no logged-in player to anchor sides, red and blue follow the lobby name order.
-- Overlay `/broadcast`: 1 match full size, 2 to 4 stacked, 5 to 8 compact grid, transparent background.
+- Overlay `/broadcast` (own card on the Overlay page): 1 match full size, 2 to 4 stacked, 5 to 8 compact grid, transparent background.
   `?matches=<id,id>` selects a subset so several OBS sources can show different matches.
 - **Never exported:** other people's matches are not posted to the user's account or Discord.
 
@@ -374,7 +380,7 @@ Delete the legacy `public/electron` and `public/osu` sources.
 - [x] Phase 4 — Server + poller + overlay
 - [x] Phase 5 — Tray, power, updater
 - [x] Phase 6 - UI foundation
-- [ ] Phase 7 - Redesign, login, animations
+- [x] Phase 7 - Redesign, login, animations
 - [ ] Phase 8 - osu!lazer Ranked Play
 - [ ] Phase 9 - Tournament broadcast mode
 - [ ] Phase 10 - Home dashboard

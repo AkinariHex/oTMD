@@ -492,6 +492,7 @@ impl Poller {
         {
             eprintln!("Could not save the finished match state");
         }
+        self.overlay.notify();
 
         let (best_of, warmups) = match tracker.config.rules {
             MatchRules::OneVOne { best_of, warmups, .. } | MatchRules::TeamVs { best_of, warmups } => (best_of, warmups),

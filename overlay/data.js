@@ -42,7 +42,8 @@ var reconnectDelay = RECONNECT_MIN_MS;
 window.addEventListener("load", initializeWebsocket);
 
 function initializeWebsocket() {
-  ws = new WebSocket(`ws://${location.host}/ws`);
+  var preview = new URLSearchParams(location.search).has("preview");
+  ws = new WebSocket(`ws://${location.host}/ws${preview ? "?preview=1" : ""}`);
 
   ws.onopen = function () {
     reconnectDelay = RECONNECT_MIN_MS;

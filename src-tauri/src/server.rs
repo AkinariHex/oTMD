@@ -17,10 +17,14 @@ use axum::{
     routing::get,
 };
 use rust_embed::RustEmbed;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{
     path::Path,
-    sync::{Arc, Mutex, PoisonError},
+    sync::{
+        Arc, Mutex, OnceLock, PoisonError,
+        atomic::{AtomicUsize, Ordering},
+    },
 };
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::{
@@ -40,6 +44,26 @@ struct OverlayFiles;
 pub struct Overlay {
     sender: Sender<String>,
     match_data: Mutex<Option<Value>>,
+    sources: AtomicUsize,
+    on_change: OnceLock<Box<dyn Fn(usize) + Send + Sync>>,
+}
+
+// Dropping it counts the disconnect, however the session ended.
+struct SourceConnection(Arc<Overlay>);
+
+impl SourceConnection {
+    fn open(overlay: Arc<Overlay>) -> Self {
+        overlay.sources.fetch_add(1, Ordering::Relaxed);
+        overlay.notify();
+        Self(overlay)
+    }
+}
+
+impl Drop for SourceConnection {
+    fn drop(&mut self) {
+        self.0.sources.fetch_sub(1, Ordering::Relaxed);
+        self.0.notify();
+    }
 }
 
 impl Overlay {
@@ -47,6 +71,22 @@ impl Overlay {
         Self {
             sender: broadcast::channel(OVERLAY_BACKLOG).0,
             match_data: Mutex::new(None),
+            sources: AtomicUsize::new(0),
+            on_change: OnceLock::new(),
+        }
+    }
+
+    pub fn set_on_change(&self, listener: impl Fn(usize) + Send + Sync + 'static) {
+        let _ = self.on_change.set(Box::new(listener));
+    }
+
+    pub fn sources(&self) -> usize {
+        self.sources.load(Ordering::Relaxed)
+    }
+
+    pub fn notify(&self) {
+        if let Some(listener) = self.on_change.get() {
+            listener(self.sources());
         }
     }
 
@@ -77,6 +117,7 @@ impl Overlay {
     pub fn publish(&self, kind: &str, settings: &SettingsStore) {
         // An error only means no overlay is connected right now.
         let _ = self.sender.send(self.message(kind, settings));
+        self.notify();
     }
 }
 
@@ -93,7 +134,17 @@ fn is_allowed_origin(headers: &HeaderMap) -> bool {
         .is_some_and(|origin| ALLOWED_ORIGINS.contains(&origin))
 }
 
-async fn overlay_socket(ws: WebSocketUpgrade, headers: HeaderMap, State(state): State<OverlayState>) -> Response {
+#[derive(Deserialize)]
+struct SocketParams {
+    preview: Option<String>,
+}
+
+async fn overlay_socket(
+    ws: WebSocketUpgrade,
+    headers: HeaderMap,
+    Query(params): Query<SocketParams>,
+    State(state): State<OverlayState>,
+) -> Response {
     if !is_allowed_origin(&headers) {
         return StatusCode::FORBIDDEN.into_response();
     }
@@ -101,7 +152,12 @@ async fn overlay_socket(ws: WebSocketUpgrade, headers: HeaderMap, State(state): 
     // Subscribing before reading the state means no update can fall between the two.
     let receiver = state.overlay.subscribe();
     let initial = state.overlay.message("initLoad", &state.settings);
-    ws.on_upgrade(move |socket| run_overlay_session(socket, initial, receiver))
+    let overlay = state.overlay.clone();
+    ws.on_upgrade(move |socket| async move {
+        // The app's own preview is not an OBS source.
+        let _connection = params.preview.is_none().then(|| SourceConnection::open(overlay));
+        run_overlay_session(socket, initial, receiver).await;
+    })
 }
 
 async fn run_overlay_session(mut socket: WebSocket, initial: String, mut receiver: Receiver<String>) {
@@ -256,6 +312,55 @@ mod tests {
             request = request.header("origin", origin);
         }
         request.send().await.unwrap().status().as_u16()
+    }
+
+    async fn open_socket(base: &str, query: &str) -> tokio::net::TcpStream {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+        let host = base.trim_start_matches("http://");
+        let mut stream = tokio::net::TcpStream::connect(host).await.unwrap();
+        let request = format!(
+            "GET /ws{query} HTTP/1.1\r\nHost: {host}\r\nConnection: upgrade\r\nUpgrade: websocket\r\n\
+             Sec-WebSocket-Version: 13\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\
+             Origin: http://localhost:21086\r\n\r\n"
+        );
+        stream.write_all(request.as_bytes()).await.unwrap();
+        let mut response = [0u8; 1024];
+        let read = stream.read(&mut response).await.unwrap();
+        assert!(String::from_utf8_lossy(&response[..read]).contains("101"));
+        stream
+    }
+
+    async fn wait_for_sources(overlay: &Overlay, expected: usize) {
+        for _ in 0..200 {
+            if overlay.sources() == expected {
+                return;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+        assert_eq!(overlay.sources(), expected);
+    }
+
+    #[tokio::test]
+    async fn sources_count_connections_but_not_the_app_preview() {
+        let (base, overlay, _) = start().await;
+        let changes = Arc::new(AtomicUsize::new(0));
+        let counter = changes.clone();
+        overlay.set_on_change(move |_| {
+            counter.fetch_add(1, Ordering::Relaxed);
+        });
+
+        let source = open_socket(&base, "").await;
+        wait_for_sources(&overlay, 1).await;
+
+        let preview = open_socket(&base, "?preview=1").await;
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        assert_eq!(overlay.sources(), 1);
+
+        drop(preview);
+        drop(source);
+        wait_for_sources(&overlay, 0).await;
+        assert!(changes.load(Ordering::Relaxed) >= 2);
     }
 
     // Bug 1: any website could connect to the old socket and read the settings.
