@@ -73,12 +73,26 @@ pub enum TrayBehavior {
 }
 
 #[allow(non_snake_case)]
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppSettings {
     pub CompactUI: bool,
     pub TrayBehavior: TrayBehavior,
     pub ExportMatches: ExportMatches,
+    pub Animations: bool,
+    pub HardwareAcceleration: bool,
+}
+
+impl Default for AppSettings {
+    fn default() -> Self {
+        Self {
+            CompactUI: false,
+            TrayBehavior: TrayBehavior::default(),
+            ExportMatches: ExportMatches::default(),
+            Animations: true,
+            HardwareAcceleration: true,
+        }
+    }
 }
 
 // No `accounts` field on purpose: legacy osu! v1 keys must never be read or copied.
@@ -216,6 +230,25 @@ pub mod tests {
             assert_eq!(settings.matchSettings.Stage, "Friendly");
             assert_eq!(settings.matchSettings.BestOF, "9");
             assert_eq!(settings.displayerSettings.VisualizerStyle, "0px 0px 0px 0px");
+        });
+    }
+
+    #[test]
+    fn display_preferences_default_on_for_existing_files_and_can_be_turned_off() {
+        let existing: Settings = serde_json::from_str(r#"{"appSettings":{"CompactUI":true}}"#).unwrap();
+        assert!(existing.appSettings.Animations);
+        assert!(existing.appSettings.HardwareAcceleration);
+
+        let dir = temp_dir();
+        SettingsStore::open(&dir, None)
+            .update(|settings| {
+                settings.appSettings.Animations = false;
+                settings.appSettings.HardwareAcceleration = false;
+            })
+            .unwrap();
+        SettingsStore::open(&dir, None).read(|settings| {
+            assert!(!settings.appSettings.Animations);
+            assert!(!settings.appSettings.HardwareAcceleration);
         });
     }
 

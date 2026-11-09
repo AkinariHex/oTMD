@@ -36,6 +36,16 @@
   align-self: center;
 }
 
+.preferenceRow {
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ccc;
+  font-size: 13.6px;
+  font-weight: 400;
+}
+
 /* SWITCH THING */
 /* The switch - the box around the slider */
 .switch {

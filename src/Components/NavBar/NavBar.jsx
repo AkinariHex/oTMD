@@ -2,13 +2,16 @@ import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "./NavBar.css";
 import {
-  RecordCircle,
-  Setting,
-  Setting2,
-  UserOctagon,
-  DocumentText,
-} from "iconsax-react";
+  CircleDot,
+  FileText,
+  Monitor,
+  SlidersHorizontal,
+  UserRound,
+} from "lucide-react";
 import * as api from "@/lib/api";
+
+const ICON_SIZE = 25;
+const ICON_STROKE = 1.5;
 
 function NavBar() {
   const [account, setAccount] = useState({});
@@ -39,7 +42,7 @@ function NavBar() {
             backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.88), rgba(0,0,0,0.2)), url(https://a.ppy.sh/${account.userID})`,
           }}
         >
-          <UserOctagon size="25" />
+          <UserRound size={ICON_SIZE} strokeWidth={ICON_STROKE} />
           <div className="name">{account.username}</div>
           <img
             src={`https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags/${account.country}.png`}
@@ -49,11 +52,11 @@ function NavBar() {
           {/* <i className={`twa twa-2x twa-${'AD'} flag`}></i> */}
         </NavLink>
         <NavLink to="/app/match" className="item" activeClassName="active">
-          <RecordCircle size="25" />
+          <CircleDot size={ICON_SIZE} strokeWidth={ICON_STROKE} />
           <div className="text">Match</div>
         </NavLink>
         <NavLink to="/app/dsettings" className="item" activeClassName="active">
-          <Setting size="25" />
+          <Monitor size={ICON_SIZE} strokeWidth={ICON_STROKE} />
           <div className="text">Displayer Settings</div>
         </NavLink>
         <NavLink
@@ -61,13 +64,13 @@ function NavBar() {
           className="item"
           activeClassName="active"
         >
-          <Setting2 size="25" />
+          <SlidersHorizontal size={ICON_SIZE} strokeWidth={ICON_STROKE} />
           <div className="text">App Settings</div>
         </NavLink>
       </div>
       <div className="bottomRoutes">
         <NavLink to="/app/changelog" className="item" activeClassName="active">
-          <DocumentText size="25" />
+          <FileText size={ICON_SIZE} strokeWidth={ICON_STROKE} />
           <div className="text">Changelog</div>
         </NavLink>
       </div>

@@ -4,7 +4,13 @@
 @import "tailwindcss/utilities.css" layer(utilities) source(none);
 @source "./Components/ui";
 
+/* The app has a single dark theme, whatever the OS preference is. */
+@custom-variant dark (&:where(:root, :root *));
+
 @theme inline {
+  --color-background: var(--background);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-input: var(--input);
@@ -14,6 +20,10 @@
 }
 
 :root {
+  --background: oklch(0.2 0.012 265);
+  --primary: oklch(0.72 0.08 215);
+  --primary-foreground: oklch(0.2 0.012 265);
+  --switch-thumb-checked: oklch(0.39 0.06 215);
   --foreground: oklch(0.89 0 0);
   --muted: oklch(0.32 0.014 265);
   --input: oklch(0.32 0.014 265);
@@ -41,6 +51,17 @@ body {
 a {
   text-decoration: none;
   cursor: default;
+}
+
+/* Durations go to zero instead of `animation: none`, so elements still reach their end state. */
+:root[data-animations="off"] *,
+:root[data-animations="off"] *::before,
+:root[data-animations="off"] *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
 }
 
 /* Chrome, Safari, Edge, Opera */

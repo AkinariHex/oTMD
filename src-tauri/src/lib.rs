@@ -37,6 +37,8 @@ pub struct AppState {
     wake: Arc<Notify>,
     callback_ready: bool,
     webview_data_dir: Option<PathBuf>,
+    // Read once: WebView2 rejects a new window whose flags differ from a browser process still alive.
+    hardware_acceleration: bool,
     window_memory: Mutex<window::WindowMemory>,
 }
 
@@ -122,6 +124,13 @@ pub fn run() {
             let auth = Arc::new(AuthManager::open(&data_dir, wake.clone())?);
             let settings_store = Arc::new(SettingsStore::open(&data_dir, legacy.as_deref()));
             let overlay = Arc::new(Overlay::new());
+            let hardware_acceleration = settings_store.read(|settings| settings.appSettings.HardwareAcceleration);
+
+            #[cfg(target_os = "linux")]
+            if !hardware_acceleration {
+                // SAFETY: the runtime workers are idle and nothing reads the environment concurrently yet.
+                unsafe { std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1") };
+            }
 
             app.manage(AppState {
                 settings: settings_store.clone(),
@@ -130,6 +139,7 @@ pub fn run() {
                 wake: wake.clone(),
                 callback_ready: listener.is_some(),
                 webview_data_dir: settings::portable_data_dir().map(|dir| dir.join("webview")),
+                hardware_acceleration,
                 window_memory: Mutex::default(),
             });
 

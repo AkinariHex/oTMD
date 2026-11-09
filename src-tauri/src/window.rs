@@ -12,6 +12,8 @@ const APP_ROUTE_PREFIX: &str = "/app/";
 // Matches --primary-color, so nothing bright can show before the page paints.
 const BACKGROUND: Color = Color(27, 29, 35, 255);
 const REVEAL_FALLBACK: Duration = Duration::from_secs(3);
+// Setting browser arguments replaces wry's defaults, so they are repeated here.
+const SOFTWARE_RENDERING_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-gpu";
 // Windows parks minimized windows at this coordinate.
 const MINIMIZED_COORDINATE: i32 = -32000;
 
@@ -134,6 +136,10 @@ pub fn open_main(app: &AppHandle) {
 
     if let Some(directory) = app.state::<AppState>().webview_data_dir.clone() {
         builder = builder.data_directory(directory);
+    }
+
+    if !app.state::<AppState>().hardware_acceleration {
+        builder = builder.additional_browser_args(SOFTWARE_RENDERING_ARGS);
     }
 
     match builder.build() {

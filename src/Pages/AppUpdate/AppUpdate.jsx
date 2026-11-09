@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import "./AppUpdate.css";
-import { Progress } from "react-sweet-progress";
-import "react-sweet-progress/lib/style.css";
+import { Progress } from "@/Components/ui/progress";
 import * as api from "@/lib/api";
 
 function AppUpdate() {
@@ -26,26 +25,7 @@ function AppUpdate() {
           {downloadSpeed}MB/s - {progress}%
         </div>
         <div className="bar" id="bar">
-          <Progress
-            percent={progress}
-            theme={{
-              success: {
-                symbol: "",
-                color: "hsla(225, 13%, 35%, 1)",
-                background: "hsla(225, 13%, 16%, 1)",
-              },
-              active: {
-                symbol: "",
-                color: "hsla(225, 13%, 35%, 1)",
-                background: "hsla(225, 13%, 16%, 1)",
-              },
-              default: {
-                symbol: "",
-                color: "hsla(225, 13%, 35%, 1)",
-                background: "hsla(225, 13%, 16%, 1)",
-              },
-            }}
-          ></Progress>
+          <Progress value={progress} aria-label="Download progress" />
         </div>
       </div>
     </div>

@@ -212,7 +212,8 @@ Tray and window lifecycle stay exactly as Phase 5 left them. No GPUI, no warm hi
 - React 17 to 19: `ReactDOM.render` becomes `createRoot` in `src/index.jsx`. formik, react-router 6
   and iconsax accept React 19. Replace `react-sweet-progress` with shadcn `Progress`.
 - Add `motion`, `lucide-react`, `sonner`. Add only the shadcn primitives a screen actually uses.
-  New or rewritten components are `.tsx`; iconsax goes away with the last screen that uses it.
+  New or rewritten components are `.tsx`. iconsax is removed here: React 19 ignores the `defaultProps`
+  its icons depend on.
 - Keep the Tailwind setup (`source(none)`, no preflight) until the last legacy CSS is gone in Phase 7.
 - `appSettings` gains `Animations` and `HardwareAcceleration`, both default `true`, both with serde
   defaults so existing settings files load unchanged. Both are shadcn `Switch` rows in App Settings.
@@ -226,8 +227,9 @@ Tray and window lifecycle stay exactly as Phase 5 left them. No GPUI, no warm hi
   Takes effect on the next app start and the row says so. No automatic restart, it would stop tracking.
 
 **Accept:** every existing screen works on React 19; both switches persist; animations off leaves no
-running transition; GPU off shows no GPU process activity in Task Manager after a restart; tray cost
-unchanged from Phase 5.
+running transition; GPU off starts WebView2 with `--disable-gpu` and the GPU column in Task Manager
+stays near 0 after a restart (the GPU process still exists, rendering in software); tray cost unchanged
+from Phase 5.
 
 ### Phase 7 - Redesign, login, animations
 Agree a visual direction on one screen first; no bulk restyling before that. Window stays 1000x600,
@@ -371,7 +373,7 @@ Delete the legacy `public/electron` and `public/osu` sources.
 - [x] Phase 3 — Settings + commands
 - [x] Phase 4 — Server + poller + overlay
 - [x] Phase 5 — Tray, power, updater
-- [ ] Phase 6 - UI foundation
+- [x] Phase 6 - UI foundation
 - [ ] Phase 7 - Redesign, login, animations
 - [ ] Phase 8 - osu!lazer Ranked Play
 - [ ] Phase 9 - Tournament broadcast mode

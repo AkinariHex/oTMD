@@ -1,35 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./AppSettings.css";
 import { Formik, Field, Form } from "formik";
+import { toast } from "sonner";
 import * as api from "@/lib/api";
+import { setAnimationsEnabled } from "@/lib/animations";
+import { Switch } from "@/Components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/Components/ui/toggle-group";
 
 const TRAY_BEHAVIOR_HINTS = {
   closeToTray: "X keeps o!TMD running in the tray. Minimize works as usual.",
   minimizeToTray: "Minimize sends o!TMD to the tray. X quits the app.",
 };
+// WKWebView offers no switch for GPU compositing.
+const CAN_TOGGLE_HARDWARE_ACCELERATION = !navigator.userAgent.includes("Macintosh");
 
 function AppSettings() {
   const [ui, setUi] = useState(false);
   const [trayBehavior, setTrayBehavior] = useState("closeToTray");
   const [exportMatchesStatus, setExportMatchesStatus] = useState(false);
   const [exportMatchesAPIkey, setExportMatchesAPIkey] = useState("");
+  const [animations, setAnimations] = useState(true);
+  const [hardwareAcceleration, setHardwareAcceleration] = useState(true);
 
   const [apiLoading, setApiLoading] = useState(false);
   const [validate, setValidate] = useState("");
 
-  const saveSettings = (
-    CompactUI,
-    TrayBehavior,
-    ExportMatchesStatus,
-    ExportMatchesAPI
-  ) => {
-    const settings = {
-      CompactUI,
-      TrayBehavior,
-      ExportMatches: { status: ExportMatchesStatus, apikey: ExportMatchesAPI },
-    };
-    api.saveAppSettings(settings);
+  const savedSettings = useRef(null);
+
+  const saveSettings = async (change) => {
+    if (!savedSettings.current) return;
+    savedSettings.current = { ...savedSettings.current, ...change };
+    try {
+      await api.saveAppSettings(savedSettings.current);
+    } catch {
+      toast.error("Could not save the settings.");
+    }
   };
 
   const validateAPI = async (apikey) => {
@@ -46,6 +51,9 @@ function AppSettings() {
   useEffect(() => {
     const load = async () => {
       const appSettings = await api.getAppSettings();
+      savedSettings.current = appSettings;
+      setAnimations(appSettings.Animations);
+      setHardwareAcceleration(appSettings.HardwareAcceleration);
       setUi(appSettings.CompactUI);
       setTrayBehavior(appSettings.TrayBehavior);
       setExportMatchesStatus(appSettings.ExportMatches.status);
@@ -74,12 +82,7 @@ function AppSettings() {
                   checked={ui}
                   onChange={(e) => {
                     setUi(e.target.checked);
-                    saveSettings(
-                      !ui,
-                      trayBehavior,
-                      exportMatchesStatus,
-                      exportMatchesAPIkey
-                    );
+                    saveSettings({ CompactUI: e.target.checked });
                   }}
                 />
                 <span className="slider round"></span>
@@ -99,12 +102,7 @@ function AppSettings() {
               onValueChange={(value) => {
                 if (!value) return;
                 setTrayBehavior(value);
-                saveSettings(
-                  ui,
-                  value,
-                  exportMatchesStatus,
-                  exportMatchesAPIkey
-                );
+                saveSettings({ TrayBehavior: value });
               }}
             >
               <ToggleGroupItem value="closeToTray">Close to tray</ToggleGroupItem>
@@ -116,6 +114,38 @@ function AppSettings() {
               {TRAY_BEHAVIOR_HINTS[trayBehavior]}
             </span>
           </div>
+          <div className="item">
+            <span className="nameField">Animations</span>
+            <label className="preferenceRow">
+              <Switch
+                checked={animations}
+                onCheckedChange={(checked) => {
+                  setAnimations(checked);
+                  setAnimationsEnabled(checked);
+                  saveSettings({ Animations: checked });
+                }}
+              />
+              Play interface animations
+            </label>
+          </div>
+          {CAN_TOGGLE_HARDWARE_ACCELERATION && (
+            <div className="item">
+              <span className="nameField">Hardware Acceleration</span>
+              <label className="preferenceRow">
+                <Switch
+                  checked={hardwareAcceleration}
+                  onCheckedChange={(checked) => {
+                    setHardwareAcceleration(checked);
+                    saveSettings({ HardwareAcceleration: checked });
+                  }}
+                />
+                Use the GPU to draw the interface
+              </label>
+              <div className="description">
+                Takes effect the next time o!TMD starts.
+              </div>
+            </div>
+          )}
           <div className="item">
             <label className="nameField" htmlFor="exportMatches">
               Export Matches
@@ -129,12 +159,12 @@ function AppSettings() {
                   checked={exportMatchesStatus}
                   onChange={(e) => {
                     setExportMatchesStatus(e.target.checked);
-                    saveSettings(
-                      ui,
-                      trayBehavior,
-                      !exportMatchesStatus,
-                      exportMatchesAPIkey
-                    );
+                    saveSettings({
+                      ExportMatches: {
+                        status: e.target.checked,
+                        apikey: exportMatchesAPIkey,
+                      },
+                    });
                   }}
                 />
                 <span className="slider round"></span>
@@ -160,12 +190,12 @@ function AppSettings() {
                   placeholder="Apikey"
                   onChange={(e) => {
                     setExportMatchesAPIkey(e.target.value);
-                    saveSettings(
-                      ui,
-                      trayBehavior,
-                      exportMatchesStatus,
-                      e.target.value
-                    );
+                    saveSettings({
+                      ExportMatches: {
+                        status: exportMatchesStatus,
+                        apikey: e.target.value,
+                      },
+                    });
                   }}
                 />
 

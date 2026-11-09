@@ -1,9 +1,12 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
+import { Toaster } from "sonner";
 import "./index.css";
 import App from "./App";
 import AppBar from "./Components/AppBar/AppBar";
+import MotionProvider from "./Components/MotionProvider/MotionProvider";
 import * as api from "@/lib/api";
+import { setAnimationsEnabled } from "@/lib/animations";
 
 const start = async () => {
   try {
@@ -13,12 +16,21 @@ const start = async () => {
     window.location.hash = "/login";
   }
 
-  ReactDOM.render(
+  try {
+    const { Animations } = await api.getAppSettings();
+    setAnimationsEnabled(Animations);
+  } catch {
+    setAnimationsEnabled(true);
+  }
+
+  createRoot(document.getElementById("root")).render(
     <React.StrictMode>
-      <AppBar />
-      <App />
-    </React.StrictMode>,
-    document.getElementById("root")
+      <MotionProvider>
+        <AppBar />
+        <App />
+        <Toaster richColors position="bottom-right" theme="dark" />
+      </MotionProvider>
+    </React.StrictMode>
   );
 };
 

@@ -38,6 +38,8 @@ export interface AppSettings {
   CompactUI: boolean;
   TrayBehavior: "closeToTray" | "minimizeToTray";
   ExportMatches: { status: boolean; apikey: string };
+  Animations: boolean;
+  HardwareAcceleration: boolean;
 }
 
 export interface NavBarData {
