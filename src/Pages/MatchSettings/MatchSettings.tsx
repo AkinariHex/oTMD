@@ -55,16 +55,14 @@ function MatchSettings() {
   const [matchId, setMatchId] = useState("");
   const [tracking, setTracking] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [transparent, setTransparent] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const [settings, displayer] = await Promise.all([api.getMatchSettings(), api.getDisplayerSettings()]);
+      const settings = await api.getMatchSettings();
       setForm(settings);
       setMatchId(settings.MatchID);
       setTracking(settings.MatchID !== "");
       setFinished(settings.isFinished);
-      setTransparent(displayer.TransparentBackground);
     };
     void load();
 
@@ -150,7 +148,6 @@ function MatchSettings() {
       </div>
       <OverlayPreview
         label="Overlay preview"
-        transparent={transparent}
         status={
           <div className="flex items-center gap-1.5">
             <CopyUrlButton url={api.OVERLAY_URL} label="Copy OBS URL" className="h-6 px-2 text-xs" />

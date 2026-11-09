@@ -31,9 +31,11 @@ export interface DisplayerSettings {
 }
 
 export type Layout = "sidebar" | "tabs";
+export type PreviewBackground = "checker" | "black";
 
 export interface AppSettings {
   Layout: Layout;
+  PreviewBackground: PreviewBackground;
   TrayBehavior: "closeToTray" | "minimizeToTray";
   ExportMatches: { status: boolean; apikey: string };
   Animations: boolean;

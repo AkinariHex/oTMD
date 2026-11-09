@@ -80,11 +80,20 @@ pub enum Layout {
     Tabs,
 }
 
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PreviewBackground {
+    #[default]
+    Checker,
+    Black,
+}
+
 #[allow(non_snake_case)]
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppSettings {
     pub Layout: Layout,
+    pub PreviewBackground: PreviewBackground,
     pub TrayBehavior: TrayBehavior,
     pub ExportMatches: ExportMatches,
     pub Animations: bool,
@@ -95,6 +104,7 @@ impl Default for AppSettings {
     fn default() -> Self {
         Self {
             Layout: Layout::default(),
+            PreviewBackground: PreviewBackground::default(),
             TrayBehavior: TrayBehavior::default(),
             ExportMatches: ExportMatches::default(),
             Animations: true,
@@ -247,6 +257,7 @@ pub mod tests {
         assert!(existing.appSettings.Animations);
         assert!(existing.appSettings.HardwareAcceleration);
         assert!(existing.appSettings.Layout == Layout::Sidebar);
+        assert!(existing.appSettings.PreviewBackground == PreviewBackground::Checker);
 
         let dir = temp_dir();
         SettingsStore::open(&dir, None)

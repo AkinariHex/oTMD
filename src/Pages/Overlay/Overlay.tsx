@@ -5,10 +5,12 @@ import OverlayPreview from "@/Components/OverlayPreview/OverlayPreview";
 import PageHeader from "@/Components/PageHeader/PageHeader";
 import SettingRow from "@/Components/SettingRow/SettingRow";
 import { Input } from "@/Components/ui/input";
+import { Segmented } from "@/Components/ui/segmented";
 import { Select } from "@/Components/ui/select";
 import { SelectCard } from "@/Components/ui/select-card";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
+import { applyPreferences, usePreviewBackground } from "@/lib/preferences";
 
 type OverlayKind = "match" | "ranked" | "broadcast";
 
@@ -22,6 +24,10 @@ const CORNER_STYLES = [
   { value: "15px 15px 15px 15px", label: "Rounded" },
   { value: "15px 15px 0px 0px", label: "Top-rounded" },
   { value: "0px 0px 15px 15px", label: "Bottom-rounded" },
+];
+const PREVIEW_BACKGROUNDS = [
+  { value: "checker", label: "Checker" },
+  { value: "black", label: "Black" },
 ];
 
 function OverlayThumbnail({ kind }: { kind: OverlayKind }) {
@@ -68,6 +74,7 @@ function OverlayThumbnail({ kind }: { kind: OverlayKind }) {
 
 function Overlay({ sources }: { sources: number }) {
   const [settings, setSettings] = useState<api.DisplayerSettings | null>(null);
+  const previewBackground = usePreviewBackground();
 
   useEffect(() => {
     const load = async () => setSettings(await api.getDisplayerSettings());
@@ -84,6 +91,16 @@ function Overlay({ sources }: { sources: number }) {
       await api.saveDisplayerSettings(next);
     } catch {
       toast.error("Could not save the overlay settings.");
+    }
+  };
+
+  const changePreviewBackground = async (PreviewBackground: api.PreviewBackground) => {
+    try {
+      const next = { ...(await api.getAppSettings()), PreviewBackground };
+      applyPreferences(next);
+      await api.saveAppSettings(next);
+    } catch {
+      toast.error("Could not save the preview background.");
     }
   };
 
@@ -119,9 +136,17 @@ function Overlay({ sources }: { sources: number }) {
             <SettingRow compact label="Transparent">
               <Switch aria-label="Transparent background" checked={settings.TransparentBackground} onCheckedChange={(TransparentBackground) => void change({ TransparentBackground })} />
             </SettingRow>
+            <SettingRow compact label="Preview background" hint="Only in this app">
+              <Segmented
+                label="Preview background"
+                value={previewBackground}
+                onChange={(value) => void changePreviewBackground(value as api.PreviewBackground)}
+                options={PREVIEW_BACKGROUNDS}
+              />
+            </SettingRow>
           </div>
         </div>
-        <OverlayPreview label="Live preview" transparent={settings.TransparentBackground} small={settings.SmallDisplayer} />
+        <OverlayPreview label="Live preview" small={settings.SmallDisplayer} />
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ const start = async () => {
   try {
     applyPreferences(await api.getAppSettings());
   } catch {
-    applyPreferences({ Animations: true, Layout: "sidebar" });
+    applyPreferences({ Animations: true, Layout: "sidebar", PreviewBackground: "checker" });
   }
 
   createRoot(document.getElementById("root")).render(

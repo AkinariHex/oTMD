@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { usePreviewBackground } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 
 const OVERLAY_WIDTH = 400;
@@ -9,13 +10,13 @@ const PREVIEW_URL = "http://127.0.0.1:21086/visualizer?preview=1";
 
 interface OverlayPreviewProps {
   label: string;
-  transparent: boolean;
   small?: boolean;
   status?: ReactNode;
 }
 
 // The real overlay in a frame, so what is shown here is exactly what OBS shows.
-function OverlayPreview({ label, transparent, small = false, status }: OverlayPreviewProps) {
+function OverlayPreview({ label, small = false, status }: OverlayPreviewProps) {
+  const background = usePreviewBackground();
   const stage = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const height = small ? SMALL_OVERLAY_HEIGHT : OVERLAY_HEIGHT;
@@ -39,7 +40,7 @@ function OverlayPreview({ label, transparent, small = false, status }: OverlayPr
       <div
         className={cn(
           "flex flex-1 flex-col justify-center rounded-lg p-4 ring-1 ring-line",
-          transparent ? "bg-[repeating-conic-gradient(oklch(1_0_0/0.03)_0_25%,transparent_0_50%)] bg-size-[24px_24px]" : "bg-black"
+          background === "checker" ? "bg-[repeating-conic-gradient(oklch(1_0_0/0.03)_0_25%,transparent_0_50%)] bg-size-[24px_24px]" : "bg-black"
         )}
       >
         <div ref={stage} className="flex justify-center">
