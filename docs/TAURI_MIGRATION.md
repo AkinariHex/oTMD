@@ -126,6 +126,7 @@ src-tauri/src/
                      (rust-embed), GET /teams/* from data dir, GET /ws (broadcast subscriber)
   export.rs          otmd.app POST + discord webhook, once per finished match
   window.rs          open_main / send_to_tray (destroy) / power::background|foreground
+  ranked.rs          PURE life-point rules + parser for the official sources (Phase 8)
   obs.rs             sysinfo: is OBS running (obs64.exe / obs / OBS)
   commands.rs        #[tauri::command] wrappers used by React
 src/                 React UI (Vite + TS), src/lib/api.ts wraps invoke()/listen()
@@ -206,14 +207,149 @@ the AppUpdate page (progress events).
 **Accept:** in tray, Task Manager shows no `msedgewebview2.exe` children of oTMD,
 `otmd.exe` ~0% CPU, Efficiency mode leaf visible, OBS overlay still updating.
 
-### Phase 6 — Packaging + CI
+### Phase 6 - UI foundation
+Tray and window lifecycle stay exactly as Phase 5 left them. No GPUI, no warm hide.
+- React 17 to 19: `ReactDOM.render` becomes `createRoot` in `src/index.jsx`. formik, react-router 6
+  and iconsax accept React 19. Replace `react-sweet-progress` with shadcn `Progress`.
+- Add `motion`, `lucide-react`, `sonner`. Add only the shadcn primitives a screen actually uses.
+  New or rewritten components are `.tsx`; iconsax goes away with the last screen that uses it.
+- Keep the Tailwind setup (`source(none)`, no preflight) until the last legacy CSS is gone in Phase 7.
+- `appSettings` gains `Animations` and `HardwareAcceleration`, both default `true`, both with serde
+  defaults so existing settings files load unchanged. Both are shadcn `Switch` rows in App Settings.
+- **Animations off:** `MotionConfig reducedMotion="always"` plus `data-animations="off"` on `<html>`
+  zeroing CSS transitions and keyframes. Applied before `window_ready`, so nothing animates on open.
+  With the switch on, OS reduced-motion is still respected (`reducedMotion="user"`). OBS overlays are
+  not affected.
+- **Hardware acceleration off:** Windows, `--disable-gpu` through `additional_browser_args` in
+  `open_main`; that call replaces Tauri's default WebView2 flags, so pass those too. Linux,
+  `WEBKIT_DISABLE_COMPOSITING_MODE=1` set before WebKit starts. macOS has no switch: hide the row.
+  Takes effect on the next app start and the row says so. No automatic restart, it would stop tracking.
+
+**Accept:** every existing screen works on React 19; both switches persist; animations off leaves no
+running transition; GPU off shows no GPU process activity in Task Manager after a restart; tray cost
+unchanged from Phase 5.
+
+### Phase 7 - Redesign, login, animations
+Agree a visual direction on one screen first; no bulk restyling before that. Window stays 1000x600,
+not resizable, and hidden until the first screen is ready.
+- Rebuild on shadcn: shell and NavBar, Match, Displayer, App Settings, Profile, Changelog, Update.
+  Forms keep their current fields and validation. Delete each legacy CSS file as its screen moves.
+- **Login page:** one "Login with osu!" action, a visible waiting-for-browser state with cancel and
+  retry, clear messages for port 21086 in use and expired session. Tokens still never reach React.
+- **Animations:** route transitions, staggered entrances on first paint of a list, press feedback,
+  animated number changes, shared-element movement for the nav indicator. `opacity` and `transform`
+  only. Micro interactions up to 150 ms, transitions up to 300 ms. Nothing loops while idle.
+- Errors and confirmations go through sonner.
+
+**Accept:** no legacy page CSS left; every action has loading and error feedback; route changes hold
+60 fps on the integrated GPU; all screens remain usable with animations off.
+
+### Phase 8 - osu!lazer Ranked Play
+Port from `../oTMD_v3` what the user sees, not how it was built. **Do not port:** `new Function` on
+downloaded text, the client secret, access tokens passing through the renderer, Express on port 22088,
+history files inside `src/`, `localhost:3001` calls. v3 also fetches a pinned fork commit and its regex
+no longer matches upstream, so it is stuck on an old formula without base damage or personal multipliers.
+
+**Mode:** `appSettings.Mode` (`Tournament` default, `Ranked`). One mode at a time. The existing poller
+task gains the mode as its work source; no second task, and it sleeps when the mode has nothing to do.
+
+**Finding the room:** automatic with `GET /rooms?type_group=ranked-play&mode=participated&is_active=true`
+every 30 s while Ranked is on, with a manual room ID as fallback. `GET /rooms/{id}/events` every 10 s
+during a match. Needs only the `public` scope already granted. Before writing the parser, save a real
+response as a fixture: the event payload may now include beatmap objects, making v3's per-beatmap fetch
+unnecessary. Rating comes from `matchmaking_stats` on `GET /users/{id}`.
+
+**Life points:** the official API never exposes life or damage, they exist only on the spectator
+server's SignalR state, so the core recomputes them. `ranked.rs`, pure and unit tested. Current rule
+(upstream `cbb4d38`, 2026-05-18), identical for every ruleset:
+
+```
+global(round)    = global_start + global_step * (round - 1)      every played round, ties included
+personal(winner) = personal_start + personal_step * rounds_won_before_this_round
+damage           = ceil((winner_score - loser_score) * (global + personal)) + base_damage
+new_life         = max(old_life == max_life ? 1 : 0, old_life - damage)   loser only; a tie deals nothing
+```
+
+Values today: `max_life` 1,000,000, `base_damage` 50,000, all four multiplier values 0.5. Process rounds
+in `played_at` order. A player with no score counts as 0.
+
+**Staying current automatically.** Rules are data, parsed from the official repositories into a typed
+`RankedRules`. Never evaluate downloaded text.
+- Sources on `raw.githubusercontent.com`, branch `master`. `ppy/osu`, under
+  `osu.Game/Online/Multiplayer/MatchTypes/RankedPlay/`: `RankedPlayUserInfo.cs` (`Life`, personal start),
+  `RankedPlayRoomState.cs` (global start). `ppy/osu-server-spectator`, under
+  `osu.Server.Spectator/Hubs/Multiplayer/Matchmaking/RankedPlay/`: `Stages/ResultsStage.cs` (`BaseDamage`,
+  personal step), `Stages/RoundWarmupStage.cs` (global step), `RankedPlayMatchController.cs`.
+- Each number comes from an anchored regex accepting numeric literals only, then a range check.
+- Sentinels confirm the formula's shape: the normalized lines computing `attackMultiplier`,
+  `totalDamage` (`Math.Ceiling`) and `NewLife` must be present.
+- Changed numbers apply automatically. A missing sentinel, failed parse or out-of-range value keeps
+  the last good rules and shows "ranked rules may be outdated" in the UI, never in the overlay.
+  All sources must pass together: no partial updates.
+- Embedded baseline plus `ranked-rules.json` in the data dir, atomic write. Fetched at most once per
+  24 h and only when a ranked session starts, 15 s timeout, 1 MB cap per file. Failure never blocks play.
+- Rules are frozen per match, so a mid-match update cannot change a running score.
+
+**Known limits, shown as they are:** a forfeit (life set to 0) and the failed-download penalty
+(100,000 x global multiplier, no base damage) are not visible through the API. A room that ends with
+both players alive shows "match ended" and never invents a winner. `master` can briefly run ahead of
+what is deployed.
+
+**Output:** overlays `overlay/ranked/` (HP bars, ratio, history) rebuilt as plain JS on the embedded
+server and the existing `/ws`, `escapeHtml` on every API string. Finished matches are saved once to the
+existing `POST /api/rooms` from Rust, through the export retry path and only with a valid export key.
+
+**Accept:** tests cover first-hit survival at 1 life, ceiling, tie, personal multiplier growth,
+unmultiplied base damage, malformed upstream files and a changed constant. A real ranked match matches
+the in-game life bar round by round. Tray cost unchanged while a ranked match updates the overlay.
+
+### Phase 9 - Tournament broadcast mode
+For streamers of someone else's tournament. New `Broadcast` value for `Mode`.
+- A list of up to 8 matches, added by MP link or ID; each row reuses the match config fields
+  (type, stage, best of, warmups, reverse). The list survives restart; finished matches stay until removed.
+- Reuses `Tracker` and `scoring.rs` per match inside the same poller task, one match per slice
+  (10 s divided by the number of matches, minimum 1.25 s), so 8 matches stay under 60 requests a minute
+  including player lookups. Back off on 429.
+- With no logged-in player to anchor sides, red and blue follow the lobby name order.
+- Overlay `/broadcast`: 1 match full size, 2 to 4 stacked, 5 to 8 compact grid, transparent background.
+  `?matches=<id,id>` selects a subset so several OBS sources can show different matches.
+- **Never exported:** other people's matches are not posted to the user's account or Discord.
+
+**Accept:** 4 live or replayed lobbies update in a single OBS source; adding or removing a match needs
+no restart; one failing lobby does not stall the others; no request bursts in the log; no tokens in
+payloads; tray cost unchanged.
+
+### Phase 10 - Home dashboard
+New `/app/home`, first nav item and default route for logged-in users.
+
+Do the website first, on a branch, and deploy before the app part. New `GET /api/match/stats`,
+`Authorization: Bearer <export key>`: aggregates for the key's owner only, never accepts a user ID, rate
+limited with `consumeRateLimit`, returns no webhook or key data.
+
+| Section | Source |
+|---|---|
+| Saved matches: total, win rate, by type, top tournaments, average match cost, last 10 | `GET /api/match/stats` |
+| Ranked: rating, wins and losses, recent rooms | osu! API, `/users/{id}`, `/rooms?type_group=ranked-play&mode=participated` |
+| Live status: current mode, tracked match, overlay URL | local state |
+
+Fetched by a Rust command only while the window is open, 60 s in-memory cache. Without an export key the
+saved section shows how to connect one and the rest still works. Tournament matches that were tracked but
+never exported do not exist anywhere, so they are not counted.
+
+**Accept:** another user's data is unreachable with any key; site down or no key leaves a usable screen
+with a sonner error at most once; numbers match a hand count on a known account; no dashboard work in tray.
+
+### Phase 11 - Packaging + CI
 `tauri.conf.json` bundles: NSIS (per-user), zip portable, AppImage + deb, macOS dmg.
 GitHub Actions matrix (windows/ubuntu/macos) with `tauri-apps/tauri-action`, signed
 updater artifacts (`TAURI_SIGNING_PRIVATE_KEY` secret), `latest.json` on releases.
+The maintainer generates the signing key and keeps it; only the public key goes in `plugins.updater.pubkey`.
+Portable mode checks GitHub releases and links to the zip.
 **Accept:** tag push produces all artifacts; installed app auto-updates from a test release.
 
-### Phase 7 — Hand-off from Electron
+### Phase 12 - Hand-off from Electron
 Last Electron 2.x release whose update screen links to the v3 download. README update.
+Delete the legacy `public/electron` and `public/osu` sources.
 
 ## 5. Rules for Claude Code
 
@@ -221,6 +357,10 @@ Last Electron 2.x release whose update screen links to the v3 download. README u
 - Use plan mode before writing code; show the plan, then implement.
 - Never reintroduce: admin rights, priority boosts, API keys in overlay payloads,
   `hide()` for tray, Node in the UI.
+- Never evaluate downloaded text (`eval`, `new Function`, expression interpreters). Remote data
+  becomes typed values and is validated.
+- New network calls live in Rust; React receives finished views. New background work runs inside the
+  single poller task and adds nothing while idle or in tray.
 - Run `cargo clippy`, `cargo test`, `npm run build` before declaring a phase done.
 - Commit at the end of each phase with a clear message. Update the checklist below.
 
@@ -230,6 +370,11 @@ Last Electron 2.x release whose update screen links to the v3 download. README u
 - [x] Phase 2 — Scoring + tests (done after Phase 3: real fixtures need a login)
 - [x] Phase 3 — Settings + commands
 - [x] Phase 4 — Server + poller + overlay
-- [ ] Phase 5 — Tray, power, OBS, updater
-- [ ] Phase 6 — Packaging + CI
-- [ ] Phase 7 — Electron hand-off
+- [x] Phase 5 — Tray, power, updater
+- [ ] Phase 6 - UI foundation
+- [ ] Phase 7 - Redesign, login, animations
+- [ ] Phase 8 - osu!lazer Ranked Play
+- [ ] Phase 9 - Tournament broadcast mode
+- [ ] Phase 10 - Home dashboard
+- [ ] Phase 11 - Packaging + CI
+- [ ] Phase 12 - Electron hand-off
