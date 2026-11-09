@@ -3,20 +3,32 @@ mod commands;
 mod export;
 mod osu;
 mod poller;
+mod power;
 pub mod scoring;
 mod server;
 mod settings;
 mod tournament;
+mod window;
 
 use auth::AuthManager;
 use poller::{Endpoints, Poller};
 use server::Overlay;
 use settings::SettingsStore;
-use std::sync::Arc;
-use tauri::{Emitter, Manager};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
+use tauri::{
+    AppHandle, Emitter, Manager, RunEvent, WindowEvent,
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+};
+use tauri_plugin_notification::NotificationExt;
 use tokio::{net::TcpListener, sync::Notify};
 
 const SITE_URL: &str = "https://otmd.app";
+const TRAY_OPEN: &str = "open";
+const TRAY_QUIT: &str = "quit";
 
 pub struct AppState {
     settings: Arc<SettingsStore>,
@@ -24,6 +36,53 @@ pub struct AppState {
     overlay: Arc<Overlay>,
     wake: Arc<Notify>,
     callback_ready: bool,
+    webview_data_dir: Option<PathBuf>,
+    window_memory: Mutex<window::WindowMemory>,
+}
+
+fn build_tray(app: &AppHandle) -> tauri::Result<()> {
+    let open = MenuItem::with_id(app, TRAY_OPEN, "Open", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, TRAY_QUIT, "Quit", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&open, &quit])?;
+
+    let mut tray = TrayIconBuilder::new()
+        .tooltip("o!TMD")
+        .menu(&menu)
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id().as_ref() {
+            TRAY_OPEN => window::request_open(app),
+            TRAY_QUIT => window::quit(app),
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                window::request_open(tray.app_handle());
+            }
+        });
+
+    if let Some(icon) = app.default_window_icon() {
+        tray = tray.icon(icon.clone());
+    }
+    tray.build(app)?;
+    Ok(())
+}
+
+fn on_session_expired(app: &AppHandle) {
+    let _ = app.emit("session-expired", ());
+    let shown = app
+        .notification()
+        .builder()
+        .title("o!TMD")
+        .body("Your osu! session has expired. Open o!TMD to log in again.")
+        .show();
+    if shown.is_err() {
+        eprintln!("Could not show the session notification");
+    }
 }
 
 pub fn run() {
@@ -35,13 +94,23 @@ pub fn run() {
     tauri::async_runtime::set(runtime.handle().clone());
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.unminimize();
-                let _ = window.set_focus();
-            }
-        }))
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| window::request_open(app)))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .on_window_event(|window, event| match event {
+            WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                window::close(window.app_handle());
+            }
+            WindowEvent::Moved(position) if !window.is_minimized().unwrap_or(false) => {
+                window::remember_position(window.app_handle(), *position);
+            }
+            WindowEvent::Resized(_) if window.is_minimized().unwrap_or(false) => {
+                window::minimized(window.app_handle());
+            }
+            _ => {}
+        })
         .setup(|app| {
             let handle = app.handle().clone();
             let data_dir = settings::resolve_data_dir(&handle)?;
@@ -60,7 +129,12 @@ pub fn run() {
                 overlay: overlay.clone(),
                 wake: wake.clone(),
                 callback_ready: listener.is_some(),
+                webview_data_dir: settings::portable_data_dir().map(|dir| dir.join("webview")),
+                window_memory: Mutex::default(),
             });
+
+            build_tray(&handle)?;
+            window::open_main(&handle);
 
             if let Some(listener) = listener {
                 let overlay = overlay.clone();
@@ -79,9 +153,7 @@ pub fn run() {
                 site: SITE_URL.into(),
             };
             let poller = Poller::new(auth, settings_store, overlay, teams_dir, wake, &endpoints)?;
-            tauri::async_runtime::spawn(poller.run(move || {
-                let _ = handle.emit("session-expired", ());
-            }));
+            tauri::async_runtime::spawn(poller.run(move || on_session_expired(&handle)));
 
             Ok(())
         })
@@ -97,8 +169,18 @@ pub fn run() {
             commands::get_app_settings,
             commands::save_app_settings,
             commands::validate_export_key,
+            commands::check_update,
             commands::close_app,
+            commands::get_start_route,
+            commands::remember_route,
+            commands::window_ready,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app, event| {
+            // Destroying the window for the tray must not end the process; Quit passes a code.
+            if let RunEvent::ExitRequested { code: None, api, .. } = event {
+                api.prevent_exit();
+            }
+        });
 }

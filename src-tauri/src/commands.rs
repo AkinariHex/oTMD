@@ -2,12 +2,22 @@ use crate::{
     AppState,
     auth::{User, now_seconds},
     settings::{AppSettings, DisplayerSettings, MatchSettings},
+    window,
 };
 use serde::Serialize;
-use tauri::{AppHandle, State};
+use std::time::{Duration, Instant};
+use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_opener::OpenerExt;
+use tauri_plugin_updater::{Update, UpdaterExt};
 
 const SAVE_FAILED: &str = "Could not save the settings.";
+const PROGRESS_INTERVAL: Duration = Duration::from_millis(250);
+
+#[derive(Clone, Serialize)]
+struct DownloadProgress {
+    speed: f64,
+    percent: u64,
+}
 
 #[derive(Serialize)]
 pub struct AppInfo {
@@ -99,13 +109,75 @@ pub async fn validate_export_key(apikey: String, state: State<'_, AppState>) -> 
 }
 
 #[tauri::command]
-pub fn close_app(app: AppHandle, state: State<'_, AppState>) {
-    let cleared = state.settings.update(|current| {
-        current.matchSettings.MatchID.clear();
-        current.matchSettings.isFinished = false;
-    });
-    if cleared.is_err() {
-        eprintln!("{SAVE_FAILED}");
+pub fn get_start_route(app: AppHandle) -> String {
+    window::start_route(&app)
+}
+
+#[tauri::command]
+pub fn remember_route(app: AppHandle, route: String) {
+    window::remember_route(&app, route);
+}
+
+#[tauri::command]
+pub fn window_ready(app: AppHandle) {
+    window::reveal(&app);
+}
+
+#[tauri::command]
+pub fn close_app(app: AppHandle) {
+    window::close(&app);
+}
+
+#[tauri::command]
+pub async fn check_update(app: AppHandle, state: State<'_, AppState>) -> Result<bool, String> {
+    // Portable installs are replaced by hand, and a dev build has nothing to update.
+    if cfg!(debug_assertions) || state.webview_data_dir.is_some() {
+        return Ok(false);
     }
-    app.exit(0);
+
+    let Ok(updater) = app.updater() else {
+        return Ok(false);
+    };
+    let Ok(Some(update)) = updater.check().await else {
+        return Ok(false);
+    };
+
+    tauri::async_runtime::spawn(install_update(app, update));
+    Ok(true)
+}
+
+async fn install_update(app: AppHandle, update: Update) {
+    let emitter = app.clone();
+    let started = Instant::now();
+    let mut last_emit: Option<Instant> = None;
+    let mut downloaded = 0u64;
+
+    let result = update
+        .download_and_install(
+            move |chunk, total| {
+                downloaded += chunk as u64;
+                if last_emit.is_none_or(|last| last.elapsed() >= PROGRESS_INTERVAL) {
+                    last_emit = Some(Instant::now());
+                    let _ = emitter.emit("download-progress", download_progress(downloaded, total, started));
+                }
+            },
+            || {},
+        )
+        .await;
+
+    match result {
+        Ok(()) => app.restart(),
+        Err(_) => {
+            eprintln!("The update could not be installed");
+            let _ = app.emit("update-failed", ());
+        }
+    }
+}
+
+fn download_progress(downloaded: u64, total: Option<u64>, started: Instant) -> DownloadProgress {
+    let seconds = started.elapsed().as_secs_f64().max(0.001);
+    DownloadProgress {
+        speed: (downloaded as f64 / seconds / 1_000_000.0 * 100.0).round() / 100.0,
+        percent: total.filter(|total| *total > 0).map_or(0, |total| downloaded * 100 / total),
+    }
 }

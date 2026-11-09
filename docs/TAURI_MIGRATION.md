@@ -11,7 +11,7 @@ per session, and do not start a phase until the previous one meets its acceptanc
 1. **Zero cost while in tray.** Players are in-game. When the app is in the tray, the
    WebView must NOT exist (destroy the window, never `hide()`). Only the Rust core runs:
    tray icon + one poller task + the axum server feeding OBS. No GPU, no JS, no timers
-   besides the poller. Process priority below-normal + Windows Efficiency Mode.
+   besides the poller. Process priority idle + Windows Efficiency Mode.
 2. Never run elevated, never raise priority. Remove `requireAdministrator`, `perMachine`,
    and the old `os.setPriority(-20)` behavior.
 3. Small and light: system WebView, no Node runtime, overlay files embedded in the binary.
@@ -34,7 +34,7 @@ per session, and do not start a phase until the previous one meets its acceptanc
   plus `teams/` (team images) and `exports/`. Shape:
   `{ accounts[], matchSettings{ActiveAccount, MatchID, MatchType, Stage, BestOF,
   MapsNqualifiers, Warmups, ScoreReverse, isFinished}, displayerSettings{VisualizerStyle,
-  SmallDisplayer, TransparentBackground}, appSettings{CompactUI, SystemTray,
+  SmallDisplayer, TransparentBackground}, appSettings{CompactUI, TrayBehavior,
   ExportMatches{status, apikey}} }`
 
 ## 2. Known bugs to FIX during the port (do not replicate)
@@ -140,15 +140,15 @@ optional tauri-plugin-window-state.
 
 ### Tray / zero-cost rules (goal #1, details)
 
-- Tray icon always exists (Open / Quit, double-click opens).
+- Tray icon always exists (Open / Quit, single click opens).
 - `send_to_tray`: `window.destroy()` then `power::background()`:
-  `SetPriorityClass(BELOW_NORMAL_PRIORITY_CLASS)`, `SetProcessInformation(ProcessPowerThrottling,
+  `SetPriorityClass(IDLE_PRIORITY_CLASS)`, `SetProcessInformation(ProcessPowerThrottling,
   EXECUTION_SPEED)` (Efficiency mode), `SetProcessWorkingSetSize(-1,-1)`.
 - `open_main`: `power::foreground()` (NORMAL, throttling off), recreate window with
   `WebviewWindowBuilder` (label "main", 1000×600, not resizable, `decorations(false)`).
 - `RunEvent::ExitRequested { code: None }` → `api.prevent_exit()`. Quit menu → `app.exit(0)`.
-- OS minimize (`WindowEvent::Resized` + `is_minimized()`) → `send_to_tray` when
-  `appSettings.SystemTray` is true.
+- X or OS close → `send_to_tray` with `TrayBehavior: closeToTray` (default), quit otherwise. OS minimize → `send_to_tray` only when
+  `TrayBehavior` is `minimizeToTray`.
 - macOS: `ActivationPolicy::Accessory` while in tray.
 - tokio runtime capped at 2 worker threads. No `timeBeginPeriod`. No busy loops.
 - React holds NO authoritative state: on mount it fetches everything via `invoke`.
@@ -229,7 +229,7 @@ Last Electron 2.x release whose update screen links to the v3 download. README u
 - [x] Phase 1 — Scaffold
 - [x] Phase 2 — Scoring + tests (done after Phase 3: real fixtures need a login)
 - [x] Phase 3 — Settings + commands
-- [ ] Phase 4 — Server + poller + overlay
+- [x] Phase 4 — Server + poller + overlay
 - [ ] Phase 5 — Tray, power, OBS, updater
 - [ ] Phase 6 — Packaging + CI
 - [ ] Phase 7 — Electron hand-off

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import NavBar from "../NavBar/NavBar";
 import Profile from "../../Pages/Profile/Profile";
 import MatchSettings from "../../Pages/MatchSettings/MatchSettings";
@@ -10,6 +10,11 @@ import * as api from "@/lib/api";
 
 function AppRoutes() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    api.rememberRoute(pathname);
+  }, [pathname]);
 
   useEffect(() => {
     const load = async () => {

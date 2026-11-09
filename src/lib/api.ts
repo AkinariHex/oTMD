@@ -36,7 +36,7 @@ export interface DisplayerSettings {
 
 export interface AppSettings {
   CompactUI: boolean;
-  SystemTray: boolean;
+  TrayBehavior: "closeToTray" | "minimizeToTray";
   ExportMatches: { status: boolean; apikey: string };
 }
 
@@ -63,6 +63,17 @@ function subscribe<T>(event: string, listener: (payload: T) => void): () => void
 const navBarListeners = new Set<(data: NavBarData) => void>();
 
 export const getSession = (): Promise<User | null> => invoke("get_session");
+
+export const getStartRoute = (): Promise<string> => invoke("get_start_route");
+
+export const rememberRoute = (route: string): Promise<void> =>
+  invoke("remember_route", { route });
+
+// The extra round trip lets the data requests of the first screen finish before it is shown.
+export const showWindowWhenReady = async (): Promise<void> => {
+  await getSession();
+  await invoke("window_ready");
+};
 
 export const login = (): Promise<void> => invoke("login");
 
@@ -132,14 +143,14 @@ export const onNavBarData = (
   };
 };
 
-// Phase 5: updater plugin
-export const isUpdateAvailable = async (): Promise<boolean> => false;
+export const isUpdateAvailable = (): Promise<boolean> => invoke("check_update");
 
 export const onDownloadProgress = (
-  _listener: (progress: DownloadProgress) => void
-): (() => void) => {
-  return () => {};
-};
+  listener: (progress: DownloadProgress) => void
+): (() => void) => subscribe("download-progress", listener);
+
+export const onUpdateFailed = (listener: () => void): (() => void) =>
+  subscribe("update-failed", listener);
 
 export const minimizeApp = async (): Promise<void> => {
   await getCurrentWindow().minimize();

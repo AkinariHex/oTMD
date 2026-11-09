@@ -1,9 +1,10 @@
 import { fileURLToPath, URL } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   // public/ still holds the Electron sources for later phases; none of it may ship.
   publicDir: false,
   clearScreen: false,

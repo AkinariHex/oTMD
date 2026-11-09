@@ -2,10 +2,16 @@ import React, { useEffect, useState } from "react";
 import "./AppSettings.css";
 import { Formik, Field, Form } from "formik";
 import * as api from "@/lib/api";
+import { ToggleGroup, ToggleGroupItem } from "@/Components/ui/toggle-group";
+
+const TRAY_BEHAVIOR_HINTS = {
+  closeToTray: "X keeps o!TMD running in the tray. Minimize works as usual.",
+  minimizeToTray: "Minimize sends o!TMD to the tray. X quits the app.",
+};
 
 function AppSettings() {
   const [ui, setUi] = useState(false);
-  const [systemTray, setSystemTray] = useState(false);
+  const [trayBehavior, setTrayBehavior] = useState("closeToTray");
   const [exportMatchesStatus, setExportMatchesStatus] = useState(false);
   const [exportMatchesAPIkey, setExportMatchesAPIkey] = useState("");
 
@@ -14,13 +20,13 @@ function AppSettings() {
 
   const saveSettings = (
     CompactUI,
-    SystemTray,
+    TrayBehavior,
     ExportMatchesStatus,
     ExportMatchesAPI
   ) => {
     const settings = {
       CompactUI,
-      SystemTray,
+      TrayBehavior,
       ExportMatches: { status: ExportMatchesStatus, apikey: ExportMatchesAPI },
     };
     api.saveAppSettings(settings);
@@ -41,7 +47,7 @@ function AppSettings() {
     const load = async () => {
       const appSettings = await api.getAppSettings();
       setUi(appSettings.CompactUI);
-      setSystemTray(appSettings.SystemTray);
+      setTrayBehavior(appSettings.TrayBehavior);
       setExportMatchesStatus(appSettings.ExportMatches.status);
       setExportMatchesAPIkey(appSettings.ExportMatches.apikey);
       if (appSettings.ExportMatches.apikey !== "") {
@@ -70,7 +76,7 @@ function AppSettings() {
                     setUi(e.target.checked);
                     saveSettings(
                       !ui,
-                      systemTray,
+                      trayBehavior,
                       exportMatchesStatus,
                       exportMatchesAPIkey
                     );
@@ -82,33 +88,36 @@ function AppSettings() {
             </div>
           </div>
           <div className="item">
-            <label className="nameField" htmlFor="systemTray">
-              System Tray
-            </label>
-            <div className="clickable">
-              <label className="switch">
-                <Field
-                  type="checkbox"
-                  id="systemTray"
-                  name="systemTray"
-                  checked={systemTray}
-                  onChange={(e) => {
-                    setSystemTray(e.target.checked);
-                    saveSettings(
-                      ui,
-                      !systemTray,
-                      exportMatchesStatus,
-                      exportMatchesAPIkey
-                    );
-                  }}
-                />
-                <span className="slider round"></span>
-              </label>
-              <span>Enable minimize to system tray</span>
-            </div>
+            <span className="nameField">System Tray</span>
+            <ToggleGroup
+              type="single"
+              spacing={0}
+              value={trayBehavior}
+              data-selected={trayBehavior}
+              className="trayBehavior"
+              aria-label="System tray behavior"
+              onValueChange={(value) => {
+                if (!value) return;
+                setTrayBehavior(value);
+                saveSettings(
+                  ui,
+                  value,
+                  exportMatchesStatus,
+                  exportMatchesAPIkey
+                );
+              }}
+            >
+              <ToggleGroupItem value="closeToTray">Close to tray</ToggleGroupItem>
+              <ToggleGroupItem value="minimizeToTray">
+                Minimize to tray
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <span className="trayBehaviorHint">
+              {TRAY_BEHAVIOR_HINTS[trayBehavior]}
+            </span>
           </div>
           <div className="item">
-            <label className="nameField" htmlFor="systemTray">
+            <label className="nameField" htmlFor="exportMatches">
               Export Matches
             </label>
             <div className="clickable">
@@ -122,7 +131,7 @@ function AppSettings() {
                     setExportMatchesStatus(e.target.checked);
                     saveSettings(
                       ui,
-                      systemTray,
+                      trayBehavior,
                       !exportMatchesStatus,
                       exportMatchesAPIkey
                     );
@@ -153,7 +162,7 @@ function AppSettings() {
                     setExportMatchesAPIkey(e.target.value);
                     saveSettings(
                       ui,
-                      systemTray,
+                      trayBehavior,
                       exportMatchesStatus,
                       e.target.value
                     );

@@ -11,16 +11,7 @@
     "beforeBuildCommand": "npm run build"
   },
   "app": {
-    "windows": [
-      {
-        "label": "main",
-        "title": "osu! Tourney Match Displayer",
-        "width": 1000,
-        "height": 600,
-        "resizable": false,
-        "decorations": false
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://raw.githubusercontent.com; img-src 'self' data: https://a.ppy.sh https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com",
       "devCsp": null
@@ -35,5 +26,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": [
+        "https://github.com/AkinariHex/oTMD/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

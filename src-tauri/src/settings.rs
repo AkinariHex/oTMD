@@ -64,12 +64,20 @@ pub struct ExportMatches {
     pub apikey: String,
 }
 
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TrayBehavior {
+    #[default]
+    CloseToTray,
+    MinimizeToTray,
+}
+
 #[allow(non_snake_case)]
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppSettings {
     pub CompactUI: bool,
-    pub SystemTray: bool,
+    pub TrayBehavior: TrayBehavior,
     pub ExportMatches: ExportMatches,
 }
 
@@ -145,13 +153,15 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> io::Result<()> {
     fs::rename(&temporary, path)
 }
 
-pub fn resolve_data_dir(app: &AppHandle) -> tauri::Result<PathBuf> {
-    let portable_dir = std::env::current_exe()?.parent().and_then(|exe_dir| {
-        let is_portable = exe_dir.join("portable.txt").exists() || exe_dir.join("data").is_dir();
-        is_portable.then(|| exe_dir.join("data"))
-    });
+pub fn portable_data_dir() -> Option<PathBuf> {
+    let exe = std::env::current_exe().ok()?;
+    let exe_dir = exe.parent()?;
+    let is_portable = exe_dir.join("portable.txt").exists() || exe_dir.join("data").is_dir();
+    is_portable.then(|| exe_dir.join("data"))
+}
 
-    let data_dir = match portable_dir {
+pub fn resolve_data_dir(app: &AppHandle) -> tauri::Result<PathBuf> {
+    let data_dir = match portable_data_dir() {
         Some(dir) => dir,
         None => app.path().app_config_dir()?,
     };
@@ -207,6 +217,17 @@ pub mod tests {
             assert_eq!(settings.matchSettings.BestOF, "9");
             assert_eq!(settings.displayerSettings.VisualizerStyle, "0px 0px 0px 0px");
         });
+    }
+
+    #[test]
+    fn tray_behavior_defaults_to_close_to_tray_and_round_trips() {
+        let legacy: Settings = serde_json::from_str(r#"{"appSettings":{"SystemTray":true}}"#).unwrap();
+        assert!(legacy.appSettings.TrayBehavior == TrayBehavior::CloseToTray);
+
+        let parsed: Settings =
+            serde_json::from_str(r#"{"appSettings":{"TrayBehavior":"minimizeToTray"}}"#).unwrap();
+        assert!(parsed.appSettings.TrayBehavior == TrayBehavior::MinimizeToTray);
+        assert!(serde_json::to_string(&parsed).unwrap().contains(r#""TrayBehavior":"minimizeToTray""#));
     }
 
     #[test]

@@ -14,6 +14,8 @@ function App() {
       setIsUpdateAvailable(await api.isUpdateAvailable());
     };
     load();
+    api.showWindowWhenReady();
+    return api.onUpdateFailed(() => setIsUpdateAvailable(false));
   }, []);
 
   return (

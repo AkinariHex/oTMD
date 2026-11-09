@@ -1,6 +1,24 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+/* No Tailwind preflight, and only shadcn sources: the app's plain CSS classes (.container...) must stay untouched. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "./Components/ui";
+
+@theme inline {
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --radius-md: 6px;
+}
 
 :root {
+  --foreground: oklch(0.89 0 0);
+  --muted: oklch(0.32 0.014 265);
+  --input: oklch(0.32 0.014 265);
+  --ring: oklch(0.7 0.075 215);
+  --destructive: oklch(0.65 0.2 25);
   --teal-blue: hsla(196, 24%, 46%, 1);
   --turquoise-green: hsla(139, 36%, 78%, 1);
   --puce: hsla(352, 36%, 65%, 1);
