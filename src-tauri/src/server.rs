@@ -45,8 +45,10 @@ pub struct Overlay {
     sender: Sender<String>,
     match_data: Mutex<Option<Value>>,
     ranked: Mutex<RankedState>,
+    broadcast: Mutex<Option<Value>>,
     match_sources: AtomicUsize,
     ranked_sources: AtomicUsize,
+    broadcast_sources: AtomicUsize,
     on_change: OnceLock<Box<dyn Fn(OverlaySources) + Send + Sync>>,
 }
 
@@ -62,25 +64,43 @@ pub struct OverlaySources {
     #[serde(rename = "match")]
     pub match_overlay: usize,
     pub ranked: usize,
+    pub broadcast: usize,
+}
+
+#[derive(Clone, Copy)]
+enum SourceKind {
+    Match,
+    Ranked,
+    Broadcast,
+}
+
+impl SourceKind {
+    fn from_param(source: Option<&str>) -> Self {
+        match source {
+            Some("ranked") => Self::Ranked,
+            Some("broadcast") => Self::Broadcast,
+            _ => Self::Match,
+        }
+    }
 }
 
 // Dropping it counts the disconnect, however the session ended.
 struct SourceConnection {
     overlay: Arc<Overlay>,
-    ranked: bool,
+    kind: SourceKind,
 }
 
 impl SourceConnection {
-    fn open(overlay: Arc<Overlay>, ranked: bool) -> Self {
-        overlay.counter(ranked).fetch_add(1, Ordering::Relaxed);
+    fn open(overlay: Arc<Overlay>, kind: SourceKind) -> Self {
+        overlay.counter(kind).fetch_add(1, Ordering::Relaxed);
         overlay.notify();
-        Self { overlay, ranked }
+        Self { overlay, kind }
     }
 }
 
 impl Drop for SourceConnection {
     fn drop(&mut self) {
-        self.overlay.counter(self.ranked).fetch_sub(1, Ordering::Relaxed);
+        self.overlay.counter(self.kind).fetch_sub(1, Ordering::Relaxed);
         self.overlay.notify();
     }
 }
@@ -91,14 +111,20 @@ impl Overlay {
             sender: broadcast::channel(OVERLAY_BACKLOG).0,
             match_data: Mutex::new(None),
             ranked: Mutex::default(),
+            broadcast: Mutex::default(),
             match_sources: AtomicUsize::new(0),
             ranked_sources: AtomicUsize::new(0),
+            broadcast_sources: AtomicUsize::new(0),
             on_change: OnceLock::new(),
         }
     }
 
-    fn counter(&self, ranked: bool) -> &AtomicUsize {
-        if ranked { &self.ranked_sources } else { &self.match_sources }
+    fn counter(&self, kind: SourceKind) -> &AtomicUsize {
+        match kind {
+            SourceKind::Match => &self.match_sources,
+            SourceKind::Ranked => &self.ranked_sources,
+            SourceKind::Broadcast => &self.broadcast_sources,
+        }
     }
 
     pub fn set_on_change(&self, listener: impl Fn(OverlaySources) + Send + Sync + 'static) {
@@ -109,6 +135,7 @@ impl Overlay {
         OverlaySources {
             match_overlay: self.match_sources.load(Ordering::Relaxed),
             ranked: self.ranked_sources.load(Ordering::Relaxed),
+            broadcast: self.broadcast_sources.load(Ordering::Relaxed),
         }
     }
 
@@ -141,6 +168,14 @@ impl Overlay {
         self.ranked.lock().unwrap_or_else(PoisonError::into_inner).rules_outdated
     }
 
+    pub fn set_broadcast(&self, view: Option<Value>) {
+        *self.broadcast.lock().unwrap_or_else(PoisonError::into_inner) = view;
+    }
+
+    pub fn broadcast_view(&self) -> Option<Value> {
+        self.broadcast.lock().unwrap_or_else(PoisonError::into_inner).clone()
+    }
+
     pub fn subscribe(&self) -> Receiver<String> {
         self.sender.subscribe()
     }
@@ -151,8 +186,8 @@ impl Overlay {
 
     // Built field by field: app settings hold the website API key and must never be included.
     pub fn message(&self, kind: &str, settings: &SettingsStore) -> String {
-        let (match_settings, displayer_settings, ranked_settings) = settings.read(|settings| {
-            (settings.matchSettings.clone(), settings.displayerSettings.clone(), settings.rankedSettings.clone())
+        let (match_settings, displayer_settings, ranked_settings, broadcast_style) = settings.read(|settings| {
+            (settings.matchSettings.clone(), settings.displayerSettings.clone(), settings.rankedSettings.clone(), settings.broadcastStyle.clone())
         });
 
         let mut message = json!({
@@ -165,8 +200,13 @@ impl Overlay {
                     "Maps": ranked_settings.Maps,
                     "Ratio": ranked_settings.Ratio,
                 },
+                "broadcastStyle": broadcast_style,
             },
         });
+
+        if let Some(view) = self.broadcast_view() {
+            message["settings"]["broadcastData"] = view;
+        }
 
         let ranked = self.ranked.lock().unwrap_or_else(PoisonError::into_inner);
         if let Some(view) = &ranked.view {
@@ -225,8 +265,8 @@ async fn overlay_socket(
     let overlay = state.overlay.clone();
     ws.on_upgrade(move |socket| async move {
         // The app's own preview is not an OBS source.
-        let ranked = params.source.as_deref() == Some("ranked");
-        let _connection = params.preview.is_none().then(|| SourceConnection::open(overlay, ranked));
+        let kind = SourceKind::from_param(params.source.as_deref());
+        let _connection = params.preview.is_none().then(|| SourceConnection::open(overlay, kind));
         run_overlay_session(socket, initial, receiver).await;
     })
 }
@@ -277,6 +317,10 @@ async fn ranked_ratio_page() -> Response {
     embedded_file("ranked-ratio.html")
 }
 
+async fn broadcast_page() -> Response {
+    embedded_file("broadcast.html")
+}
+
 async fn maps_page() -> Response {
     embedded_file("maps.html")
 }
@@ -292,6 +336,7 @@ fn overlay_routes(overlay: Arc<Overlay>, settings: Arc<SettingsStore>, teams_dir
         .route("/ranked", get(ranked_page))
         .route("/ranked/maps", get(maps_page))
         .route("/ranked/ratio", get(ranked_ratio_page))
+        .route("/broadcast", get(broadcast_page))
         .route("/ws", get(overlay_socket))
         .nest_service("/teams", ServeDir::new(teams_dir))
         .fallback(overlay_asset)
@@ -426,6 +471,28 @@ mod tests {
             tokio::time::sleep(std::time::Duration::from_millis(10)).await;
         }
         assert_eq!(overlay.sources().match_overlay, expected);
+    }
+
+    #[tokio::test]
+    async fn the_broadcast_page_is_served_and_counts_its_own_sources() {
+        let (base, overlay, _) = start().await;
+
+        let page = reqwest::get(format!("{base}/broadcast")).await.unwrap();
+        assert_eq!(page.status(), 200);
+        assert!(page.text().await.unwrap().contains("/broadcast.js"));
+        for asset in ["broadcast.js", "broadcast.css"] {
+            assert_eq!(reqwest::get(format!("{base}/{asset}")).await.unwrap().status(), 200);
+        }
+
+        let _source = open_socket(&base, "?source=broadcast").await;
+        for _ in 0..200 {
+            if overlay.sources().broadcast == 1 {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+        assert_eq!(overlay.sources().broadcast, 1);
+        assert_eq!(overlay.sources().match_overlay, 0);
     }
 
     #[tokio::test]

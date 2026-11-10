@@ -86,7 +86,7 @@ function initializeWebsocket() {
 
   ws.onmessage = function (message) {
     var data = JSON.parse(message.data);
-    if (data.type === "rankedState") return;
+    if (data.type === "rankedState" || data.type === "broadcastState") return;
     if (showSample) applySampleMatch(data.settings);
     let isMatch = false;
 

@@ -12,11 +12,11 @@ import { SelectCard } from "@/Components/ui/select-card";
 import { Slider } from "@/Components/ui/slider";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
-import { HEALTH_HEIGHT, MAPS_HEIGHT, OVERLAY_WIDTH, RATIO_HEIGHT, SCORE_HEIGHT, SMALL_SCORE_HEIGHT, withPadding } from "@/lib/overlays";
+import { BROADCAST_HEIGHT, BROADCAST_WIDTH, HEALTH_HEIGHT, MAPS_HEIGHT, OVERLAY_WIDTH, RATIO_HEIGHT, SCORE_HEIGHT, SMALL_SCORE_HEIGHT, withPadding } from "@/lib/overlays";
 
 type OverlayKind = "match" | "ranked" | "broadcast";
 
-type ViewId = "score" | "health" | "maps" | "ratio";
+type ViewId = "score" | "health" | "maps" | "ratio" | "board";
 
 interface OverlayView {
   id: ViewId;
@@ -35,16 +35,26 @@ const view = (id: ViewId, label: string, path: string, height: number): OverlayV
   preview: `${PREVIEW_BASE}${path}?preview=1`,
   height,
 });
-const VIEWS: Record<"match" | "ranked", OverlayView[]> = {
+const VIEWS: Record<OverlayKind, OverlayView[]> = {
   match: [view("score", "Score", "/visualizer", SCORE_HEIGHT), view("maps", "Maps", "/visualizer/maps", MAPS_HEIGHT)],
   ranked: [view("health", "Health", "/ranked", HEALTH_HEIGHT), view("maps", "Maps", "/ranked/maps", MAPS_HEIGHT), view("ratio", "Overview", "/ranked/ratio", RATIO_HEIGHT)],
+  broadcast: [view("board", "Broadcast", "/broadcast", BROADCAST_HEIGHT)],
 };
 
-const OVERLAYS: { id: OverlayKind; name: string; available: boolean }[] = [
-  { id: "match", name: "Match", available: true },
-  { id: "ranked", name: "Ranked", available: true },
-  { id: "broadcast", name: "Broadcast", available: false },
+const OVERLAYS: { id: OverlayKind; name: string }[] = [
+  { id: "match", name: "Match" },
+  { id: "ranked", name: "Ranked" },
+  { id: "broadcast", name: "Broadcast" },
 ];
+const BROADCAST_LOOKS = [
+  { value: "table", label: "Table" },
+  { value: "duel", label: "Duel" },
+];
+const POINT_ANIMATIONS = [
+  { value: "pop", label: "Pop" },
+  { value: "roll", label: "Roll up" },
+];
+const SAMPLE_COUNTS = ["1", "4", "8"].map((value) => ({ value, label: value }));
 const CORNER_STYLES = [
   { value: "0px 0px 0px 0px", label: "Default" },
   { value: "15px 15px 15px 15px", label: "Rounded" },
@@ -140,22 +150,34 @@ function StyleControls({ style, onChange }: { style: api.OverlayStyle; onChange:
 }
 
 function Overlay({ sources }: { sources: api.OverlaySources }) {
-  const [kind, setKind] = useState<"match" | "ranked">("match");
-  const [views, setViews] = useState<Record<"match" | "ranked", ViewId>>({ match: "score", ranked: "health" });
+  const [kind, setKind] = useState<OverlayKind>("match");
+  const [views, setViews] = useState<Record<OverlayKind, ViewId>>({ match: "score", ranked: "health", broadcast: "board" });
   const [previewData, setPreviewData] = useState("sample");
+  const [sampleCount, setSampleCount] = useState("4");
   const [settings, setSettings] = useState<api.DisplayerSettings | null>(null);
   const [ranked, setRanked] = useState<api.RankedSettings | null>(null);
+  const [broadcast, setBroadcast] = useState<api.BroadcastStyle | null>(null);
 
   useEffect(() => {
+    let active = true;
     const load = async () => {
-      const [displayer, rankedSettings] = await Promise.all([api.getDisplayerSettings(), api.getRankedSettings()]);
-      setSettings(displayer);
-      setRanked(rankedSettings);
+      try {
+        const [displayer, rankedSettings, broadcastStatus] = await Promise.all([api.getDisplayerSettings(), api.getRankedSettings(), api.getBroadcastStatus()]);
+        if (!active) return;
+        setSettings(displayer);
+        setRanked(rankedSettings);
+        setBroadcast(broadcastStatus.style);
+      } catch {
+        toast.error("Could not load the overlay settings.");
+      }
     };
     void load();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (!settings || !ranked) return null;
+  if (!settings || !ranked || !broadcast) return null;
 
   const change = async (update: Partial<api.DisplayerSettings>) => {
     const next = { ...settings, ...update };
@@ -177,8 +199,22 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
     }
   };
 
+  const saveBroadcast = async (next: api.BroadcastStyle) => {
+    try {
+      await api.saveBroadcastStyle(next);
+    } catch {
+      toast.error("Could not save the overlay settings.");
+    }
+  };
+
+  const changeBroadcast = (update: Partial<api.BroadcastStyle>) => {
+    const next = { ...broadcast, ...update };
+    setBroadcast(next);
+    void saveBroadcast(next);
+  };
+
   const countOf = (id: OverlayKind) => {
-    const count = id === "ranked" ? sources.ranked : sources.match;
+    const count = sources[id];
     return `${count} ${count === 1 ? "source" : "sources"}`;
   };
 
@@ -187,37 +223,33 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
   const isMatchScore = kind === "match" && selected.id === "score";
   const activePadding = kind === "ranked" ? ranked[rankedStyle].padding : 0;
   const sourceHeight = isMatchScore && settings.SmallDisplayer ? SMALL_SCORE_HEIGHT : selected.id === "maps" ? selected.height : withPadding(selected.height, activePadding);
+  const sourceWidth = kind === "broadcast" ? BROADCAST_WIDTH : OVERLAY_WIDTH;
+  const sampleQuery = previewData !== "sample" ? "" : kind === "broadcast" ? `&sample=1&count=${sampleCount}` : "&sample=1";
 
   return (
     <div className="flex h-full flex-col gap-3">
       <PageHeader title="Overlay" description="Choose an overlay to configure for OBS" />
       <div role="radiogroup" aria-label="Overlay type" className="grid grid-cols-3 gap-2.5">
-        {OVERLAYS.map(({ id, name, available }) => (
-          <SelectCard
-            key={id}
-            selected={id === kind}
-            disabled={!available}
-            onClick={() => {
-              if (id !== "broadcast") setKind(id);
-            }}
-            className="flex items-center gap-2.5"
-          >
+        {OVERLAYS.map(({ id, name }) => (
+          <SelectCard key={id} selected={id === kind} onClick={() => setKind(id)} className="flex items-center gap-2.5">
             <OverlayThumbnail kind={id} />
             <span className="min-w-0">
               <span className="block text-ui font-semibold text-ink">{name}</span>
-              <span className="block text-xs text-ink-3">{available ? countOf(id) : "Soon"}</span>
+              <span className="block text-xs text-ink-3">{countOf(id)}</span>
             </span>
           </SelectCard>
         ))}
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] gap-5">
         <div className="-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1">
-          <Segmented
-            label="Overlay view"
-            value={selected.id}
-            onChange={(id) => setViews((current) => ({ ...current, [kind]: id as ViewId }))}
-            options={VIEWS[kind].map(({ id, label }) => ({ value: id, label }))}
-          />
+          {VIEWS[kind].length > 1 && (
+            <Segmented
+              label="Overlay view"
+              value={selected.id}
+              onChange={(id) => setViews((current) => ({ ...current, [kind]: id as ViewId }))}
+              options={VIEWS[kind].map(({ id, label }) => ({ value: id, label }))}
+            />
+          )}
           <div className="flex gap-1.5">
             <Input readOnly value={selected.url} aria-label="Overlay URL" className="text-xs" />
             <CopyUrlButton url={selected.url} label="Copy" />
@@ -225,7 +257,7 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
           <p className="flex items-center justify-between text-xs text-ink-3">
             OBS browser source
             <span className="font-medium tabular-nums text-ink-2">
-              {OVERLAY_WIDTH} x {sourceHeight}
+              {sourceWidth} x {sourceHeight}
             </span>
           </p>
           <div className="divide-y divide-line">
@@ -250,14 +282,52 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
             {kind === "ranked" && (
               <StyleControls style={ranked[rankedStyle]} onChange={(update) => void changeRanked({ [rankedStyle]: { ...ranked[rankedStyle], ...update } })} />
             )}
+            {kind === "broadcast" && (
+              <>
+                <SettingRow compact label="Look">
+                  <div className="w-full">
+                    <Segmented small label="Look" value={broadcast.look} onChange={(look) => changeBroadcast({ look: look as api.BroadcastStyle["look"] })} options={BROADCAST_LOOKS} />
+                  </div>
+                </SettingRow>
+                <SettingRow compact label="Point animation">
+                  <div className="w-full">
+                    <Segmented small label="Point animation" value={broadcast.pointAnimation} onChange={(pointAnimation) => changeBroadcast({ pointAnimation: pointAnimation as api.BroadcastStyle["pointAnimation"] })} options={POINT_ANIMATIONS} />
+                  </div>
+                </SettingRow>
+                <SettingRow compact label="Single title" hint="One title above all matches">
+                  <Switch aria-label="Single title" checked={broadcast.singleTitle} onCheckedChange={(singleTitle) => changeBroadcast({ singleTitle })} />
+                </SettingRow>
+                {broadcast.singleTitle && (
+                  <SettingRow compact label="Title">
+                    <Input
+                      value={broadcast.title}
+                      maxLength={80}
+                      aria-label="Title"
+                      placeholder="First match's tournament"
+                      className="text-xs"
+                      onChange={(event) => setBroadcast({ ...broadcast, title: event.target.value })}
+                      onBlur={() => void saveBroadcast(broadcast)}
+                    />
+                  </SettingRow>
+                )}
+              </>
+            )}
           </div>
         </div>
         <OverlayPreview
-          src={`${selected.preview}${previewData === "sample" ? "&sample=1" : ""}`}
+          src={`${selected.preview}${sampleQuery}`}
+          width={sourceWidth}
           height={sourceHeight}
           label={
-            <div className="w-44">
-              <Segmented small label="Preview data" value={previewData} onChange={setPreviewData} options={PREVIEW_DATA} />
+            <div className="flex gap-2">
+              <div className="w-44">
+                <Segmented small label="Preview data" value={previewData} onChange={setPreviewData} options={PREVIEW_DATA} />
+              </div>
+              {kind === "broadcast" && previewData === "sample" && (
+                <div className="w-28">
+                  <Segmented small label="Sample matches" value={sampleCount} onChange={setSampleCount} options={SAMPLE_COUNTS} />
+                </div>
+              )}
             </div>
           }
         />

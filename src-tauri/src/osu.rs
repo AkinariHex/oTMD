@@ -1,5 +1,5 @@
 use crate::scoring::{MatchResponse, MatchUser, OSU_API_VERSION};
-use reqwest::{Client, StatusCode, Url};
+use reqwest::{Client, StatusCode, Url, header::RETRY_AFTER};
 use serde::{Deserialize, de::DeserializeOwned};
 use serde_json::Value;
 use std::time::Duration;
@@ -124,6 +124,8 @@ pub struct RoomEvents {
 pub enum OsuError {
     Unauthorized,
     Unavailable,
+    // Seconds asked by the Retry-After header, when osu! sends one.
+    RateLimited(Option<u64>),
 }
 
 #[derive(Clone)]
@@ -152,6 +154,11 @@ impl OsuClient {
 
         if response.status() == StatusCode::UNAUTHORIZED {
             return Err(OsuError::Unauthorized);
+        }
+
+        if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            let seconds = response.headers().get(RETRY_AFTER).and_then(|value| value.to_str().ok()).and_then(|value| value.trim().parse().ok());
+            return Err(OsuError::RateLimited(seconds));
         }
 
         response

@@ -1,5 +1,6 @@
 use crate::{
     auth::{AuthManager, RefreshOutcome, RefreshSchedule, now_seconds},
+    broadcast::{self, BroadcastContext, BroadcastWatch},
     export::{self, ExportInput, ExportResult},
     maps::{BeatmapCache, MapEntry, MapSide, avatar_url},
     osu::{OsuClient, OsuError},
@@ -18,12 +19,14 @@ use std::{
     fs,
     path::PathBuf,
     sync::Arc,
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::Notify;
 
 const POLL_SECONDS: u64 = 10;
-const MAX_SLEEP_SECONDS: u64 = 300;
+const MAX_SLEEP_MS: u64 = 300_000;
+const MIN_POLL_WAIT_MS: u64 = 50;
+const MS_PER_SECOND: u64 = 1000;
 const MAX_EXPORT_ATTEMPTS: u8 = 5;
 const HTTP_TIMEOUT: Duration = Duration::from_secs(15);
 const QUALIFIERS_STAGE: &str = "Qualifiers";
@@ -35,9 +38,13 @@ pub struct Player {
 }
 
 #[derive(Clone, Serialize)]
-struct TeamImage {
+pub struct TeamImage {
     name: String,
-    path: String,
+    pub path: String,
+}
+
+fn now_millis() -> u64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |elapsed| elapsed.as_millis() as u64)
 }
 
 #[derive(Serialize)]
@@ -82,15 +89,15 @@ struct MatchView {
 }
 
 #[derive(Clone, PartialEq)]
-struct MatchConfig {
-    match_id: u64,
+pub struct MatchConfig {
+    pub match_id: u64,
     match_type: String,
     stage: String,
-    rules: MatchRules,
+    pub rules: MatchRules,
 }
 
 impl MatchConfig {
-    fn from_settings(settings: &MatchSettings, me: u64) -> Option<Self> {
+    pub fn from_settings(settings: &MatchSettings, me: u64) -> Option<Self> {
         let match_id = settings.MatchID.trim().parse().ok()?;
         let warmups = settings.Warmups.trim().parse().unwrap_or(0);
         let best_of = settings.BestOF.trim().parse().unwrap_or(0);
@@ -122,12 +129,12 @@ struct PendingExport {
     attempts: u8,
 }
 
-struct Tracker {
-    config: MatchConfig,
-    title: String,
+pub struct Tracker {
+    pub config: MatchConfig,
+    pub title: String,
     start_time: String,
-    events: BTreeMap<u64, Option<Game>>,
-    usernames: HashMap<u64, String>,
+    pub events: BTreeMap<u64, Option<Game>>,
+    pub usernames: HashMap<u64, String>,
     players: Option<[Player; 2]>,
     last_published: Option<String>,
     finished: bool,
@@ -135,7 +142,7 @@ struct Tracker {
 }
 
 impl Tracker {
-    fn new(config: MatchConfig) -> Self {
+    pub fn new(config: MatchConfig) -> Self {
         Self {
             config,
             title: String::new(),
@@ -150,7 +157,7 @@ impl Tracker {
     }
 
     // osu! finishes a game by updating its existing event, so reading only newer events would miss it.
-    fn next_after(&self) -> u64 {
+    pub fn next_after(&self) -> u64 {
         let first_open = self
             .events
             .iter()
@@ -163,12 +170,12 @@ impl Tracker {
         }
     }
 
-    fn games(&self) -> Vec<Game> {
+    pub fn games(&self) -> Vec<Game> {
         self.events.values().flatten().cloned().collect()
     }
 }
 
-fn names_in_parentheses(title: &str) -> Vec<String> {
+pub fn names_in_parentheses(title: &str) -> Vec<String> {
     let mut names = Vec::new();
     let mut rest = title;
 
@@ -183,11 +190,11 @@ fn names_in_parentheses(title: &str) -> Vec<String> {
     names
 }
 
-fn acronym_of(title: &str) -> &str {
+pub fn acronym_of(title: &str) -> &str {
     title.split_once(':').map_or("", |(acronym, _)| acronym)
 }
 
-fn team_names(title: &str) -> Vec<String> {
+pub fn team_names(title: &str) -> Vec<String> {
     let names = names_in_parentheses(title);
     if names.len() >= 2 {
         names
@@ -202,7 +209,7 @@ fn team_image_url(file_name: &str) -> Option<String> {
     Some(url.path().to_string())
 }
 
-fn find_team_images(directory: &PathBuf, teams: &[String]) -> [Option<TeamImage>; 2] {
+pub fn find_team_images(directory: &PathBuf, teams: &[String]) -> [Option<TeamImage>; 2] {
     let files: Vec<String> = fs::read_dir(directory)
         .map(|entries| {
             entries
@@ -252,10 +259,11 @@ pub struct Poller {
     tracker: Option<Tracker>,
     next_poll: u64,
     ranked: RankedWatch,
+    broadcast: BroadcastWatch,
     beatmaps: BeatmapCache,
     sync: SettingsSync,
     github_raw: String,
-    last_source: (bool, String),
+    last_source: (AppMode, String),
 }
 
 impl Poller {
@@ -290,9 +298,10 @@ impl Poller {
             tracker: None,
             next_poll: 0,
             ranked: RankedWatch::new(data_dir),
+            broadcast: BroadcastWatch::default(),
             beatmaps: BeatmapCache::default(),
             github_raw: endpoints.github_raw.clone(),
-            last_source: (false, String::new()),
+            last_source: (AppMode::default(), String::new()),
         })
     }
 
@@ -306,20 +315,25 @@ impl Poller {
             let sync_wait = self.sync_settings(&on_settings_replaced).await;
 
             let poll_wait = if self.has_work() {
-                if now_seconds() >= self.next_poll {
-                    let wait = self.poll(&on_expired).await;
-                    self.next_poll = now_seconds() + wait;
+                if now_millis() >= self.next_poll {
+                    let wait = if self.mode() == AppMode::Broadcast {
+                        self.poll_broadcast(&on_expired).await
+                    } else {
+                        self.poll(&on_expired).await * MS_PER_SECOND
+                    };
+                    self.next_poll = now_millis() + wait;
                 }
-                Some(self.next_poll.saturating_sub(now_seconds()).max(1))
+                Some(self.next_poll.saturating_sub(now_millis()).max(MIN_POLL_WAIT_MS))
             } else {
                 None
             };
 
-            match [refresh_wait, poll_wait, sync_wait].into_iter().flatten().min() {
+            let seconds_to_ms = |wait: Option<u64>| wait.map(|seconds| seconds.saturating_mul(MS_PER_SECOND));
+            match [seconds_to_ms(refresh_wait), poll_wait, seconds_to_ms(sync_wait)].into_iter().flatten().min() {
                 // Short sleeps against the wall clock also cover PC sleep, where monotonic timers can stall.
-                Some(seconds) => {
+                Some(ms) => {
                     tokio::select! {
-                        () = tokio::time::sleep(Duration::from_secs(seconds.min(MAX_SLEEP_SECONDS))) => {}
+                        () = tokio::time::sleep(Duration::from_millis(ms.min(MAX_SLEEP_MS))) => {}
                         () = self.wake.notified() => {}
                     }
                 }
@@ -334,17 +348,23 @@ impl Poller {
         self.sync.step(&context, on_replaced).await
     }
 
+    fn mode(&self) -> AppMode {
+        self.settings.read(|settings| settings.appSettings.Mode)
+    }
+
     fn is_ranked(&self) -> bool {
-        self.settings.read(|settings| settings.appSettings.Mode == AppMode::Ranked)
+        self.mode() == AppMode::Ranked
     }
 
     fn has_work(&self) -> bool {
-        self.auth.user().is_some()
-            && (self.is_ranked()
-                || self
-                    .tracker
-                    .as_ref()
-                    .is_some_and(|tracker| !tracker.finished || tracker.export.is_some()))
+        if self.auth.user().is_none() {
+            return false;
+        }
+        match self.mode() {
+            AppMode::Ranked => true,
+            AppMode::Broadcast => self.broadcast.has_active(),
+            AppMode::Tournament => self.tracker.as_ref().is_some_and(|tracker| !tracker.finished || tracker.export.is_some()),
+        }
     }
 
     // Logged out keeps the tracker, so the overlay holds its last data as the spec requires.
@@ -353,13 +373,19 @@ impl Poller {
             return;
         };
 
-        let source = (self.is_ranked(), self.settings.read(|settings| settings.rankedSettings.RoomID.clone()));
+        let source = (self.mode(), self.settings.read(|settings| settings.rankedSettings.RoomID.clone()));
         if source != self.last_source {
             self.last_source = source.clone();
             self.next_poll = 0;
         }
-        if !source.0 && !self.ranked.is_idle() {
+        if source.0 != AppMode::Ranked && !self.ranked.is_idle() {
             self.ranked.reset(&self.overlay, &self.settings);
+        }
+        if source.0 == AppMode::Broadcast {
+            let list = self.settings.read(|settings| settings.broadcastMatches.clone());
+            self.broadcast.sync(&list, &self.overlay, &self.settings);
+        } else if !self.broadcast.is_idle() {
+            self.broadcast.reset(&self.overlay, &self.settings);
         }
 
         let settings = self.settings.read(|settings| settings.matchSettings.clone());
@@ -403,7 +429,30 @@ impl Poller {
                 }
                 ranked_watch::IDLE_SECONDS
             }
-            Err(OsuError::Unavailable) => ranked_watch::IDLE_SECONDS,
+            Err(OsuError::Unavailable | OsuError::RateLimited(_)) => ranked_watch::IDLE_SECONDS,
+        }
+    }
+
+    async fn poll_broadcast(&mut self, on_expired: &impl Fn()) -> u64 {
+        let Some(token) = self.auth.access_token() else {
+            return broadcast::RETRY_MS;
+        };
+
+        let mut context = BroadcastContext {
+            osu: &self.osu,
+            tournaments: &mut self.tournaments,
+            teams_dir: &self.teams_dir,
+            settings: &self.settings,
+            overlay: &self.overlay,
+        };
+        match self.broadcast.poll(&mut context, &token, now_millis()).await {
+            Some(wait) => wait,
+            None => {
+                if self.auth.refresh_rejected(&token, now_seconds()).await == RefreshOutcome::Ended {
+                    on_expired();
+                }
+                broadcast::RETRY_MS
+            }
         }
     }
 
@@ -426,7 +475,7 @@ impl Poller {
                         on_expired();
                     }
                 }
-                Err(OsuError::Unavailable) => {}
+                Err(OsuError::Unavailable | OsuError::RateLimited(_)) => {}
             }
         }
 

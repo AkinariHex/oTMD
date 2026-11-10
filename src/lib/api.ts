@@ -9,6 +9,7 @@ export const OVERLAY_URL = "http://localhost:21086/visualizer";
 export const RANKED_OVERLAY_URL = "http://localhost:21086/ranked";
 export const MATCH_PREVIEW_URL = "http://127.0.0.1:21086/visualizer?preview=1";
 export const RANKED_PREVIEW_URL = "http://127.0.0.1:21086/ranked?preview=1";
+export const BROADCAST_URL = "http://localhost:21086/broadcast";
 
 export interface User {
   id: number;
@@ -37,6 +38,7 @@ export interface DisplayerSettings {
 export interface OverlaySources {
   match: number;
   ranked: number;
+  broadcast: number;
 }
 
 export interface OverlayStyle {
@@ -89,7 +91,7 @@ export type Layout = "sidebar" | "tabs";
 export type PreviewBackground = "checker" | "black" | "dark" | "gray" | "light" | "white" | "darkScene" | "lightScene" | "custom";
 
 export interface AppSettings {
-  Mode: "tournament" | "ranked";
+  Mode: "tournament" | "ranked" | "broadcast";
   Layout: Layout;
   PreviewBackground: PreviewBackground;
   TextSize: number;
@@ -256,6 +258,48 @@ export const getRankedSettings = (): Promise<RankedSettings> => invoke("get_rank
 
 export const saveRankedSettings = (settings: RankedSettings): Promise<void> =>
   invoke("save_ranked_settings", { settings });
+
+export interface BroadcastMatch {
+  MatchID: string;
+  MatchType: string;
+  Stage: string;
+  BestOF: string;
+  Warmups: string;
+  ScoreReverse: boolean;
+}
+
+export interface BroadcastStyle {
+  look: "table" | "duel";
+  pointAnimation: "pop" | "roll";
+  singleTitle: boolean;
+  title: string;
+}
+
+export interface BroadcastCard {
+  matchId: string;
+  status: "loading" | "live" | "finished" | "error";
+  stage: string;
+  bestOf: number;
+  acronym: string;
+  tournamentName: string;
+  sides: [{ name: string; avatar: string | null; score: number }, { name: string; avatar: string | null; score: number }];
+  winner: SideIndex | null;
+}
+
+export interface BroadcastStatus {
+  enabled: boolean;
+  matches: BroadcastMatch[];
+  style: BroadcastStyle;
+  view: BroadcastCard[] | null;
+}
+
+export const getBroadcastStatus = (): Promise<BroadcastStatus> => invoke("get_broadcast_status");
+
+export const saveBroadcastMatches = (matches: BroadcastMatch[]): Promise<void> => invoke("save_broadcast_matches", { matches });
+
+export const saveBroadcastStyle = (style: BroadcastStyle): Promise<void> => invoke("save_broadcast_style", { style });
+
+export const setBroadcastEnabled = (enabled: boolean): Promise<void> => invoke("set_broadcast_enabled", { enabled });
 
 export const isUpdateAvailable = (): Promise<boolean> => invoke("check_update");
 

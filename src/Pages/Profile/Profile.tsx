@@ -87,7 +87,8 @@ function Profile({ user }: { user: api.User | null }) {
   const siteMessage = data && data.siteStatus !== "ok" ? SITE_MESSAGES[data.siteStatus] : null;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    // The list runs to the edge of the app, so the page entrance would otherwise flash a scrollbar.
+    <div data-fills-page className="flex h-full min-h-0 flex-col gap-4">
       <header data-tauri-drag-region className="flex shrink-0 items-center gap-4 pr-(--window-controls-inset)">
         {user ? <Avatar userId={user.id} username={user.username} size={56} /> : <Skeleton className="size-14 shrink-0 rounded-full" />}
         <div className="min-w-0 flex-1">

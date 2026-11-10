@@ -86,7 +86,7 @@ function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps)
         <div className="absolute top-0 right-0 z-20 h-8">
           <WindowControls />
         </div>
-        <main data-tauri-drag-region className="h-full overflow-y-auto p-5">
+        <main data-tauri-drag-region className="h-full overflow-y-auto p-5 has-[[data-fills-page]]:overflow-hidden">
           {children}
         </main>
       </div>

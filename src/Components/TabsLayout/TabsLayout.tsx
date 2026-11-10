@@ -64,7 +64,7 @@ function TabsLayout({ user, children }: TabsLayoutProps) {
           <WindowControls />
         </div>
       </div>
-      <main className="min-h-0 flex-1 overflow-y-auto bg-panel p-5">{children}</main>
+      <main className="min-h-0 flex-1 overflow-y-auto bg-panel p-5 has-[[data-fills-page]]:overflow-hidden">{children}</main>
     </div>
   );
 }

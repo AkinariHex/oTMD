@@ -85,7 +85,7 @@ impl BeatmapCache {
                     self.beatmaps.insert(id, details);
                 }
                 Err(OsuError::Unauthorized) => return Err(OsuError::Unauthorized),
-                Err(OsuError::Unavailable) => {}
+                Err(OsuError::Unavailable | OsuError::RateLimited(_)) => {}
             }
         }
         Ok(())

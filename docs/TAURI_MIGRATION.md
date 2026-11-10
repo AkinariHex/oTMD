@@ -317,13 +317,16 @@ the in-game life bar round by round. Tray cost unchanged while a ranked match up
 ### Phase 9 - Tournament broadcast mode
 For streamers of someone else's tournament. New `Broadcast` value for `Mode`.
 - A list of up to 8 matches, added by MP link or ID; each row reuses the match config fields
-  (type, stage, best of, warmups, reverse). The list survives restart; finished matches stay until removed.
-- Reuses `Tracker` and `scoring.rs` per match inside the same poller task, one match per slice
-  (10 s divided by the number of matches, minimum 1.25 s), so 8 matches stay under 60 requests a minute
-  including player lookups. Back off on 429.
+  (type, stage, best of, warmups, reverse). Qualifiers are left out: they score one specific player.
+  The list survives restart; finished matches stay until removed.
+- Reuses `Tracker` and `scoring.rs` per match inside the same poller task (`broadcast.rs`), one osu! request per slice
+  (10 s divided by the number of active matches, minimum 1.25 s), so 8 matches stay at 48 requests a minute
+  including player lookups, which take a slice of their own. A 429 pauses every match; a failing lobby backs off alone.
 - With no logged-in player to anchor sides, red and blue follow the lobby name order.
 - Overlay `/broadcast` (own card on the Overlay page): 1 match full size, 2 to 4 stacked, 5 to 8 compact grid, transparent background.
   `?matches=<id,id>` selects a subset so several OBS sources can show different matches.
+- Overlay settings: look (Table or Duel), point animation (Pop or Roll up), and a single title above all matches
+  (custom text, or the first match's tournament when empty). They stay on this PC: account sync has a fixed list of fields.
 - **Never exported:** other people's matches are not posted to the user's account or Discord.
 
 **Accept:** 4 live or replayed lobbies update in a single OBS source; adding or removing a match needs

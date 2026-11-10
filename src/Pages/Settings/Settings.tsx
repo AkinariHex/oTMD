@@ -25,6 +25,9 @@ const TRAY_OPTIONS = [
 ];
 const DEFAULT_FIXED_TEXT_SIZE = 100;
 
+// Outlives the page, so coming back to Settings does not ask the website again.
+let lastKeyCheck: { apikey: string; valid: boolean } | null = null;
+
 const LAYOUTS: { id: api.Layout; name: string; hint: string }[] = [
   { id: "sidebar", name: "Sidebar", hint: "Grouped menu with connected sources" },
   { id: "tabs", name: "Tabs", hint: "Navigation in the title bar, more room for content" },
@@ -81,7 +84,9 @@ function Settings() {
   const checkKey = async (apikey: string) => {
     setChecking(true);
     try {
-      setKeyValid(await api.validateExportKey(apikey));
+      const valid = await api.validateExportKey(apikey);
+      lastKeyCheck = { apikey, valid };
+      setKeyValid(valid);
     } catch {
       setKeyValid(false);
     } finally {
@@ -91,9 +96,15 @@ function Settings() {
 
   useEffect(() => {
     const load = async () => {
-      const loaded = await api.getAppSettings();
-      setSettings(loaded);
-      if (loaded.ExportMatches.apikey !== "") void checkKey(loaded.ExportMatches.apikey);
+      try {
+        const loaded = await api.getAppSettings();
+        setSettings(loaded);
+        const { apikey } = loaded.ExportMatches;
+        if (lastKeyCheck?.apikey === apikey) setKeyValid(lastKeyCheck.valid);
+        else if (apikey !== "") void checkKey(apikey);
+      } catch {
+        toast.error("Could not load the settings.");
+      }
     };
     void load();
   }, []);
@@ -182,7 +193,7 @@ function Settings() {
             {keyValid === true && <span className="text-win">The key is valid. </span>}
             {keyValid === false && <span className="text-loss">The key is not valid. </span>}
             Get it from the settings page on the{" "}
-            <button type="button" className="font-medium text-accent" onClick={() => void api.openExternal(SITE_URL)}>
+            <button type="button" className="cursor-pointer font-medium text-accent" onClick={() => void api.openExternal(SITE_URL)}>
               website
             </button>
             .

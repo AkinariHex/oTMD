@@ -1,9 +1,10 @@
 use crate::{
     AppState,
     auth::{User, now_seconds},
+    broadcast,
     dashboard::{DashboardData, FeedCursor, FeedPage},
     server::OverlaySources,
-    settings::{AppMode, AppSettings, DisplayerSettings, MatchSettings, RankedSettings},
+    settings::{AppMode, AppSettings, BroadcastMatch, BroadcastStyle, DisplayerSettings, MatchSettings, RankedSettings},
     system_fonts, window,
 };
 use serde::Serialize;
@@ -194,6 +195,68 @@ pub fn save_ranked_settings(settings: RankedSettings, state: State<'_, AppState>
         .map_err(|_| SAVE_FAILED.to_string())?;
 
     state.overlay.publish("rankedState", &state.settings);
+    state.wake.notify_one();
+    Ok(())
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BroadcastStatus {
+    enabled: bool,
+    matches: Vec<BroadcastMatch>,
+    style: BroadcastStyle,
+    view: Option<Value>,
+}
+
+#[tauri::command]
+pub fn get_broadcast_status(state: State<'_, AppState>) -> BroadcastStatus {
+    let (enabled, matches, style) = state
+        .settings
+        .read(|settings| (settings.appSettings.Mode == AppMode::Broadcast, settings.broadcastMatches.clone(), settings.broadcastStyle.clone()));
+    BroadcastStatus { enabled, matches, style, view: state.overlay.broadcast_view() }
+}
+
+#[tauri::command]
+pub fn save_broadcast_matches(matches: Vec<BroadcastMatch>, state: State<'_, AppState>) -> Result<(), String> {
+    if !broadcast::is_valid_list(&matches) {
+        return Err("The match list is not valid.".into());
+    }
+
+    state
+        .settings
+        .update(|current| current.broadcastMatches = matches)
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.wake.notify_one();
+    Ok(())
+}
+
+#[tauri::command]
+pub fn save_broadcast_style(mut style: BroadcastStyle, state: State<'_, AppState>) -> Result<(), String> {
+    style.title = style.title.chars().take(broadcast::MAX_TITLE_CHARS).collect();
+    state
+        .settings
+        .update(|current| current.broadcastStyle = style)
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.overlay.publish("broadcastState", &state.settings);
+    Ok(())
+}
+
+#[tauri::command]
+pub fn set_broadcast_enabled(enabled: bool, state: State<'_, AppState>) -> Result<(), String> {
+    state
+        .settings
+        .update(|current| {
+            current.appSettings.Mode = if enabled { AppMode::Broadcast } else { AppMode::Tournament };
+            if enabled {
+                current.matchSettings.MatchID.clear();
+                current.matchSettings.isFinished = false;
+            }
+        })
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.overlay.publish("matchSettings", &state.settings);
     state.wake.notify_one();
     Ok(())
 }

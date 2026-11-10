@@ -88,6 +88,57 @@ pub enum AppMode {
     #[default]
     Tournament,
     Ranked,
+    Broadcast,
+}
+
+#[allow(non_snake_case)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct BroadcastMatch {
+    pub MatchID: String,
+    pub MatchType: String,
+    pub Stage: String,
+    pub BestOF: String,
+    pub Warmups: String,
+    pub ScoreReverse: bool,
+}
+
+impl Default for BroadcastMatch {
+    fn default() -> Self {
+        Self {
+            MatchID: String::new(),
+            MatchType: "1vs1".into(),
+            Stage: "Friendly".into(),
+            BestOF: "9".into(),
+            Warmups: "0".into(),
+            ScoreReverse: false,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum BroadcastLook {
+    #[default]
+    Table,
+    Duel,
+}
+
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PointAnimation {
+    #[default]
+    Pop,
+    Roll,
+}
+
+#[derive(Clone, Default, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct BroadcastStyle {
+    pub look: BroadcastLook,
+    pub point_animation: PointAnimation,
+    pub single_title: bool,
+    pub title: String,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -197,6 +248,8 @@ pub struct Settings {
     pub displayerSettings: DisplayerSettings,
     pub appSettings: AppSettings,
     pub rankedSettings: RankedSettings,
+    pub broadcastMatches: Vec<BroadcastMatch>,
+    pub broadcastStyle: BroadcastStyle,
 }
 
 pub struct SettingsStore {

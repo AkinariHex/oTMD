@@ -44,6 +44,8 @@ pub struct MatchInfo {
     pub name: String,
     #[serde(default)]
     pub start_time: Option<String>,
+    #[serde(default)]
+    pub end_time: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -248,6 +250,23 @@ fn team_side(score: &GameScore) -> Option<Side> {
 
 pub fn one_v_one(games: &[Game], me: u64, warmups: usize, best_of: u32, multipliers: &Multipliers) -> VersusResult {
     score_versus(games, warmups, best_of, multipliers, |score| one_v_one_side(score, me))
+}
+
+fn named_side(score: &GameScore, players: [u64; 2]) -> Option<Side> {
+    if players.contains(&0) {
+        one_v_one_side(score, 0)
+    } else if score.user_id == players[0] {
+        Some(Side::First)
+    } else if score.user_id == players[1] {
+        Some(Side::Second)
+    } else {
+        None
+    }
+}
+
+// For lobbies the viewer is not in: sides follow the lobby name, and slots are used only until both players are known.
+pub fn one_v_one_named(games: &[Game], players: [u64; 2], warmups: usize, best_of: u32, multipliers: &Multipliers) -> VersusResult {
+    score_versus(games, warmups, best_of, multipliers, |score| named_side(score, players))
 }
 
 pub fn team_vs(games: &[Game], warmups: usize, best_of: u32, multipliers: &Multipliers) -> VersusResult {

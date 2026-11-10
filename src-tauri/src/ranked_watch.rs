@@ -277,7 +277,7 @@ impl RankedWatch {
         let profile = match context.osu.ranked_profile(token, me).await {
             Ok(profile) => profile,
             Err(OsuError::Unauthorized) => return Err(OsuError::Unauthorized),
-            Err(OsuError::Unavailable) => return Ok(()),
+            Err(OsuError::Unavailable | OsuError::RateLimited(_)) => return Ok(()),
         };
         self.user_stale = false;
 

@@ -1,4 +1,5 @@
 mod auth;
+mod broadcast;
 mod dashboard;
 mod maps;
 mod commands;
@@ -206,6 +207,10 @@ pub fn run() {
             commands::set_ranked_enabled,
             commands::get_ranked_settings,
             commands::save_ranked_settings,
+            commands::get_broadcast_status,
+            commands::save_broadcast_matches,
+            commands::save_broadcast_style,
+            commands::set_broadcast_enabled,
             commands::check_update,
             commands::close_app,
             commands::get_start_route,

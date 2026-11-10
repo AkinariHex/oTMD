@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import SidebarLayout from "@/Components/SidebarLayout/SidebarLayout";
 import TabsLayout from "@/Components/TabsLayout/TabsLayout";
+import Broadcast from "@/Pages/Broadcast/Broadcast";
 import MatchSettings from "@/Pages/MatchSettings/MatchSettings";
 import Overlay from "@/Pages/Overlay/Overlay";
 import Ranked from "@/Pages/Ranked/Ranked";
@@ -20,7 +21,7 @@ function AppShell() {
   const layout = useLayout();
   const [user, setUser] = useState<api.User | null>(null);
   const [version, setVersion] = useState("");
-  const [sources, setSources] = useState<api.OverlaySources>({ match: 0, ranked: 0 });
+  const [sources, setSources] = useState<api.OverlaySources>({ match: 0, ranked: 0, broadcast: 0 });
   const [settingsVersion, setSettingsVersion] = useState(0);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ function AppShell() {
   const Layout = layout === "tabs" ? TabsLayout : SidebarLayout;
 
   return (
-    <Layout user={user} version={version} sources={sources.match + sources.ranked}>
+    <Layout user={user} version={version} sources={sources.match + sources.ranked + sources.broadcast}>
       <motion.div
         key={`${location.pathname}-${settingsVersion}`}
         initial={{ opacity: 0, y: 4 }}
@@ -81,6 +82,7 @@ function AppShell() {
         <Routes location={location}>
           <Route path="match" element={<MatchSettings />} />
           <Route path="ranked" element={<Ranked />} />
+          <Route path="broadcast" element={<Broadcast />} />
           <Route path="overlay" element={<Overlay sources={sources} />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile user={user} />} />
