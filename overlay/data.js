@@ -136,7 +136,7 @@ function initializeWebsocket() {
       /* General Settings */
       stageBO.innerHTML =
         data.settings.matchSettings.MatchID !== ""
-          ? `${data.settings.matchSettings.Stage} - BO${data.settings.matchSettings.BestOF}`
+          ? `${escapeHtml(data.settings.matchSettings.Stage)} - BO${escapeHtml(data.settings.matchSettings.BestOF)}`
           : "";
       tournamentName.innerHTML =
         /* Check for match data and if the tournament is into the database */
@@ -157,7 +157,7 @@ function initializeWebsocket() {
 
         /* console.log(data.settings.matchData); */
 
-        stageBO.innerHTML = data.settings.matchSettings.Stage;
+        stageBO.innerHTML = escapeHtml(data.settings.matchSettings.Stage);
 
         let name =
           data.settings.matchData.player.username.length > 12
@@ -191,7 +191,7 @@ function initializeWebsocket() {
               item.classList.add("item");
               let mods = "";
               sc.mods.forEach((mod) => {
-                mods += `<object data="./img/modsIcons/${mod}.svg" height="18"></object>`;
+                mods += `<img src="./img/modsIcons/${escapeHtml(mod)}.svg" height="18" alt="" />`;
                 return mods;
               });
 

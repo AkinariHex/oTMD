@@ -355,13 +355,16 @@ from `/api/fonts/popular`. Site SQL: `docs/migrations/002_app_settings.sql` in t
 **Accept:** another user's data is unreachable with any key; site down or no key leaves a usable screen
 with a sonner error at most once; numbers match a hand count on a known account; no dashboard work in tray.
 
-### Phase 11 - Packaging + CI
-`tauri.conf.json` bundles: NSIS (per-user), zip portable, AppImage + deb, macOS dmg.
-GitHub Actions matrix (windows/ubuntu/macos) with `tauri-apps/tauri-action`, signed
-updater artifacts (`TAURI_SIGNING_PRIVATE_KEY` secret), `latest.json` on releases.
+### Phase 11 - Packaging + manual releases
+No GitHub Actions or other CI: every release is built by hand by the maintainer.
+`tauri.conf.json` bundles: NSIS (per-user), zip portable, AppImage + deb, macOS dmg. Tauri does not
+cross-compile these, so each one is built on its own OS: Windows here, Linux on a Linux machine or WSL, dmg on a Mac.
+A platform with no build for a release is left out of that release and of its `latest.json`.
+Signed updater artifacts use `TAURI_SIGNING_PRIVATE_KEY`, set only in the local shell during the build. The artifacts
+and `latest.json` are uploaded by hand to the GitHub release.
 The maintainer generates the signing key and keeps it; only the public key goes in `plugins.updater.pubkey`.
 Portable mode checks GitHub releases and links to the zip.
-**Accept:** tag push produces all artifacts; installed app auto-updates from a test release.
+**Accept:** the documented local steps produce the Windows artifacts; installed app auto-updates from a test release.
 
 ### Phase 12 - Hand-off from Electron
 Last Electron 2.x release whose update screen links to the v3 download. README update.
@@ -377,7 +380,8 @@ Delete the legacy `public/electron` and `public/osu` sources.
   becomes typed values and is validated.
 - New network calls live in Rust; React receives finished views. New background work runs inside the
   single poller task and adds nothing while idle or in tray.
-- Run `cargo clippy`, `cargo test`, `npm run build` before declaring a phase done.
+- Run `cargo clippy`, `cargo test`, `npm run build` before declaring a phase done. If the phase touched React
+  code, also run the react-doctor check and fix or explicitly accept what it reports.
 - Commit at the end of each phase with a clear message. Update the checklist below.
 
 ## 6. Progress checklist
@@ -390,7 +394,8 @@ Delete the legacy `public/electron` and `public/osu` sources.
 - [x] Phase 6 - UI foundation
 - [x] Phase 7 - Redesign, login, animations
 - [x] Phase 8 - osu!lazer Ranked Play
+- [x] react-doctor baseline on the UI from Phases 6 to 10, before starting Phase 9
 - [ ] Phase 9 - Tournament broadcast mode
 - [x] Phase 10 - Dashboard
-- [ ] Phase 11 - Packaging + CI
+- [ ] Phase 11 - Packaging + manual releases
 - [ ] Phase 12 - Electron hand-off

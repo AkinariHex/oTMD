@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import { toast } from "sonner";
 import SidebarLayout from "@/Components/SidebarLayout/SidebarLayout";
 import TabsLayout from "@/Components/TabsLayout/TabsLayout";
 import MatchSettings from "@/Pages/MatchSettings/MatchSettings";
@@ -23,22 +24,34 @@ function AppShell() {
   const [settingsVersion, setSettingsVersion] = useState(0);
 
   useEffect(() => {
+    let active = true;
     const load = async () => {
-      const [session, appVersion, connected] = await Promise.all([api.getSession(), api.getAppVersion(), api.getOverlaySources()]);
-      if (!session) {
-        navigate("/login", { replace: true });
-        return;
+      try {
+        const [session, appVersion, connected] = await Promise.all([api.getSession(), api.getAppVersion(), api.getOverlaySources()]);
+        if (!active) return;
+        if (!session) {
+          navigate("/login", { replace: true });
+          return;
+        }
+        setUser(session);
+        setVersion(appVersion);
+        setSources(connected);
+      } catch {
+        toast.error("Could not load your session.");
       }
-      setUser(session);
-      setVersion(appVersion);
-      setSources(connected);
     };
     void load();
 
     const stopSettings = api.onSettingsReplaced(() => {
       const refresh = async () => {
-        applyPreferences(await api.getAppSettings());
-        setSettingsVersion((version) => version + 1);
+        try {
+          const settings = await api.getAppSettings();
+          if (!active) return;
+          applyPreferences(settings);
+          setSettingsVersion((version) => version + 1);
+        } catch {
+          toast.error("Could not apply your synced settings.");
+        }
       };
       void refresh();
     });
@@ -47,6 +60,7 @@ function AppShell() {
       navigate("/login", { replace: true, state: { message: "Your session has expired. Please log in again." } })
     );
     return () => {
+      active = false;
       stopSettings();
       stopSources();
       stopSession();
