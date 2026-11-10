@@ -120,12 +120,12 @@ pub struct RankedWatch {
     rating_change: Option<i64>,
 }
 
-fn is_finished(events: &RoomEvents) -> bool {
+pub fn is_finished(events: &RoomEvents) -> bool {
     !events.room.active || events.room.ends_at.is_some()
 }
 
 // A score can land seconds after the map ends: a round counts once both are in or play has moved on.
-fn completed_rounds(events: &RoomEvents) -> Vec<&RoomItem> {
+pub fn completed_rounds(events: &RoomEvents) -> Vec<&RoomItem> {
     let mut played: Vec<&RoomItem> = events.playlist_items.iter().filter(|item| item.played_at.is_some()).collect();
     played.sort_by(|first, second| first.played_at.cmp(&second.played_at));
 
@@ -141,6 +141,10 @@ fn completed_rounds(events: &RoomEvents) -> Vec<&RoomItem> {
 
 fn read_stored(path: &Path) -> Option<StoredRules> {
     serde_json::from_slice(&fs::read(path).ok()?).ok()
+}
+
+pub fn saved_rules(data_dir: &Path) -> RankedRules {
+    read_stored(&data_dir.join(RULES_FILE)).map_or_else(RankedRules::default, |stored| stored.rules)
 }
 
 async fn fetch_source(http: &Client, base: &str, path: &str) -> Option<String> {

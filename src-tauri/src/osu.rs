@@ -11,6 +11,10 @@ const TIMEOUT: Duration = Duration::from_secs(15);
 #[derive(Deserialize)]
 pub struct RoomSummary {
     pub id: u64,
+    #[serde(default)]
+    pub starts_at: Option<String>,
+    #[serde(default)]
+    pub ends_at: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -49,6 +53,24 @@ pub struct RoomItem {
 pub struct BeatmapCovers {
     #[serde(default)]
     pub card: String,
+    #[serde(default)]
+    pub cover: String,
+}
+
+#[derive(Deserialize)]
+pub struct RoomBeatmap {
+    pub id: u64,
+    pub beatmapset_id: u64,
+    pub version: String,
+    pub difficulty_rating: f64,
+}
+
+#[derive(Deserialize)]
+pub struct RoomBeatmapset {
+    pub id: u64,
+    pub title: String,
+    #[serde(default)]
+    pub covers: BeatmapCovers,
 }
 
 #[derive(Deserialize)]
@@ -92,6 +114,10 @@ pub struct RoomEvents {
     pub users: Vec<RoomUser>,
     #[serde(default)]
     pub playlist_items: Vec<RoomItem>,
+    #[serde(default)]
+    pub beatmaps: Vec<RoomBeatmap>,
+    #[serde(default)]
+    pub beatmapsets: Vec<RoomBeatmapset>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -100,6 +126,7 @@ pub enum OsuError {
     Unavailable,
 }
 
+#[derive(Clone)]
 pub struct OsuClient {
     http: Client,
     base: String,
@@ -157,6 +184,11 @@ impl OsuClient {
 
     pub async fn active_ranked_rooms(&self, token: &str) -> Result<Vec<RoomSummary>, OsuError> {
         let query = [("type_group", "ranked-play"), ("mode", "participated"), ("is_active", "true")];
+        self.get(self.url(&["rooms"])?, token, &query, false).await
+    }
+
+    pub async fn recent_ranked_rooms(&self, token: &str, limit: &str) -> Result<Vec<RoomSummary>, OsuError> {
+        let query = [("type_group", "ranked-play"), ("mode", "participated"), ("limit", limit)];
         self.get(self.url(&["rooms"])?, token, &query, false).await
     }
 

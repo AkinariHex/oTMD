@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import CopyUrlButton from "@/Components/CopyUrlButton/CopyUrlButton";
+import FontPicker from "@/Components/FontPicker/FontPicker";
 import OverlayPreview from "@/Components/OverlayPreview/OverlayPreview";
 import PageHeader from "@/Components/PageHeader/PageHeader";
 import SettingRow from "@/Components/SettingRow/SettingRow";
@@ -38,13 +39,6 @@ const VIEWS: Record<"match" | "ranked", OverlayView[]> = {
   match: [view("score", "Score", "/visualizer", SCORE_HEIGHT), view("maps", "Maps", "/visualizer/maps", MAPS_HEIGHT)],
   ranked: [view("health", "Health", "/ranked", HEALTH_HEIGHT), view("maps", "Maps", "/ranked/maps", MAPS_HEIGHT), view("ratio", "Overview", "/ranked/ratio", RATIO_HEIGHT)],
 };
-const FONTS = [
-  { value: "Nunito, Inter, sans-serif", label: "Nunito" },
-  { value: "Inter, sans-serif", label: "Inter" },
-  { value: "Poppins, sans-serif", label: "Poppins" },
-  { value: "Roboto, sans-serif", label: "Roboto" },
-  { value: "Figtree, sans-serif", label: "Figtree" },
-];
 
 const OVERLAYS: { id: OverlayKind; name: string; available: boolean }[] = [
   { id: "match", name: "Match", available: true },
@@ -138,7 +132,7 @@ function StyleControls({ style, onChange }: { style: api.OverlayStyle; onChange:
       </SettingRow>
       <SettingRow compact label="Font">
         <div className="w-full">
-          <Select label="Font" value={style.fontFamily} onChange={(fontFamily) => onChange({ fontFamily })} options={FONTS} />
+          <FontPicker label="Font" value={style.fontFamily} onChange={(fontFamily) => onChange({ fontFamily })} />
         </div>
       </SettingRow>
     </>

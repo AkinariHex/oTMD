@@ -11,6 +11,8 @@ mod ranked_watch;
 pub mod scoring;
 mod server;
 mod settings;
+mod settings_sync;
+mod system_fonts;
 mod tournament;
 mod window;
 
@@ -146,7 +148,7 @@ pub fn run() {
                 callback_ready: listener.is_some(),
                 webview_data_dir: settings::portable_data_dir().map(|dir| dir.join("webview")),
                 hardware_acceleration,
-                dashboard: dashboard::Dashboard::new(osu::OSU_API_URL, SITE_URL)?,
+                dashboard: dashboard::Dashboard::new(osu::OSU_API_URL, SITE_URL, data_dir.clone())?,
                 window_memory: Mutex::default(),
             });
 
@@ -176,7 +178,10 @@ pub fn run() {
                 github_raw: GITHUB_RAW_URL.into(),
             };
             let poller = Poller::new(auth, settings_store, overlay, teams_dir, &data_dir, wake, &endpoints)?;
-            tauri::async_runtime::spawn(poller.run(move || on_session_expired(&handle)));
+            let replaced_handle = handle.clone();
+            tauri::async_runtime::spawn(poller.run(move || on_session_expired(&handle), move || {
+                let _ = replaced_handle.emit("settings-replaced", ());
+            }));
 
             Ok(())
         })
@@ -194,6 +199,9 @@ pub fn run() {
             commands::validate_export_key,
             commands::get_overlay_sources,
             commands::get_dashboard,
+            commands::get_match_feed,
+            commands::get_system_fonts,
+            commands::get_popular_fonts,
             commands::get_ranked_status,
             commands::set_ranked_enabled,
             commands::get_ranked_settings,
@@ -201,7 +209,6 @@ pub fn run() {
             commands::check_update,
             commands::close_app,
             commands::get_start_route,
-            commands::remember_route,
             commands::window_ready,
         ])
         .build(tauri::generate_context!())

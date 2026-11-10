@@ -8,7 +8,6 @@ use tauri::{AppHandle, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, Web
 const MAIN_WINDOW: &str = "main";
 const LOGIN_ROUTE: &str = "/login";
 const DEFAULT_ROUTE: &str = "/app/profile";
-const APP_ROUTE_PREFIX: &str = "/app/";
 // Matches --primary-color, so nothing bright can show before the page paints.
 const BACKGROUND: Color = Color(27, 29, 35, 255);
 const REVEAL_FALLBACK: Duration = Duration::from_secs(3);
@@ -20,7 +19,6 @@ const MINIMIZED_COORDINATE: i32 = -32000;
 // Kept in memory only: it restores the window after the tray, not after a full restart.
 #[derive(Default)]
 pub struct WindowMemory {
-    route: Option<String>,
     position: Option<PhysicalPosition<i32>>,
 }
 
@@ -32,26 +30,13 @@ fn memory(app: &AppHandle) -> MutexGuard<'_, WindowMemory> {
         .unwrap_or_else(PoisonError::into_inner)
 }
 
-fn is_restorable_route(route: &str) -> bool {
-    route.starts_with(APP_ROUTE_PREFIX)
-}
-
-fn resolve_start_route(logged_in: bool, remembered: Option<&str>) -> String {
-    if !logged_in {
-        return LOGIN_ROUTE.into();
-    }
-    remembered.unwrap_or(DEFAULT_ROUTE).into()
+fn resolve_start_route(logged_in: bool) -> String {
+    if logged_in { DEFAULT_ROUTE } else { LOGIN_ROUTE }.into()
 }
 
 pub fn start_route(app: &AppHandle) -> String {
     let logged_in = app.state::<AppState>().auth.user().is_some();
-    resolve_start_route(logged_in, memory(app).route.as_deref())
-}
-
-pub fn remember_route(app: &AppHandle, route: String) {
-    if is_restorable_route(&route) {
-        memory(app).route = Some(route);
-    }
+    resolve_start_route(logged_in)
 }
 
 pub fn remember_position(app: &AppHandle, position: PhysicalPosition<i32>) {
@@ -225,19 +210,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn start_route_restores_the_last_screen_only_when_logged_in() {
-        assert_eq!(resolve_start_route(true, Some("/app/dsettings")), "/app/dsettings");
-        assert_eq!(resolve_start_route(true, None), DEFAULT_ROUTE);
-        assert_eq!(resolve_start_route(false, Some("/app/dsettings")), LOGIN_ROUTE);
-        assert_eq!(resolve_start_route(false, None), LOGIN_ROUTE);
-    }
-
-    #[test]
-    fn only_app_screens_can_be_remembered() {
-        assert!(is_restorable_route("/app/profile"));
-        assert!(!is_restorable_route("/login"));
-        assert!(!is_restorable_route("/update"));
-        assert!(!is_restorable_route("https://evil.test/app/"));
+    fn the_app_opens_on_the_dashboard_when_logged_in() {
+        assert_eq!(resolve_start_route(true), DEFAULT_ROUTE);
+        assert_eq!(resolve_start_route(false), LOGIN_ROUTE);
     }
 
     #[test]

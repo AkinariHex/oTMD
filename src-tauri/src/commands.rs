@@ -1,10 +1,10 @@
 use crate::{
     AppState,
     auth::{User, now_seconds},
-    dashboard::DashboardData,
+    dashboard::{DashboardData, FeedCursor, FeedPage},
     server::OverlaySources,
     settings::{AppMode, AppSettings, DisplayerSettings, MatchSettings, RankedSettings},
-    window,
+    system_fonts, window,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -94,6 +94,7 @@ pub fn save_displayer_settings(settings: DisplayerSettings, state: State<'_, App
         .map_err(|_| SAVE_FAILED.to_string())?;
 
     state.overlay.publish("displayerSettings", &state.settings);
+    state.wake.notify_one();
     Ok(())
 }
 
@@ -107,7 +108,10 @@ pub fn save_app_settings(settings: AppSettings, state: State<'_, AppState>) -> R
     state
         .settings
         .update(|current| current.appSettings = settings)
-        .map_err(|_| SAVE_FAILED.to_string())
+        .map_err(|_| SAVE_FAILED.to_string())?;
+
+    state.wake.notify_one();
+    Ok(())
 }
 
 #[tauri::command]
@@ -116,8 +120,25 @@ pub async fn validate_export_key(apikey: String, state: State<'_, AppState>) -> 
 }
 
 #[tauri::command]
+pub async fn get_system_fonts() -> Result<Vec<String>, String> {
+    tauri::async_runtime::spawn_blocking(system_fonts::installed_families)
+        .await
+        .map_err(|_| "Could not read the installed fonts.".to_string())
+}
+
+#[tauri::command]
+pub async fn get_popular_fonts(state: State<'_, AppState>) -> Result<Vec<String>, String> {
+    Ok(state.dashboard.popular_fonts().await)
+}
+
+#[tauri::command]
 pub async fn get_dashboard(state: State<'_, AppState>) -> Result<DashboardData, String> {
     Ok(state.dashboard.get(&state.auth, &state.settings).await)
+}
+
+#[tauri::command]
+pub async fn get_match_feed(state: State<'_, AppState>, cursor: FeedCursor) -> Result<FeedPage, String> {
+    Ok(state.dashboard.feed(&state.auth, &state.settings, cursor).await)
 }
 
 #[tauri::command]
@@ -180,11 +201,6 @@ pub fn save_ranked_settings(settings: RankedSettings, state: State<'_, AppState>
 #[tauri::command]
 pub fn get_start_route(app: AppHandle) -> String {
     window::start_route(&app)
-}
-
-#[tauri::command]
-pub fn remember_route(app: AppHandle, route: String) {
-    window::remember_route(&app, route);
 }
 
 #[tauri::command]

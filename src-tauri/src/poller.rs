@@ -7,6 +7,7 @@ use crate::{
     scoring::{Game, MatchRules, QualifierResult, ScoreOutcome, match_cost},
     server::Overlay,
     settings::{AppMode, MatchSettings, SettingsStore},
+    settings_sync::{SettingsSync, SyncContext},
     tournament::{Tournament, TournamentCache},
 };
 use reqwest::{Client, Url};
@@ -252,6 +253,7 @@ pub struct Poller {
     next_poll: u64,
     ranked: RankedWatch,
     beatmaps: BeatmapCache,
+    sync: SettingsSync,
     github_raw: String,
     last_source: (bool, String),
 }
@@ -272,7 +274,10 @@ impl Poller {
             .user_agent(concat!("oTMD/", env!("CARGO_PKG_VERSION")))
             .build()?;
 
+        let sync = SettingsSync::new(http.clone(), &endpoints.site, data_dir);
+
         Ok(Self {
+            sync,
             auth,
             settings,
             overlay,
@@ -292,12 +297,13 @@ impl Poller {
     }
 
     // The single background task: poll and token refresh share one sleep, per the zero-cost goal.
-    pub async fn run(mut self, on_expired: impl Fn()) {
+    pub async fn run(mut self, on_expired: impl Fn(), on_settings_replaced: impl Fn()) {
         let mut schedule = RefreshSchedule::default();
 
         loop {
             let refresh_wait = self.auth.refresh_step(&mut schedule, now_seconds(), &on_expired).await;
             self.sync_config();
+            let sync_wait = self.sync_settings(&on_settings_replaced).await;
 
             let poll_wait = if self.has_work() {
                 if now_seconds() >= self.next_poll {
@@ -309,7 +315,7 @@ impl Poller {
                 None
             };
 
-            match [refresh_wait, poll_wait].into_iter().flatten().min() {
+            match [refresh_wait, poll_wait, sync_wait].into_iter().flatten().min() {
                 // Short sleeps against the wall clock also cover PC sleep, where monotonic timers can stall.
                 Some(seconds) => {
                     tokio::select! {
@@ -320,6 +326,12 @@ impl Poller {
                 None => self.wake.notified().await,
             }
         }
+    }
+
+    async fn sync_settings(&mut self, on_replaced: &impl Fn()) -> Option<u64> {
+        let (token, user) = (self.auth.access_token()?, self.auth.user()?);
+        let context = SyncContext { token: &token, me: user.id, settings: &self.settings, overlay: &self.overlay };
+        self.sync.step(&context, on_replaced).await
     }
 
     fn is_ranked(&self) -> bool {

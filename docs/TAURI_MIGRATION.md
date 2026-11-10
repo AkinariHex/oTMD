@@ -348,6 +348,10 @@ Fetched by a Rust command only while the window is open, 60 s in-memory cache. W
 saved section shows how to connect one and the rest still works. Tournament matches that were tracked but
 never exported do not exist anywhere, so they are not counted.
 
+Settings sync: display settings follow the osu! account through `GET/PUT /api/app/settings`, from the poller task,
+never the API key, IDs or PC-specific options. Overlay fonts come from the installed fonts, with shared suggestions
+from `/api/fonts/popular`. Site SQL: `docs/migrations/002_app_settings.sql` in the website repo.
+
 **Accept:** another user's data is unreachable with any key; site down or no key leaves a usable screen
 with a sonner error at most once; numbers match a hand count on a known account; no dashboard work in tray.
 

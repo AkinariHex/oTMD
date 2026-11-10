@@ -14,6 +14,8 @@
   --color-teal: var(--teal);
   --color-win: var(--win);
   --color-loss: var(--loss);
+  --color-damage: var(--damage);
+  --color-heart: var(--heart);
   --font-sans: "Plus Jakarta Sans Variable", "Segoe UI", sans-serif;
   --text-caption: calc(0.6875rem * var(--text-scale));
   --text-ui: calc(0.8125rem * var(--text-scale));
@@ -39,6 +41,16 @@
   --teal: oklch(0.57 0.05 225);
   --win: oklch(0.86 0.06 155);
   --loss: oklch(0.68 0.09 10);
+  --damage: oklch(0.79 0.121 20.1);
+  --heart: oklch(0.823 0.11 346);
+  --health-red-high: oklch(0.59 0.195 9.3);
+  --health-red-mid: oklch(0.471 0.166 4.2);
+  --health-red-low: oklch(0.336 0.134 14.5);
+  --health-red-end: oklch(0.723 0.185 1.8);
+  --health-blue-high: oklch(0.586 0.153 257.2);
+  --health-blue-mid: oklch(0.476 0.147 257);
+  --health-blue-low: oklch(0.299 0.103 260.4);
+  --health-blue-end: oklch(0.739 0.123 249.5);
 }
 
 html,
@@ -56,6 +68,15 @@ body {
   font-size: calc(0.8125rem * var(--text-scale));
   -webkit-font-smoothing: antialiased;
   user-select: none;
+}
+
+html {
+  scrollbar-color: oklch(1 0 0 / 0.22) transparent;
+  scrollbar-width: thin;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
 }
 
 input,
@@ -83,6 +104,73 @@ input::-webkit-inner-spin-button {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0s !important;
+  }
+}
+
+.health-shimmer {
+  position: absolute;
+  top: 0;
+  width: 3rem;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.08) 35%, oklch(1 0 0 / 0.15) 50%, oklch(1 0 0 / 0.08) 65%, transparent 100%);
+  pointer-events: none;
+}
+
+.health-shimmer[data-side="0"] {
+  left: 0;
+  animation: health-shimmer-ltr 2.4s ease-in-out infinite;
+}
+
+.health-shimmer[data-side="1"] {
+  right: 0;
+  animation: health-shimmer-rtl 2.4s ease-in-out infinite;
+}
+
+[data-open="false"] .health-shimmer {
+  animation-play-state: paused;
+}
+
+:root[data-animations="off"] .health-shimmer {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .health-shimmer {
+    display: none;
+  }
+}
+
+@keyframes health-shimmer-ltr {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(700%);
+    opacity: 0;
+  }
+}
+
+@keyframes health-shimmer-rtl {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(-700%);
+    opacity: 0;
   }
 }
 

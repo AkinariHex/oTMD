@@ -11,7 +11,7 @@ import Profile from "@/Pages/Profile/Profile";
 import Changelog from "@/Pages/Changelog/Changelog";
 import * as api from "@/lib/api";
 import { EASE_OUT } from "@/lib/motion";
-import { useLayout } from "@/lib/preferences";
+import { applyPreferences, useLayout } from "@/lib/preferences";
 
 function AppShell() {
   const navigate = useNavigate();
@@ -20,10 +20,7 @@ function AppShell() {
   const [user, setUser] = useState<api.User | null>(null);
   const [version, setVersion] = useState("");
   const [sources, setSources] = useState<api.OverlaySources>({ match: 0, ranked: 0 });
-
-  useEffect(() => {
-    void api.rememberRoute(location.pathname);
-  }, [location.pathname]);
+  const [settingsVersion, setSettingsVersion] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -38,11 +35,19 @@ function AppShell() {
     };
     void load();
 
+    const stopSettings = api.onSettingsReplaced(() => {
+      const refresh = async () => {
+        applyPreferences(await api.getAppSettings());
+        setSettingsVersion((version) => version + 1);
+      };
+      void refresh();
+    });
     const stopSources = api.onOverlayChanged(setSources);
     const stopSession = api.onSessionExpired(() =>
       navigate("/login", { replace: true, state: { message: "Your session has expired. Please log in again." } })
     );
     return () => {
+      stopSettings();
       stopSources();
       stopSession();
     };
@@ -53,7 +58,7 @@ function AppShell() {
   return (
     <Layout user={user} version={version} sources={sources.match + sources.ranked}>
       <motion.div
-        key={location.pathname}
+        key={`${location.pathname}-${settingsVersion}`}
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.16, ease: EASE_OUT }}

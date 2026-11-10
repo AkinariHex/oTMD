@@ -117,9 +117,6 @@ export const getSession = (): Promise<User | null> => invoke("get_session");
 
 export const getStartRoute = (): Promise<string> => invoke("get_start_route");
 
-export const rememberRoute = (route: string): Promise<void> =>
-  invoke("remember_route", { route });
-
 // The extra round trip lets the data requests of the first screen finish before it is shown.
 export const showWindowWhenReady = async (): Promise<void> => {
   await getSession();
@@ -174,17 +171,54 @@ export interface DashboardStats {
   totals: { all: number; oneVsOne: number; teamVS: number; qualifiers: number };
   oneVsOne: { wins: number; losses: number };
   topTournaments: { acronym: string; name: string; count: number }[];
-  recentMatches: {
-    matchID: string;
-    type: string;
-    stage: string;
-    tournament: string;
-    startTime: string | null;
-    opponent: string | null;
-    score: string | null;
-    won: boolean | null;
-  }[];
-  recentRooms: { roomId: number; endedAt: string | null; rounds: number; won: boolean | null; opponent: string | null }[];
+}
+
+export type SideIndex = 0 | 1;
+
+export interface MatchSide {
+  name: string;
+  score: number;
+  players: { id: number; username: string; cost: number }[];
+}
+
+export interface SavedMatch {
+  matchID: string;
+  type: string;
+  stage: string;
+  tournament: { acronym: string; name: string };
+  banner: string | null;
+  startTime: string | null;
+  sides: [MatchSide, MatchSide];
+  won: boolean | null;
+  winner: SideIndex | null;
+}
+
+export interface RankedMatchRound {
+  round: number;
+  title: string;
+  version: string;
+  stars: number;
+  cover: string | null;
+  scores: [number, number];
+  winner: SideIndex | null;
+  damage: number;
+  multiplier: number;
+  life: [number, number];
+}
+
+export interface RankedMatchPlayer {
+  id: number;
+  username: string;
+  roundsWon: number;
+}
+
+export interface RankedMatch {
+  roomId: number;
+  date: string;
+  winner: SideIndex | null;
+  maxLife: number;
+  players: [RankedMatchPlayer, RankedMatchPlayer];
+  rounds: RankedMatchRound[];
 }
 
 export interface DashboardData {
@@ -192,6 +226,25 @@ export interface DashboardData {
   stats: DashboardStats | null;
   ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number } | null;
 }
+
+export interface FeedCursor {
+  saved: number | null;
+  ranked: number;
+}
+
+export interface FeedPage {
+  matches: SavedMatch[];
+  rankedMatches: RankedMatch[];
+  next: FeedCursor | null;
+}
+
+export const getMatchFeed = (cursor: FeedCursor): Promise<FeedPage> => invoke("get_match_feed", { cursor });
+
+export const getSystemFonts = (): Promise<string[]> => invoke("get_system_fonts");
+
+export const getPopularFonts = (): Promise<string[]> => invoke("get_popular_fonts");
+
+export const onSettingsReplaced = (listener: () => void): (() => void) => subscribe("settings-replaced", listener);
 
 export const getDashboard = (): Promise<DashboardData> => invoke("get_dashboard");
 

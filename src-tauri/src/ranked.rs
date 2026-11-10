@@ -36,6 +36,7 @@ pub struct RoundResult {
     pub damage: i64,
     pub multiplier: f64,
     pub global: f64,
+    pub lives: [i64; 2],
 }
 
 #[derive(Debug, PartialEq)]
@@ -65,7 +66,8 @@ pub fn play(rules: &RankedRules, players: [u64; 2], rounds: &[Vec<(u64, i64)>]) 
 
         let (first, second) = (score_of(round, players[0]), score_of(round, players[1]));
         if first == second {
-            results.push(RoundResult { winner: None, loser: None, damage: 0, multiplier: 0.0, global });
+            let snapshot = players.map(|player| lives[&player]);
+            results.push(RoundResult { winner: None, loser: None, damage: 0, multiplier: 0.0, global, lives: snapshot });
             continue;
         }
 
@@ -86,7 +88,8 @@ pub fn play(rules: &RankedRules, players: [u64; 2], rounds: &[Vec<(u64, i64)>]) 
             overflow.insert(loser, remaining);
         }
         *rounds_won.entry(winner).or_default() += 1;
-        results.push(RoundResult { winner: Some(winner), loser: Some(loser), damage, multiplier, global });
+        let snapshot = players.map(|player| lives[&player]);
+        results.push(RoundResult { winner: Some(winner), loser: Some(loser), damage, multiplier, global, lives: snapshot });
     }
 
     PlayedMatch { lives, rounds_won, rounds: results, overflow }
