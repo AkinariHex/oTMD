@@ -25,7 +25,7 @@ function Segmented({ label, value, onChange, options, small = false }: Segmented
           onClick={() => onChange(option.value)}
           className={cn(
             "relative flex-1 rounded font-medium whitespace-nowrap transition-colors duration-150",
-            small ? "px-2 text-xs" : "px-3 text-[13px]",
+            small ? "px-2 text-xs" : "px-3 text-ui",
             value === option.value ? "text-ink" : "text-ink-3 hover:text-ink-2"
           )}
         >

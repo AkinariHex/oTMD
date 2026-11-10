@@ -15,9 +15,18 @@
   --color-win: var(--win);
   --color-loss: var(--loss);
   --font-sans: "Plus Jakarta Sans Variable", "Segoe UI", sans-serif;
+  --text-caption: calc(0.6875rem * var(--text-scale));
+  --text-ui: calc(0.8125rem * var(--text-scale));
+  --text-xs: calc(0.75rem * var(--text-scale));
+  --text-sm: calc(0.875rem * var(--text-scale));
+  --text-base: calc(1rem * var(--text-scale));
+  --text-lg: calc(1.125rem * var(--text-scale));
+  --text-xl: calc(1.25rem * var(--text-scale));
 }
 
 :root {
+  --text-scale: 1;
+  --window-controls-inset: 0px;
   --app: oklch(0.2 0.012 265);
   --panel: oklch(0.26 0.014 262);
   --raised: oklch(0.31 0.014 262);
@@ -44,7 +53,7 @@ body {
   background: var(--app);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: calc(0.8125rem * var(--text-scale));
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
@@ -92,15 +101,15 @@ input::-webkit-inner-spin-button {
 }
 
 .markdown h1 {
-  font-size: 16px;
+  font-size: calc(1rem * var(--text-scale));
 }
 
 .markdown h2 {
-  font-size: 14px;
+  font-size: calc(0.875rem * var(--text-scale));
 }
 
 .markdown h3 {
-  font-size: 13px;
+  font-size: calc(0.8125rem * var(--text-scale));
 }
 
 .markdown ul {

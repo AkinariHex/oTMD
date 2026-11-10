@@ -86,12 +86,13 @@ export interface RankedStatus {
 }
 
 export type Layout = "sidebar" | "tabs";
-export type PreviewBackground = "checker" | "black";
+export type PreviewBackground = "checker" | "black" | "dark" | "gray" | "light" | "white" | "darkScene" | "lightScene" | "custom";
 
 export interface AppSettings {
   Mode: "tournament" | "ranked";
   Layout: Layout;
   PreviewBackground: PreviewBackground;
+  TextSize: number;
   TrayBehavior: "closeToTray" | "minimizeToTray";
   ExportMatches: { status: boolean; apikey: string };
   Animations: boolean;
@@ -168,6 +169,31 @@ export const getOverlaySources = (): Promise<OverlaySources> => invoke("get_over
 
 export const onOverlayChanged = (listener: (sources: OverlaySources) => void): (() => void) =>
   subscribe("overlay-changed", listener);
+
+export interface DashboardStats {
+  totals: { all: number; oneVsOne: number; teamVS: number; qualifiers: number };
+  oneVsOne: { wins: number; losses: number };
+  topTournaments: { acronym: string; name: string; count: number }[];
+  recentMatches: {
+    matchID: string;
+    type: string;
+    stage: string;
+    tournament: string;
+    startTime: string | null;
+    opponent: string | null;
+    score: string | null;
+    won: boolean | null;
+  }[];
+  recentRooms: { roomId: number; endedAt: string | null; rounds: number; won: boolean | null; opponent: string | null }[];
+}
+
+export interface DashboardData {
+  siteStatus: "ok" | "noKey" | "invalidKey" | "unavailable";
+  stats: DashboardStats | null;
+  ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number } | null;
+}
+
+export const getDashboard = (): Promise<DashboardData> => invoke("get_dashboard");
 
 export const getRankedStatus = (): Promise<RankedStatus> => invoke("get_ranked_status");
 

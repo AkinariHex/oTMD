@@ -22,7 +22,7 @@ function AppUpdate() {
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-24">
         <div className="text-center">
           <h1 className="text-lg font-semibold tracking-tight text-ink">Updating o!TMD</h1>
-          <p className="mt-0.5 text-[13px] text-ink-3">The app restarts when the download is complete</p>
+          <p className="mt-0.5 text-ui text-ink-3">The app restarts when the download is complete</p>
         </div>
         <Progress value={progress} aria-label="Download progress" />
         <div className="text-xs tabular-nums text-ink-2">

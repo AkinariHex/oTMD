@@ -7,6 +7,7 @@ import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Segmented } from "@/Components/ui/segmented";
 import { SelectCard } from "@/Components/ui/select-card";
+import { Slider } from "@/Components/ui/slider";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
 import { applyPreferences } from "@/lib/preferences";
@@ -22,6 +23,8 @@ const TRAY_OPTIONS = [
   { value: "closeToTray", label: "Close to tray" },
   { value: "minimizeToTray", label: "Minimize to tray" },
 ];
+const DEFAULT_FIXED_TEXT_SIZE = 100;
+
 const LAYOUTS: { id: api.Layout; name: string; hint: string }[] = [
   { id: "sidebar", name: "Sidebar", hint: "Grouped menu with connected sources" },
   { id: "tabs", name: "Tabs", hint: "Navigation in the title bar, more room for content" },
@@ -122,7 +125,7 @@ function Settings() {
                 <LayoutThumbnail layout={layout.id} />
               </span>
               <span className="min-w-0">
-                <span className="block text-[13px] font-semibold text-ink">{layout.name}</span>
+                <span className="block text-ui font-semibold text-ink">{layout.name}</span>
                 <span className="block text-xs text-ink-3">{layout.hint}</span>
               </span>
             </SelectCard>
@@ -138,6 +141,14 @@ function Settings() {
             options={TRAY_OPTIONS}
           />
         </SettingRow>
+        <SettingRow label="Automatic text size" hint="Follows your screen resolution">
+          <Switch aria-label="Automatic text size" checked={settings.TextSize === 0} onCheckedChange={(automatic) => void change({ TextSize: automatic ? 0 : DEFAULT_FIXED_TEXT_SIZE })} />
+        </SettingRow>
+        {settings.TextSize > 0 && (
+          <SettingRow label={`Text size ${settings.TextSize}%`}>
+            <Slider label="Text size" min={80} max={140} step={5} value={settings.TextSize} onChange={(TextSize) => void change({ TextSize })} />
+          </SettingRow>
+        )}
         <SettingRow label="Animations" hint="Motion in the interface">
           <Switch aria-label="Animations" checked={settings.Animations} onCheckedChange={(Animations) => void change({ Animations })} />
         </SettingRow>

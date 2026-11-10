@@ -19,15 +19,34 @@ function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps)
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full [--window-controls-inset:96px]">
       <aside className="flex w-[188px] shrink-0 flex-col">
         <div data-tauri-drag-region className="flex h-10 shrink-0 items-center px-3 text-xs font-semibold text-ink">
           o!TMD
         </div>
-        <nav aria-label="Main" className="flex-1 divide-y divide-line px-2">
+        <div className="border-b border-line px-2 pb-2">
+          <NavLink
+            to="/app/profile"
+            className={({ isActive }) => cn("relative flex items-center gap-2 rounded-md p-1.5 transition-colors duration-150", !isActive && "hover:bg-white/5")}
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && <motion.span layoutId="sidebar-active" transition={{ duration: 0.2, ease: EASE_OUT }} className="absolute inset-0 rounded-md bg-white/9" />}
+                <span className="relative">
+                  <Avatar userId={user?.id ?? 0} username={user?.username ?? ""} size={26} />
+                </span>
+                <span className="relative min-w-0">
+                  <span className="block truncate text-xs font-medium leading-tight text-ink">{user?.username}</span>
+                  <span className="block text-caption leading-tight text-ink-3">Dashboard</span>
+                </span>
+              </>
+            )}
+          </NavLink>
+        </div>
+        <nav aria-label="Main" className="flex-1 divide-y divide-line px-2 pt-2">
           {NAV_GROUPS.map((group) => (
             <div key={group} className="py-2.5 first:pt-0">
-              <div className="px-2 pb-1 text-[11px] font-medium text-ink-3">{group}</div>
+              <div className="px-2 pb-1 text-caption font-medium text-ink-3">{group}</div>
               {NAV.filter((item) => item.group === group).map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
@@ -56,28 +75,20 @@ function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps)
         <button
           type="button"
           onClick={() => navigate("/app/overlay")}
-          className="mx-2 mb-1 flex h-7 items-center gap-2 rounded-md px-2 text-xs text-ink-2 transition-colors duration-150 hover:bg-white/5 hover:text-ink"
+          className="mx-2 flex h-7 items-center gap-2 rounded-md px-2 text-xs text-ink-2 transition-colors duration-150 hover:bg-white/5 hover:text-ink"
         >
           <span className={cn("size-2 shrink-0 rounded-full", sources > 0 ? "bg-win" : "bg-ink-3")} />
           {sources} {sources === 1 ? "source" : "sources"} connected
         </button>
-        <button
-          type="button"
-          onClick={() => navigate("/app/profile")}
-          className="flex items-center gap-2 border-t border-line p-2.5 text-left transition-colors duration-150 hover:bg-white/5"
-        >
-          <Avatar userId={user?.id ?? 0} username={user?.username ?? ""} size={26} />
-          <span className="min-w-0">
-            <span className="block truncate text-xs font-medium leading-tight text-ink">{user?.username}</span>
-            <span className="block text-[11px] leading-tight text-ink-3">v{version}</span>
-          </span>
-        </button>
+        <div className="px-4 pt-0.5 pb-2.5 text-caption text-ink-3">v{version}</div>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col bg-panel">
-        <div data-tauri-drag-region className="flex h-8 shrink-0 justify-end">
+      <div className="relative min-w-0 flex-1 bg-panel">
+        <div className="absolute top-0 right-0 z-20 h-8">
           <WindowControls />
         </div>
-        <main className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">{children}</main>
+        <main data-tauri-drag-region className="h-full overflow-y-auto p-5">
+          {children}
+        </main>
       </div>
     </div>
   );

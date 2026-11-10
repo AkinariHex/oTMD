@@ -1,6 +1,7 @@
 use crate::{
     AppState,
     auth::{User, now_seconds},
+    dashboard::DashboardData,
     server::OverlaySources,
     settings::{AppMode, AppSettings, DisplayerSettings, MatchSettings, RankedSettings},
     window,
@@ -112,6 +113,11 @@ pub fn save_app_settings(settings: AppSettings, state: State<'_, AppState>) -> R
 #[tauri::command]
 pub async fn validate_export_key(apikey: String, state: State<'_, AppState>) -> Result<bool, String> {
     Ok(state.auth.is_export_key_valid(&apikey).await)
+}
+
+#[tauri::command]
+pub async fn get_dashboard(state: State<'_, AppState>) -> Result<DashboardData, String> {
+    Ok(state.dashboard.get(&state.auth, &state.settings).await)
 }
 
 #[tauri::command]

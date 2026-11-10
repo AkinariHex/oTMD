@@ -11,7 +11,7 @@ import { SelectCard } from "@/Components/ui/select-card";
 import { Slider } from "@/Components/ui/slider";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
-import { applyPreferences, usePreviewBackground } from "@/lib/preferences";
+import { HEALTH_HEIGHT, MAPS_HEIGHT, OVERLAY_WIDTH, RATIO_HEIGHT, SCORE_HEIGHT, SMALL_SCORE_HEIGHT, withPadding } from "@/lib/overlays";
 
 type OverlayKind = "match" | "ranked" | "broadcast";
 
@@ -35,8 +35,8 @@ const view = (id: ViewId, label: string, path: string, height: number): OverlayV
   height,
 });
 const VIEWS: Record<"match" | "ranked", OverlayView[]> = {
-  match: [view("score", "Score", "/visualizer", 130), view("maps", "Maps", "/visualizer/maps", 320)],
-  ranked: [view("health", "Health", "/ranked", 210), view("maps", "Maps", "/ranked/maps", 320), view("ratio", "Ratio", "/ranked/ratio", 260)],
+  match: [view("score", "Score", "/visualizer", SCORE_HEIGHT), view("maps", "Maps", "/visualizer/maps", MAPS_HEIGHT)],
+  ranked: [view("health", "Health", "/ranked", HEALTH_HEIGHT), view("maps", "Maps", "/ranked/maps", MAPS_HEIGHT), view("ratio", "Overview", "/ranked/ratio", RATIO_HEIGHT)],
 };
 const FONTS = [
   { value: "Nunito, Inter, sans-serif", label: "Nunito" },
@@ -60,10 +60,6 @@ const CORNER_STYLES = [
 const PREVIEW_DATA = [
   { value: "sample", label: "Sample data" },
   { value: "live", label: "Live" },
-];
-const PREVIEW_BACKGROUNDS = [
-  { value: "checker", label: "Checker" },
-  { value: "black", label: "Black" },
 ];
 
 function OverlayThumbnail({ kind }: { kind: OverlayKind }) {
@@ -155,7 +151,6 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
   const [previewData, setPreviewData] = useState("sample");
   const [settings, setSettings] = useState<api.DisplayerSettings | null>(null);
   const [ranked, setRanked] = useState<api.RankedSettings | null>(null);
-  const previewBackground = usePreviewBackground();
 
   useEffect(() => {
     const load = async () => {
@@ -188,16 +183,6 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
     }
   };
 
-  const changePreviewBackground = async (PreviewBackground: api.PreviewBackground) => {
-    try {
-      const next = { ...(await api.getAppSettings()), PreviewBackground };
-      applyPreferences(next);
-      await api.saveAppSettings(next);
-    } catch {
-      toast.error("Could not save the preview background.");
-    }
-  };
-
   const countOf = (id: OverlayKind) => {
     const count = id === "ranked" ? sources.ranked : sources.match;
     return `${count} ${count === 1 ? "source" : "sources"}`;
@@ -206,6 +191,8 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
   const selected = VIEWS[kind].find(({ id }) => id === views[kind]) ?? VIEWS[kind][0];
   const rankedStyle = selected.id === "health" ? "Health" : selected.id === "ratio" ? "Ratio" : "Maps";
   const isMatchScore = kind === "match" && selected.id === "score";
+  const activePadding = kind === "ranked" ? ranked[rankedStyle].padding : 0;
+  const sourceHeight = isMatchScore && settings.SmallDisplayer ? SMALL_SCORE_HEIGHT : selected.id === "maps" ? selected.height : withPadding(selected.height, activePadding);
 
   return (
     <div className="flex h-full flex-col gap-3">
@@ -223,14 +210,14 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
           >
             <OverlayThumbnail kind={id} />
             <span className="min-w-0">
-              <span className="block text-[13px] font-semibold text-ink">{name}</span>
+              <span className="block text-ui font-semibold text-ink">{name}</span>
               <span className="block text-xs text-ink-3">{available ? countOf(id) : "Soon"}</span>
             </span>
           </SelectCard>
         ))}
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] gap-5">
-        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-1">
+        <div className="-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1">
           <Segmented
             label="Overlay view"
             value={selected.id}
@@ -241,6 +228,12 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
             <Input readOnly value={selected.url} aria-label="Overlay URL" className="text-xs" />
             <CopyUrlButton url={selected.url} label="Copy" />
           </div>
+          <p className="flex items-center justify-between text-xs text-ink-3">
+            OBS browser source
+            <span className="font-medium tabular-nums text-ink-2">
+              {OVERLAY_WIDTH} x {sourceHeight}
+            </span>
+          </p>
           <div className="divide-y divide-line">
             {isMatchScore && (
               <>
@@ -263,20 +256,11 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
             {kind === "ranked" && (
               <StyleControls style={ranked[rankedStyle]} onChange={(update) => void changeRanked({ [rankedStyle]: { ...ranked[rankedStyle], ...update } })} />
             )}
-            <SettingRow compact label="Preview background" hint="Only in this app">
-              <Segmented
-                label="Preview background"
-                value={previewBackground}
-                onChange={(value) => void changePreviewBackground(value as api.PreviewBackground)}
-                options={PREVIEW_BACKGROUNDS}
-              />
-            </SettingRow>
           </div>
         </div>
         <OverlayPreview
           src={`${selected.preview}${previewData === "sample" ? "&sample=1" : ""}`}
-          small={isMatchScore && settings.SmallDisplayer}
-          height={selected.height}
+          height={sourceHeight}
           label={
             <div className="w-44">
               <Segmented small label="Preview data" value={previewData} onChange={setPreviewData} options={PREVIEW_DATA} />

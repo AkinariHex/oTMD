@@ -305,7 +305,7 @@ what is deployed.
 
 **Output:** the oTMD_v3 overlay designs in plain JS on the embedded server and the existing `/ws`, one URL per
 view so several can run as separate OBS sources: `/ranked` (health), `/ranked/maps`, `/ranked/ratio`,
-`/visualizer/maps`, `escapeHtml` on every API string. Finished matches are saved once to the
+`/visualizer/maps`, with the OBS source size shown on the Overlay page, `escapeHtml` on every API string. Finished matches are saved once to the
 existing `POST /api/rooms` from Rust, through the export retry path and only with a valid export key.
 
 Room responses use the current API format: only `GET /matches` pins `x-api-version`.
@@ -330,8 +330,9 @@ For streamers of someone else's tournament. New `Broadcast` value for `Mode`.
 no restart; one failing lobby does not stall the others; no request bursts in the log; no tokens in
 payloads; tray cost unchanged.
 
-### Phase 10 - Home dashboard
-New `/app/home`, first nav item and default route for logged-in users.
+### Phase 10 - Dashboard
+Built on the Profile page (`/app/profile`): first nav item, default route for logged-in users. Win rate covers
+1vs1 only, and average match cost is not shown because the site does not store it per match.
 
 Do the website first, on a branch, and deploy before the app part. New `GET /api/match/stats`,
 `Authorization: Bearer <export key>`: aggregates for the key's owner only, never accepts a user ID, rate
@@ -386,6 +387,6 @@ Delete the legacy `public/electron` and `public/osu` sources.
 - [x] Phase 7 - Redesign, login, animations
 - [x] Phase 8 - osu!lazer Ranked Play
 - [ ] Phase 9 - Tournament broadcast mode
-- [ ] Phase 10 - Home dashboard
+- [x] Phase 10 - Dashboard
 - [ ] Phase 11 - Packaging + CI
 - [ ] Phase 12 - Electron hand-off

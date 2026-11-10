@@ -1,4 +1,5 @@
 mod auth;
+mod dashboard;
 mod maps;
 mod commands;
 mod export;
@@ -43,6 +44,7 @@ pub struct AppState {
     webview_data_dir: Option<PathBuf>,
     // Read once: WebView2 rejects a new window whose flags differ from a browser process still alive.
     hardware_acceleration: bool,
+    dashboard: dashboard::Dashboard,
     window_memory: Mutex<window::WindowMemory>,
 }
 
@@ -144,6 +146,7 @@ pub fn run() {
                 callback_ready: listener.is_some(),
                 webview_data_dir: settings::portable_data_dir().map(|dir| dir.join("webview")),
                 hardware_acceleration,
+                dashboard: dashboard::Dashboard::new(osu::OSU_API_URL, SITE_URL)?,
                 window_memory: Mutex::default(),
             });
 
@@ -190,6 +193,7 @@ pub fn run() {
             commands::save_app_settings,
             commands::validate_export_key,
             commands::get_overlay_sources,
+            commands::get_dashboard,
             commands::get_ranked_status,
             commands::set_ranked_enabled,
             commands::get_ranked_settings,

@@ -149,6 +149,13 @@ pub enum PreviewBackground {
     #[default]
     Checker,
     Black,
+    Dark,
+    Gray,
+    Light,
+    White,
+    DarkScene,
+    LightScene,
+    Custom,
 }
 
 #[allow(non_snake_case)]
@@ -158,6 +165,8 @@ pub struct AppSettings {
     pub Mode: AppMode,
     pub Layout: Layout,
     pub PreviewBackground: PreviewBackground,
+    // Percent of the normal size; 0 follows the screen resolution.
+    pub TextSize: u32,
     pub TrayBehavior: TrayBehavior,
     pub ExportMatches: ExportMatches,
     pub Animations: bool,
@@ -170,6 +179,7 @@ impl Default for AppSettings {
             Mode: AppMode::default(),
             Layout: Layout::default(),
             PreviewBackground: PreviewBackground::default(),
+            TextSize: 0,
             TrayBehavior: TrayBehavior::default(),
             ExportMatches: ExportMatches::default(),
             Animations: true,
@@ -328,6 +338,9 @@ pub mod tests {
         assert_eq!(existing.rankedSettings.Ratio.padding, 16);
         assert_eq!(existing.displayerSettings.MapsStyle.padding, 8);
         assert!(existing.appSettings.PreviewBackground == PreviewBackground::Checker);
+        assert_eq!(existing.appSettings.TextSize, 0);
+        let scene: Settings = serde_json::from_str(r#"{"appSettings":{"PreviewBackground":"lightScene"}}"#).unwrap();
+        assert!(scene.appSettings.PreviewBackground == PreviewBackground::LightScene);
 
         let dir = temp_dir();
         SettingsStore::open(&dir, None)

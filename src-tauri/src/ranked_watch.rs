@@ -362,13 +362,16 @@ impl RankedWatch {
             .map(|(index, (item, result))| {
                 let multiplier = if result.winner.is_some() { result.multiplier } else { result.global };
                 let sides = players.map(|player| side(player, item, result.winner == Some(player)));
-                MapEntry::new(item.id, index + 1, item.beatmap_id, self.beatmaps.get(item.beatmap_id), Some(multiplier), false, sides)
+                MapEntry {
+                    damage: result.winner.is_some().then_some(result.damage),
+                    ..MapEntry::new(item.id, index + 1, item.beatmap_id, self.beatmaps.get(item.beatmap_id), Some(multiplier), false, sides)
+                }
             })
             .collect();
 
         if let Some(item) = current {
             let multiplier = rules.global_start + rules.global_step * maps.len() as f64;
-            let sides = players.map(|player| MapSide { name: String::new(), ..side(player, item, false) });
+            let sides = players.map(|player| side(player, item, false));
             maps.push(MapEntry::new(item.id, maps.len() + 1, item.beatmap_id, self.beatmaps.get(item.beatmap_id), Some(multiplier), true, sides));
         }
         maps
@@ -715,6 +718,9 @@ mod tests {
         assert_eq!(maps[2]["live"], true);
         assert_eq!(maps[2]["round"], 3);
         assert_eq!(maps[2]["multiplier"], 1.5, "a map in play shows the global multiplier");
+        assert!(maps[2]["damage"].is_null());
+        assert!(!maps[2]["sides"][0]["name"].as_str().unwrap().is_empty());
+        assert!(maps[0]["damage"].as_i64().unwrap() > 0);
     }
 
     #[tokio::test]

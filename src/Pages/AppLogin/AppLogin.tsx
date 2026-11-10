@@ -31,7 +31,7 @@ function AppLogin() {
   };
 
   useEffect(() => {
-    const openApp = () => navigate("/app/match", { replace: true });
+    const openApp = () => navigate("/app/profile", { replace: true });
     const load = async () => {
       if (await api.getSession()) openApp();
     };
@@ -61,7 +61,7 @@ function AppLogin() {
           <img src={Logo} alt="" width={64} height={64} className="size-16" />
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight text-ink">Welcome to o!TMD</h1>
-            <p className="mt-1 text-[13px] text-ink-3">Log in with your osu! account to continue</p>
+            <p className="mt-1 text-ui text-ink-3">Log in with your osu! account to continue</p>
           </div>
         </div>
         <div className="flex w-64 flex-col gap-2">

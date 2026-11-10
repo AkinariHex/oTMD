@@ -8,6 +8,7 @@ import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import * as api from "@/lib/api";
 import { isLobbyId, parseLobbyLink } from "@/lib/lobby";
+import { HEALTH_HEIGHT, withPadding } from "@/lib/overlays";
 import { cn } from "@/lib/utils";
 
 const RECENT_ROUNDS = 5;
@@ -125,8 +126,10 @@ function Ranked() {
         </Button>
       </div>
       <OverlayPreview
-        src={api.RANKED_PREVIEW_URL}
-        label="Overlay preview"
+        src={status.view ? api.RANKED_PREVIEW_URL : `${api.RANKED_PREVIEW_URL}&sample=1`}
+        height={withPadding(HEALTH_HEIGHT, settings.Health.padding)}
+        clearWindowControls
+        label={status.view ? "Overlay preview" : "Overlay preview (sample data)"}
         status={<CopyUrlButton url={api.RANKED_OVERLAY_URL} label="Copy OBS URL" className="h-6 px-2 text-xs" />}
       />
     </div>

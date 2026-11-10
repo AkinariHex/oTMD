@@ -13,7 +13,7 @@ function Select({ label, value, onChange, options }: SelectProps) {
     <SelectPrimitive.Root value={value} onValueChange={onChange}>
       <SelectPrimitive.Trigger
         aria-label={label}
-        className="flex h-8 w-full items-center justify-between gap-2 rounded-md bg-black/25 px-2.5 text-[13px] text-ink ring-1 ring-line outline-none focus:ring-2 focus:ring-accent/60"
+        className="flex h-8 w-full items-center justify-between gap-2 rounded-md bg-black/25 px-2.5 text-ui text-ink ring-1 ring-line outline-none focus:ring-2 focus:ring-accent/60"
       >
         <SelectPrimitive.Value />
         <SelectPrimitive.Icon>
@@ -24,7 +24,7 @@ function Select({ label, value, onChange, options }: SelectProps) {
         <SelectPrimitive.Content
           position="popper"
           sideOffset={4}
-          className="z-50 max-h-56 w-(--radix-select-trigger-width) overflow-hidden rounded-md bg-raised p-1 text-[13px] text-ink shadow-xl ring-1 ring-line"
+          className="z-50 max-h-56 w-(--radix-select-trigger-width) overflow-hidden rounded-md bg-raised p-1 text-ui text-ink shadow-xl ring-1 ring-line"
         >
           <SelectPrimitive.Viewport>
             {options.map((option) => (

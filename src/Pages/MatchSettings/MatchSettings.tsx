@@ -150,6 +150,7 @@ function MatchSettings() {
       </div>
       <OverlayPreview
         label="Overlay preview"
+        clearWindowControls
         status={
           <div className="flex items-center gap-1.5">
             <CopyUrlButton url={api.OVERLAY_URL} label="Copy OBS URL" className="h-6 px-2 text-xs" />

@@ -23,11 +23,7 @@ function renderRatio(user, results, style) {
 
   setImage(element("avatar"), user.id ? `https://a.ppy.sh/${user.id}` : SAMPLE_AVATAR);
   element("username").textContent = user.username;
-
-  const ranked = user.rank !== null && user.rating !== null;
-  element("rankRow").hidden = !ranked;
-  element("rankRow").style.display = ranked ? "" : "none";
-  if (ranked) element("rank").textContent = `#${numberFormat.format(user.rank)} (${Math.round(user.rating)})`;
+  element("rank").textContent = user.rank !== null && user.rating !== null ? `#${numberFormat.format(user.rank)} - ${Math.round(user.rating)} rating` : "Unranked";
 
   const change = element("change");
   const hasChange = Boolean(user.ratingChange);
@@ -38,25 +34,20 @@ function renderRatio(user, results, style) {
   }
 
   const wins = results.filter(Boolean).length;
-  const losses = results.length - wins;
-  element("percent").textContent = `${results.length ? Math.round((wins / results.length) * 100) : 0}%`;
-  element("wins").textContent = `W: ${wins}`;
-  element("losses").textContent = `L: ${losses}`;
-
-  const recent = results.slice(-RECENT_RESULTS).reverse();
+  element("wins").textContent = wins;
+  element("losses").textContent = results.length - wins;
   element("recent").replaceChildren(
-    ...(recent.length
-      ? recent.map((won) => make("div", `ratio-square ${won ? "win" : "loss"}`, won ? "W" : "L"))
-      : [make("span", "ratio-empty", "No matches yet")])
+    ...(results.length
+      ? results.slice(-RECENT_RESULTS).map((won) => make("div", `ratio-square ${won ? "win" : "loss"}`, won ? "W" : "L"))
+      : [make("span", "ratio-empty", "No maps yet")])
   );
 
   const total = user.plays ?? 0;
-  element("history").hidden = total === 0;
-  if (total > 0) {
-    const first = user.firstPlacements ?? 0;
-    const percent = make("span", "", ` (${Math.round((first / total) * 100)}%)`);
-    element("record").replaceChildren(`${first}W – ${total - first}L`, percent);
-  }
+  const first = user.firstPlacements ?? 0;
+  const percent = total > 0 ? Math.round((first / total) * 100) : 0;
+  element("seasonPercent").textContent = `${percent}%`;
+  element("seasonRecord").textContent = `${first} wins - ${total - first} losses`;
+  element("seasonFill").style.width = `${percent}%`;
 }
 
 connectOverlay("ranked", (settings) => {

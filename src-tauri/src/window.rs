@@ -7,7 +7,7 @@ use tauri::{AppHandle, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, Web
 
 const MAIN_WINDOW: &str = "main";
 const LOGIN_ROUTE: &str = "/login";
-const DEFAULT_ROUTE: &str = "/app/match";
+const DEFAULT_ROUTE: &str = "/app/profile";
 const APP_ROUTE_PREFIX: &str = "/app/";
 // Matches --primary-color, so nothing bright can show before the page paints.
 const BACKGROUND: Color = Color(27, 29, 35, 255);
@@ -128,7 +128,7 @@ pub fn open_main(app: &AppHandle) {
     // Hidden until React reports the first screen is ready, so no blank page is ever visible.
     let mut builder = WebviewWindowBuilder::new(app, MAIN_WINDOW, WebviewUrl::default())
         .title("osu! Tourney Match Displayer")
-        .inner_size(1000.0, 600.0)
+        .inner_size(1200.0, 700.0)
         .resizable(false)
         .decorations(false)
         .visible(false)

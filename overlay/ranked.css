@@ -7,6 +7,11 @@
   border: 0 solid;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+}
+
 html,
 body {
   width: 100%;
@@ -25,9 +30,9 @@ img {
 .frame {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  flex-shrink: 1;
   width: 100%;
-  height: 100%;
+  max-height: 100%;
   overflow: hidden;
   user-select: none;
   pointer-events: none;
@@ -264,7 +269,7 @@ img {
   pointer-events: none;
 }
 
-/* Ratio */
+/* Overview */
 #ratio {
   backdrop-filter: blur(12px);
 }
@@ -272,85 +277,95 @@ img {
 .ratio-user {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.625rem;
+  margin-bottom: 0.625rem;
 }
 
 .ratio-avatar {
-  width: 3rem;
-  height: 3rem;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 2px solid #ec4899;
   border-radius: 9999px;
+  object-fit: cover;
+}
+
+.ratio-identity {
+  flex: 1 1 0%;
+  min-width: 0;
 }
 
 .ratio-name {
+  overflow: hidden;
   color: #fff;
-  font-size: 1.125rem;
-  font-weight: 700;
-  line-height: 1.75rem;
-}
-
-.ratio-rank-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ratio-rank {
   color: #facc15;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25rem;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .ratio-change {
-  padding: 0.125rem 0.375rem;
+  flex-shrink: 0;
+  padding: 0.125rem 0.4375rem;
   border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1rem;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
 }
 
 .ratio-change.up {
-  background: rgb(34 197 94 / 0.3);
+  background: rgb(34 197 94 / 0.25);
   color: #4ade80;
 }
 
 .ratio-change.down {
-  background: rgb(239 68 68 / 0.3);
+  background: rgb(239 68 68 / 0.25);
   color: #f87171;
 }
 
-.ratio-summary {
+.ratio-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.ratio-tile {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.4375rem 0.625rem 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .ratio-label {
-  display: block;
-  color: #9ca3af;
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.6563rem;
+  font-weight: 800;
   letter-spacing: 0.05em;
-  line-height: 1rem;
   text-transform: uppercase;
 }
 
-.ratio-percent {
-  display: block;
+.ratio-value {
   color: #fff;
-  font-size: 1.875rem;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
   font-weight: 800;
-  line-height: 2.25rem;
+  line-height: 1.2;
 }
 
-.ratio-counts {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25rem;
+.ratio-separator {
+  margin: 0 0.25rem;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .wins {
@@ -361,22 +376,29 @@ img {
   color: #f87171;
 }
 
+.ratio-caption {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
 .ratio-recent {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.1875rem;
+  height: 1rem;
+  margin-top: 0.25rem;
 }
 
 .ratio-square {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.25rem;
+  width: 0.9375rem;
+  height: 1rem;
+  border-radius: 0.1875rem;
   color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1rem;
+  font-size: 0.625rem;
+  font-weight: 800;
 }
 
 .ratio-square.win {
@@ -388,32 +410,20 @@ img {
 }
 
 .ratio-empty {
-  color: #6b7280;
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.6875rem;
   line-height: 1rem;
 }
 
-.ratio-history {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+.ratio-season-bar {
+  height: 0.375rem;
+  margin: 0.5rem 0 0.1875rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(239 68 68 / 0.55);
 }
 
-.ratio-history[hidden] {
-  display: none;
-}
-
-.ratio-record {
-  color: #f472b6;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1rem;
-}
-
-.ratio-record span {
-  color: #9ca3af;
-  font-weight: 400;
+.ratio-season-fill {
+  height: 100%;
+  background: #4ade80;
 }
