@@ -22,6 +22,8 @@ const RELEASES_URL: &str = "https://github.com/AkinariHex/oTMD/releases";
 struct DownloadProgress {
     speed: f64,
     percent: u64,
+    downloaded: u64,
+    total: Option<u64>,
 }
 
 #[derive(Serialize)]
@@ -314,7 +316,7 @@ pub async fn install_update(app: AppHandle, state: State<'_, AppState>) -> Resul
 }
 
 async fn download_and_restart(app: AppHandle, update: Update) {
-    let emitter = app.clone();
+    let (emitter, finisher) = (app.clone(), app.clone());
     let started = Instant::now();
     let mut last_emit: Option<Instant> = None;
     let mut downloaded = 0u64;
@@ -328,12 +330,17 @@ async fn download_and_restart(app: AppHandle, update: Update) {
                     let _ = emitter.emit("download-progress", download_progress(downloaded, total, started));
                 }
             },
-            || {},
+            move || {
+                let _ = finisher.emit("update-installing", ());
+            },
         )
         .await;
 
     match result {
-        Ok(()) => app.restart(),
+        Ok(()) => {
+            let _ = app.emit("update-restarting", ());
+            app.restart()
+        }
         Err(_) => {
             eprintln!("The update could not be installed");
             let _ = app.emit("update-failed", ());
@@ -346,5 +353,7 @@ fn download_progress(downloaded: u64, total: Option<u64>, started: Instant) -> D
     DownloadProgress {
         speed: (downloaded as f64 / seconds / 1_000_000.0 * 100.0).round() / 100.0,
         percent: total.filter(|total| *total > 0).map_or(0, |total| downloaded * 100 / total),
+        downloaded,
+        total,
     }
 }

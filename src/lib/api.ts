@@ -101,9 +101,17 @@ export interface AppSettings {
   HardwareAcceleration: boolean;
 }
 
-export interface DownloadProgress {
+interface DownloadProgress {
   speed: number;
   percent: number;
+  downloaded: number;
+  total: number | null;
+}
+
+export type UpdatePhase = "download" | "install" | "restart";
+
+export interface UpdateProgress extends DownloadProgress {
+  phase: UpdatePhase;
 }
 
 export type LoginFailure = "denied" | "failed";
@@ -335,16 +343,36 @@ export const applyUpdate = async (update: AvailableUpdate): Promise<void> => {
   }
 };
 
-export const onDownloadProgress = (listener: (progress: DownloadProgress) => void): (() => void) => {
+// Folds the updater's three events into one running state for the update page.
+export const watchUpdate = (listener: (progress: UpdateProgress) => void): (() => void) => {
+  let state: UpdateProgress = { phase: "download", percent: 0, speed: 0, downloaded: 0, total: null };
+  const emit = (next: Partial<UpdateProgress>) => {
+    state = { ...state, ...next };
+    listener(state);
+  };
+
   if (PREVIEW_UPDATE === "installed") {
-    let percent = 0;
-    const timer = setInterval(() => {
-      percent = percent >= 100 ? 0 : percent + 2;
-      listener({ percent, speed: 4.2 });
+    const total = 4_680_000;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const tick = setInterval(() => {
+      const downloaded = Math.min(total, state.downloaded + 190_000);
+      emit({ downloaded, total, percent: Math.floor((downloaded / total) * 100), speed: 0.76 });
+      if (downloaded < total) return;
+      clearInterval(tick);
+      timers.push(setTimeout(() => emit({ phase: "install" }), 300), setTimeout(() => emit({ phase: "restart" }), 2900));
     }, 250);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(tick);
+      timers.forEach(clearTimeout);
+    };
   }
-  return subscribe("download-progress", listener);
+
+  const stops = [
+    subscribe<DownloadProgress>("download-progress", (progress) => emit(progress)),
+    subscribe("update-installing", () => emit({ phase: "install" })),
+    subscribe("update-restarting", () => emit({ phase: "restart" })),
+  ];
+  return () => stops.forEach((stop) => stop());
 };
 
 export const onUpdateFailed = (listener: () => void): (() => void) =>
