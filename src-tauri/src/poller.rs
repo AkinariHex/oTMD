@@ -15,7 +15,7 @@ use reqwest::{Client, Url};
 use serde::Serialize;
 use serde_json::Value;
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet},
     fs,
     path::PathBuf,
     sync::Arc,
@@ -24,6 +24,7 @@ use std::{
 use tokio::sync::Notify;
 
 const POLL_SECONDS: u64 = 10;
+const RATE_LIMIT_SECONDS: u64 = 30;
 const MAX_SLEEP_MS: u64 = 300_000;
 const MIN_POLL_WAIT_MS: u64 = 50;
 const MS_PER_SECOND: u64 = 1000;
@@ -136,6 +137,7 @@ pub struct Tracker {
     pub events: BTreeMap<u64, Option<Game>>,
     pub usernames: HashMap<u64, String>,
     players: Option<[Player; 2]>,
+    looked_up: HashSet<String>,
     last_published: Option<String>,
     finished: bool,
     export: Option<PendingExport>,
@@ -150,6 +152,7 @@ impl Tracker {
             events: BTreeMap::new(),
             usernames: HashMap::new(),
             players: None,
+            looked_up: HashSet::new(),
             last_published: None,
             finished: false,
             export: None,
@@ -188,6 +191,11 @@ pub fn names_in_parentheses(title: &str) -> Vec<String> {
         rest = &after_open[end + 1..];
     }
     names
+}
+
+// Seconds to wait after a 429: what osu! asked for, never less than the idle pace, capped at 5 minutes.
+fn rate_limit_wait(retry_after: Option<u64>) -> u64 {
+    retry_after.unwrap_or(RATE_LIMIT_SECONDS).clamp(RATE_LIMIT_SECONDS, MAX_SLEEP_MS / MS_PER_SECOND)
 }
 
 pub fn acronym_of(title: &str) -> &str {
@@ -429,7 +437,8 @@ impl Poller {
                 }
                 ranked_watch::IDLE_SECONDS
             }
-            Err(OsuError::Unavailable | OsuError::RateLimited(_)) => ranked_watch::IDLE_SECONDS,
+            Err(OsuError::RateLimited(seconds)) => rate_limit_wait(seconds),
+            Err(OsuError::Unavailable) => ranked_watch::IDLE_SECONDS,
         }
     }
 
@@ -465,6 +474,7 @@ impl Poller {
             return POLL_SECONDS;
         };
 
+        let mut wait = POLL_SECONDS;
         if tracker.finished {
             self.attempt_export(&mut tracker).await;
         } else if let Some(token) = self.auth.access_token() {
@@ -475,12 +485,13 @@ impl Poller {
                         on_expired();
                     }
                 }
-                Err(OsuError::Unavailable | OsuError::RateLimited(_)) => {}
+                Err(OsuError::RateLimited(seconds)) => wait = rate_limit_wait(seconds),
+                Err(OsuError::Unavailable) => {}
             }
         }
 
         self.tracker = Some(tracker);
-        POLL_SECONDS
+        wait
     }
 
     async fn fetch_events(&self, tracker: &mut Tracker, token: &str) -> Result<(), OsuError> {
@@ -514,8 +525,10 @@ impl Poller {
 
         let names = team_names(&tracker.title);
         let mut resolved = Vec::with_capacity(2);
-        let mut complete = names_in_parentheses(&tracker.title).len() >= 2;
+        let real_names = names_in_parentheses(&tracker.title).len() >= 2;
+        let mut complete = real_names;
 
+        // Each real name is looked up once per match: a typo or the "Red"/"Blue" fallback must not cost a request every poll.
         for name in names.iter().take(2) {
             let known = tracker
                 .usernames
@@ -525,10 +538,15 @@ impl Poller {
 
             let player = match known {
                 Some(player) => Some(player),
-                None => self.osu.user_by_name(token, name).await.ok().map(|user| Player {
-                    userid: user.id,
-                    username: user.username,
-                }),
+                None if real_names && !tracker.looked_up.contains(name) => match self.osu.user_by_name(token, name).await {
+                    Ok(user) => Some(Player { userid: user.id, username: user.username }),
+                    Err(OsuError::RateLimited(_)) => None,
+                    Err(_) => {
+                        tracker.looked_up.insert(name.clone());
+                        None
+                    }
+                },
+                None => None,
             };
 
             complete &= player.is_some();
@@ -1056,6 +1074,23 @@ mod tests {
         assert_eq!(data["players"][0]["username"], "tester");
         assert_eq!(data["players"][1]["userid"], 900);
         assert_eq!(h.state(|state| state.user_lookups.len()), 1);
+    }
+
+    #[tokio::test]
+    async fn a_title_without_names_never_looks_up_red_and_blue() {
+        let mut h = harness(|_| {}).await;
+        h.set_body(body("TC: tester vs rival", vec![duel(10, false, 0, 0)]));
+        h.tick().await;
+        h.tick().await;
+        assert!(h.state(|state| state.user_lookups.is_empty()));
+    }
+
+    #[tokio::test]
+    async fn a_rate_limit_slows_the_next_poll() {
+        let mut h = harness(|_| {}).await;
+        h.mock.inner.lock().unwrap().match_status = 429;
+        h.poller.sync_config();
+        assert!(h.poller.poll(&NEVER).await >= RATE_LIMIT_SECONDS);
     }
 
     // Bug 5: Electron never hit its cache and re-fetched on every poll.

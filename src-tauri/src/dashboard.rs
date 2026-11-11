@@ -1,7 +1,7 @@
 use crate::{
     auth::AuthManager,
     maps::safe_cover,
-    osu::{OsuClient, RoomEvents, RoomItem, RoomSummary},
+    osu::{OsuClient, OsuError, RoomEvents, RoomItem, RoomSummary},
     ranked::{self, RankedRules},
     ranked_watch::{completed_rounds, is_finished, saved_rules},
     settings::SettingsStore,
@@ -20,6 +20,7 @@ use tokio::{sync::Mutex, task::JoinSet};
 const CACHE_FOR: Duration = Duration::from_secs(60);
 const HTTP_TIMEOUT: Duration = Duration::from_secs(15);
 const PAGE_SIZE: usize = 20;
+const MAX_PARALLEL_ROOMS: usize = 4;
 // ponytail: the most osu! returns in one request; older rooms need its cursor if anyone plays more than this.
 const MAX_ROOMS: &str = "250";
 const DATE_PRECISION: usize = 19;
@@ -287,18 +288,30 @@ impl Dashboard {
         };
         let mut finished = self.finished_rooms.lock().await;
 
+        // A few at a time: a fresh page of 20 rooms must not hit osu! as one burst.
+        let missing: Vec<u64> = rooms.iter().map(|room| room.id).filter(|id| !finished.contains_key(id)).collect();
+        let mut pending = missing.into_iter();
         let mut requests = JoinSet::new();
-        for id in rooms.iter().map(|room| room.id).filter(|id| !finished.contains_key(id)) {
+        let spawn = |requests: &mut JoinSet<_>, id: u64| {
             let (osu, token) = (self.osu.clone(), token.clone());
             requests.spawn(async move { (id, osu.room_events(&token, id).await) });
+        };
+        for id in pending.by_ref().take(MAX_PARALLEL_ROOMS) {
+            spawn(&mut requests, id);
         }
 
         let rules = saved_rules(&self.data_dir);
+        let mut stop = false;
         while let Some(done) = requests.join_next().await {
-            if let Ok((id, Ok(events))) = done
-                && is_finished(&events)
-            {
-                finished.insert(id, ranked_card(&rules, user.id, id, &events));
+            match done {
+                Ok((id, Ok(events))) if is_finished(&events) => {
+                    finished.insert(id, ranked_card(&rules, user.id, id, &events));
+                }
+                Ok((_, Err(OsuError::RateLimited(_) | OsuError::Unauthorized))) => stop = true,
+                _ => {}
+            }
+            if !stop && let Some(id) = pending.next() {
+                spawn(&mut requests, id);
             }
         }
 

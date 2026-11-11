@@ -72,6 +72,7 @@ pub fn safe_cover(url: &str) -> Option<String> {
 }
 
 // One API call per beatmap for the whole session; a failed lookup is simply retried next poll.
+// A 429 stops the caller's loop so a rate limit never turns into one request per map.
 #[derive(Default)]
 pub struct BeatmapCache {
     beatmaps: HashMap<u64, BeatmapDetails>,
@@ -84,8 +85,8 @@ impl BeatmapCache {
                 Ok(details) => {
                     self.beatmaps.insert(id, details);
                 }
-                Err(OsuError::Unauthorized) => return Err(OsuError::Unauthorized),
-                Err(OsuError::Unavailable | OsuError::RateLimited(_)) => {}
+                Err(error @ (OsuError::Unauthorized | OsuError::RateLimited(_))) => return Err(error),
+                Err(OsuError::Unavailable) => {}
             }
         }
         Ok(())
