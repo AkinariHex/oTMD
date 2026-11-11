@@ -117,6 +117,24 @@ impl<T: Clone> Cached<T> {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct TournamentEntry {
+    acronym: String,
+    name: String,
+}
+
+#[derive(Deserialize)]
+struct TournamentList {
+    tournaments: Vec<TournamentEntry>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct TournamentProposal {
+    acronym: String,
+    name: String,
+    link: String,
+}
+
 pub struct Dashboard {
     osu: OsuClient,
     http: Client,
@@ -368,6 +386,32 @@ impl Dashboard {
         };
 
         body["fonts"].as_array().map_or_else(Vec::new, |fonts| fonts.iter().filter_map(Value::as_str).map(String::from).collect())
+    }
+
+    pub async fn tournaments(&self) -> Result<Vec<TournamentEntry>, String> {
+        let url = format!("{}/api/tournaments/list", self.site);
+        let fetched: reqwest::Result<TournamentList> = async { self.http.get(url).send().await?.error_for_status()?.json().await }.await;
+        fetched.map(|list| list.tournaments).map_err(|_| "Could not load the tournaments.".to_string())
+    }
+
+    pub async fn propose_tournament(&self, auth: &AuthManager, proposal: TournamentProposal) -> Result<(), String> {
+        let token = auth.access_token().ok_or("Log in to propose a tournament.")?;
+        let response = self
+            .http
+            .post(format!("{}/api/tournaments/proposals", self.site))
+            .bearer_auth(token)
+            .json(&proposal)
+            .send()
+            .await
+            .map_err(|_| "Could not reach otmd.app.")?;
+        match response.status() {
+            status if status.is_success() => Ok(()),
+            StatusCode::CONFLICT => Err("This tournament is already listed.".into()),
+            StatusCode::BAD_REQUEST => Err("Check the acronym, name and link.".into()),
+            StatusCode::UNAUTHORIZED => Err("Log in again to propose a tournament.".into()),
+            StatusCode::TOO_MANY_REQUESTS => Err("Too many requests, try again in a minute.".into()),
+            _ => Err("Could not send the proposal.".into()),
+        }
     }
 
     // Runs only while the page is open, and the cache keeps page changes from refetching.

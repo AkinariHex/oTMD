@@ -145,7 +145,7 @@ function showMessage(text) {
 function tournamentNameOf(matchData) {
   var tournament = matchData.tournament;
   if (!tournament || tournament.error) return "";
-  return tournament.tournamentName.length >= 22 ? tournament.acronym : tournament.tournamentName;
+  return tournament.tournamentName.length >= 22 && tournament.acronym ? tournament.acronym : tournament.tournamentName;
 }
 
 function teamPicture(matchData, index) {

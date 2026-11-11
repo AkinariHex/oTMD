@@ -21,6 +21,10 @@ pub struct MatchSettings {
     pub Warmups: String,
     pub ScoreReverse: bool,
     pub isFinished: bool,
+    /// "auto" (from the match title), "pick" (TournamentAcronym) or "custom" (TournamentName on screen).
+    pub TournamentMode: String,
+    pub TournamentAcronym: String,
+    pub TournamentName: String,
 }
 
 impl Default for MatchSettings {
@@ -34,6 +38,9 @@ impl Default for MatchSettings {
             Warmups: "0".into(),
             ScoreReverse: false,
             isFinished: false,
+            TournamentMode: "auto".into(),
+            TournamentAcronym: String::new(),
+            TournamentName: String::new(),
         }
     }
 }

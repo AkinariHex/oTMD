@@ -203,6 +203,8 @@ pub fn run() {
             commands::get_match_feed,
             commands::get_system_fonts,
             commands::get_popular_fonts,
+            commands::get_tournaments,
+            commands::propose_tournament,
             commands::get_ranked_status,
             commands::set_ranked_enabled,
             commands::get_ranked_settings,

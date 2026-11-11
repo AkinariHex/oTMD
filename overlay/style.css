@@ -107,8 +107,25 @@ body {
 
 .meta.top {
   align-items: flex-end;
+  gap: 0;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* a small dot between items keeps Stage and Best of apart without a text separator */
+.meta.top span + span::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 12px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.6;
+  vertical-align: middle;
+  transform: translateY(-1px);
 }
 
 .meta.bottom {
@@ -119,7 +136,11 @@ body {
 }
 
 .panel.small .meta {
-  font-size: 10px;
+  font-size: 10.5px;
+}
+
+.panel.small .meta.top span + span::before {
+  margin: 0 9px;
 }
 
 .message {
@@ -373,6 +394,10 @@ body {
   flex: none;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.drift .meta.top span + span::before {
+  display: none;
 }
 
 .drift .meta.bottom {

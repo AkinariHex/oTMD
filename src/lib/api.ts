@@ -26,6 +26,9 @@ export interface MatchSettings {
   Warmups: string;
   ScoreReverse: boolean;
   isFinished: boolean;
+  TournamentMode: "auto" | "pick" | "custom";
+  TournamentAcronym: string;
+  TournamentName: string;
 }
 
 export interface DisplayerSettings {
@@ -254,6 +257,15 @@ export const getMatchFeed = (cursor: FeedCursor): Promise<FeedPage> => invoke("g
 export const getSystemFonts = (): Promise<string[]> => invoke("get_system_fonts");
 
 export const getPopularFonts = (): Promise<string[]> => invoke("get_popular_fonts");
+
+export interface TournamentEntry {
+  acronym: string;
+  name: string;
+}
+
+export const getTournaments = (): Promise<TournamentEntry[]> => invoke("get_tournaments");
+
+export const proposeTournament = (proposal: TournamentEntry & { link: string }): Promise<void> => invoke("propose_tournament", { proposal });
 
 export const onSettingsReplaced = (listener: () => void): (() => void) => subscribe("settings-replaced", listener);
 

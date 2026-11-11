@@ -2,7 +2,7 @@ use crate::{
     AppState,
     auth::{User, now_seconds},
     broadcast,
-    dashboard::{DashboardData, FeedCursor, FeedPage},
+    dashboard::{DashboardData, FeedCursor, FeedPage, TournamentEntry, TournamentProposal},
     server::OverlaySources,
     settings::{AppMode, AppSettings, BroadcastMatch, BroadcastStyle, DisplayerSettings, MatchSettings, RankedSettings},
     system_fonts, window,
@@ -133,6 +133,16 @@ pub async fn get_system_fonts() -> Result<Vec<String>, String> {
 #[tauri::command]
 pub async fn get_popular_fonts(state: State<'_, AppState>) -> Result<Vec<String>, String> {
     Ok(state.dashboard.popular_fonts().await)
+}
+
+#[tauri::command]
+pub async fn get_tournaments(state: State<'_, AppState>) -> Result<Vec<TournamentEntry>, String> {
+    state.dashboard.tournaments().await
+}
+
+#[tauri::command]
+pub async fn propose_tournament(proposal: TournamentProposal, state: State<'_, AppState>) -> Result<(), String> {
+    state.dashboard.propose_tournament(&state.auth, proposal).await
 }
 
 #[tauri::command]

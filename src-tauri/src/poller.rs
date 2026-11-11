@@ -627,10 +627,20 @@ impl Poller {
     }
 
     async fn update_view(&mut self, tracker: &mut Tracker, token: &str) {
-        let (tournament, tournament_resolved) = self.tournaments.get(acronym_of(&tracker.title)).await;
+        let settings = self.settings.read(|settings| settings.matchSettings.clone());
+        let picked = settings.TournamentAcronym.trim();
+        let acronym = if settings.TournamentMode == "pick" && !picked.is_empty() { picked } else { acronym_of(&tracker.title) };
+        let (detected, tournament_resolved) = self.tournaments.get(acronym).await;
+        let mut tournament = detected.clone();
+        // A custom name only changes what the overlay shows: multipliers and the export keep the detected tournament.
+        let custom = settings.TournamentName.trim();
+        if settings.TournamentMode == "custom" && !custom.is_empty() {
+            tournament.name = custom.into();
+            tournament.acronym = custom.into();
+            tournament.error = None;
+        }
         let games = tracker.games();
         let outcome = tracker.config.rules.score(&games, &tournament.multipliers);
-        let settings = self.settings.read(|settings| settings.matchSettings.clone());
         let total_maps = settings.MapsNqualifiers.trim().parse().unwrap_or(0);
 
         let (players, teams, team_images, player) = match tracker.config.rules {
@@ -721,7 +731,7 @@ impl Poller {
             best_of,
             warmups,
             total_maps,
-            tournament: &tournament,
+            tournament: &detected,
             match_start: &tracker.start_time,
             reversed: settings.ScoreReverse,
             players: players.as_ref(),

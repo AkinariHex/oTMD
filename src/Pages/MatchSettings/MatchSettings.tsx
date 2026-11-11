@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import CopyUrlButton from "@/Components/CopyUrlButton/CopyUrlButton";
 import OverlayPreview from "@/Components/OverlayPreview/OverlayPreview";
 import PageHeader from "@/Components/PageHeader/PageHeader";
+import TournamentField from "@/Components/TournamentField/TournamentField";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Segmented } from "@/Components/ui/segmented";
@@ -143,6 +144,7 @@ function MatchSettings() {
               </div>
             </>
           )}
+          <TournamentField value={form} onChange={(update) => void change(update)} />
         </div>
         <Button tone={tracking ? "danger" : "primary"} onClick={() => void toggleTracking()} className="mt-auto w-full">
           {tracking ? "Stop tracking" : "Start tracking"}
