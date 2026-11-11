@@ -1,21 +1,20 @@
-let appNotConnected = document.getElementById("appNotConnected");
-let appNoMatch = document.getElementById("appNoMatch");
-let app = document.getElementById("app");
+let panel = document.getElementById("panel");
+let amb = document.getElementById("amb");
+let metaTop = document.getElementById("metaTop");
+let metaBottom = document.getElementById("metaBottom");
+let message = document.getElementById("message");
 let match = document.getElementById("match");
 let qualifiers = document.getElementById("qualifiers");
-let winner = document.getElementById("winner");
 
-let team1 = document.getElementById("team1");
-let team2 = document.getElementById("team2");
+const FLAGS = "https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags";
+const AMBIENT = {
+  aurora: '<div class="bw r"><div class="blob"></div></div><div class="bw b"><div class="blob"></div></div><div class="film"></div>',
+  drift: '<div class="field"></div><div class="orb"></div><div class="film"></div>',
+};
 
-let score1 = document.getElementById("team1_score");
-let score2 = document.getElementById("team2_score");
-
-let stageBO = document.getElementById("stageBO");
-let tournamentName = document.getElementById("tournament");
-
-let isFinished = false;
-let isWinner = null;
+let layout = null;
+let lastRender = "";
+let lastScores = [0, 0];
 
 /* Qualifiers */
 let mapsPlayedOld = 0;
@@ -74,373 +73,220 @@ function initializeWebsocket() {
 
   ws.onopen = function () {
     reconnectDelay = RECONNECT_MIN_MS;
-    appNotConnected.style.display = "none";
-    winner.style.display = "none";
-    team1.innerHTML = "";
-    team2.innerHTML = "";
-    score1.innerHTML = 0;
-    score2.innerHTML = 0;
-    stageBO.innerHTML = "";
-    tournamentName.innerHTML = "";
+    lastRender = "";
   };
 
-  ws.onmessage = function (message) {
-    var data = JSON.parse(message.data);
+  ws.onmessage = function (event) {
+    var data = JSON.parse(event.data);
     if (data.type === "rankedState" || data.type === "broadcastState") return;
-    if (showSample) applySampleMatch(data.settings);
-    let isMatch = false;
+    var settings = data.settings;
+    if (showSample) applySampleMatch(settings);
+    applyDisplayer(settings.displayerSettings);
 
-    /* When the page is loaded */
-    isMatch =
-      data.settings?.matchSettings?.MatchID !== "" &&
-      data.settings?.matchData !== undefined;
-
-    if (!isMatch) {
-      appNoMatch.style.display = "grid";
-      app.style.display = "none";
+    var matchSettings = settings.matchSettings;
+    var matchData = settings.matchData;
+    if (!matchSettings || matchSettings.MatchID === "" || matchData === undefined) {
+      showMessage("Waiting a Match");
+      return;
     }
-
-    if (isMatch) {
-      appNoMatch.style.display = "none";
-      app.style.display = "grid";
-      app.style.backgroundImage = "url('img/redVSblue.png')";
-      app.style.backgroundPosition = "bottom";
+    if (matchSettings.Stage === "Qualifiers") {
+      renderQualifiers(matchSettings, matchData);
+      return;
     }
-
-    /* When the user changes the displayer settings */
-    if (data.type === "displayerSettings" || data.type === "initLoad") {
-      var displayer = data.settings.displayerSettings;
-      for (var panel of [app, appNoMatch]) {
-        panel.classList.toggle("small", displayer.SmallDisplayer);
-        panel.style.borderRadius = displayer.VisualizerStyle;
-      }
-      appNoMatch.style.backgroundImage = displayer.TransparentBackground ? "none" : "";
-
-      if (data.settings.displayerSettings.TransparentBackground) {
-        app.style.backgroundImage = "none";
-      } else {
-        app.style.backgroundPosition = "bottom";
-        if (isFinished && isWinner !== null) {
-          app.style.backgroundImage =
-            isWinner === 1
-              ? "url('img/winnerRed.png')"
-              : "url('img/winnerBlue.png')";
-        } else {
-          app.style.backgroundImage = "url('img/redVSblue.png')";
-        }
-      }
-    }
-
-    /* When the user changes the match settings */
-    if (isMatch === true) {
-      /* General Settings */
-      stageBO.innerHTML =
-        data.settings.matchSettings.MatchID !== ""
-          ? `${escapeHtml(data.settings.matchSettings.Stage)} - BO${escapeHtml(data.settings.matchSettings.BestOF)}`
-          : "";
-      tournamentName.innerHTML =
-        /* Check for match data and if the tournament is into the database */
-        data.settings.matchData !== undefined &&
-        !data.settings.matchData.tournament.error
-          ? escapeHtml(
-              data.settings.matchData.tournament.tournamentName.length >= 22
-                ? data.settings.matchData.tournament.acronym
-                : data.settings.matchData.tournament.tournamentName
-            )
-          : "";
-
-      /* When the match is Qualifiers */
-      if (data.settings.matchSettings.Stage === "Qualifiers") {
-        match.style.display = "none";
-        winner.style.display = "none";
-        qualifiers.style.display = "grid";
-
-        /* console.log(data.settings.matchData); */
-
-        stageBO.innerHTML = escapeHtml(data.settings.matchSettings.Stage);
-
-        let name =
-          data.settings.matchData.player.username.length > 12
-            ? `<span>${escapeHtml(data.settings.matchData.player.username)}</span>`
-            : escapeHtml(data.settings.matchData.player.username);
-
-        userDiv.innerHTML = `
-        <img src="http://s.ppy.sh/a/${data.settings.matchData.player.userid}" alt="${escapeHtml(data.settings.matchData.player.username)}" />
-        <div class="name">${name}</div>
-        `;
-
-        infoDiv.innerHTML = `
-        <div class="item" id="counterMaps">
-          <div class="title">Maps</div>
-          <div class="number odometer">${data.settings.matchData.scores.mapsPlayed}/${data.settings.matchData.totalMaps}</div>
-        </div>
-        <div class="item" id="average">
-          <div class="title">Average</div>
-          <div class="number odometer">${formatNumber(data.settings.matchData.scores.average)}</div>
-        </div>
-        `;
-
-        if (data.settings.matchData.scores.list.length > 0) {
-          data.settings.matchData.scores.list.forEach((sc) => {
-            if (
-              !qualifiersScoresAlreadyDone.some(
-                (score) => score.score === sc.score
-              )
-            ) {
-              let item = document.createElement("div");
-              item.classList.add("item");
-              let mods = "";
-              sc.mods.forEach((mod) => {
-                mods += `<img src="./img/modsIcons/${escapeHtml(mod)}.svg" height="18" alt="" />`;
-                return mods;
-              });
-
-              item.innerHTML =
-                sc.mods.length > 2
-                  ? `<div class="mods">
-              <span>${mods}</span>
-          </div>
-            <div class="number">${formatNumber(sc.score)}</div>`
-                  : `
-              <div class="mods">
-                  ${mods}
-              </div>
-                <div class="number">${formatNumber(sc.score)}</div>`;
-
-              item.classList.add("show");
-              scoresDiv.appendChild(item);
-              qualifiersScoresAlreadyDone.push(sc);
-            }
-
-            /*  if (mapsPlayedOld !== data.settings.matchData.scores.mapsPlayed) {
-              scoresDiv.innerHTML = "";
-              if (i === data.settings.matchData.scores.list.length) {
-                scoresDiv.appendChild(item);
-                setTimeout(function () {
-                  item.classList.add("show");
-                }, 10);
-              } else {
-                item.classList.add("show");
-                scoresDiv.appendChild(item);
-              }
-            } */
-          });
-        } else {
-          scoresDiv.innerHTML = "";
-        }
-        mapsPlayedOld = data.settings.matchData.scores.mapsPlayed;
-      }
-
-      /* When the match is TeamVS */
-      if (
-        data.settings.matchSettings.MatchType === "teamVS" &&
-        data.settings.matchSettings.Stage !== "Qualifiers"
-      ) {
-        qualifiers.style.display = "none";
-        match.style.display = "grid";
-
-        /* console.log(data.settings); */
-
-        let team1ImageClass = "flag";
-        let team2ImageClass = "flag";
-
-        let team1Image = `https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags/__.png`;
-        let team2Image = `https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags/__.png`;
-
-        /* Check if team names are equal to images in the folder and grab their images */
-        team1Image = isTeamImage(
-          data.settings.matchData.teams[0],
-          data.settings.matchData.teamImages[0]?.name
-        )
-          ? data.settings.matchData.teamImages[0].path
-          : team1Image;
-        team2Image = isTeamImage(
-          data.settings.matchData.teams[1],
-          data.settings.matchData.teamImages[1]?.name
-        )
-          ? data.settings.matchData.teamImages[1].path
-          : team2Image;
-
-        team1ImageClass = isTeamImage(
-          data.settings.matchData.teams[0],
-          data.settings.matchData.teamImages[0]?.name
-        )
-          ? "propic"
-          : team1ImageClass;
-
-        team2ImageClass = isTeamImage(
-          data.settings.matchData.teams[1],
-          data.settings.matchData.teamImages[1]?.name
-        )
-          ? "propic"
-          : team2ImageClass;
-
-        /* Check if team names are equal the Nations Names and grab their flag */
-        let fcountry1 = isCountry(data.settings.matchData.teams[0]);
-        let fcountry2 = isCountry(data.settings.matchData.teams[1]);
-
-        team1Image =
-          fcountry1 !== false
-            ? `https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags/${fcountry1}.png`
-            : team1Image;
-        team2Image =
-          fcountry2 !== false
-            ? `https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags/${fcountry2}.png`
-            : team2Image;
-
-        let teamOne =
-          data.settings.matchData.teams[0].length > 12
-            ? `<div class="name" id="name1">
-        <span>${escapeHtml(data.settings.matchData.teams[0])}</span>
-      </div>`
-            : `<div class="name" id="name1">${escapeHtml(data.settings.matchData.teams[0])}
-    </div>`;
-        let teamTwo =
-          data.settings.matchData.teams[1].length > 12
-            ? `<div class="name" id="name2">
-        <span>${escapeHtml(data.settings.matchData.teams[1])}</span>
-      </div>`
-            : `<div class="name" id="name2">${escapeHtml(data.settings.matchData.teams[1])}
-      </div>`;
-
-        if (data.settings.matchSettings.ScoreReverse) {
-          team1.innerHTML = `
-        <img
-          class="${team2ImageClass}"
-          id="flag1"
-          src="${team2Image}"
-          alt=""
-        />${teamTwo}`;
-
-          team2.innerHTML = `
-        <img
-          class="${team1ImageClass}"
-          id="flag2"
-          src="${team1Image}"
-          alt=""
-        />${teamOne}
-        `;
-        } else {
-          team1.innerHTML = `
-        <img
-          class="${team1ImageClass}"
-          id="flag1"
-          src="${team1Image}"
-          alt=""
-        />${teamOne}`;
-
-          team2.innerHTML = `
-        <img
-          class="${team2ImageClass}"
-          id="flag2"
-          src="${team2Image}"
-          alt=""
-        />${teamTwo}
-        `;
-        }
-
-        score1.innerHTML = data.settings.matchData.scores.team1;
-        score2.innerHTML = data.settings.matchData.scores.team2;
-      }
-
-      /* When the match is 1VS1 */
-      if (
-        data.settings.matchSettings.MatchType === "1vs1" &&
-        data.settings.matchSettings.Stage !== "Qualifiers"
-      ) {
-        qualifiers.style.display = "none";
-        match.style.display = "grid";
-        let playerOne =
-          data.settings.matchData.players[0].username.length > 12
-            ? `<div class="name" id="name1">
-        <span>${escapeHtml(data.settings.matchData.players[0].username)}</span>
-      </div>`
-            : `<div class="name" id="name1">${escapeHtml(data.settings.matchData.players[0].username)}</div>`;
-
-        let playerTwo =
-          data.settings.matchData.players[1].username.length > 12
-            ? `<div class="name" id="name2">
-        <span>${escapeHtml(data.settings.matchData.players[1].username)}</span>
-      </div>`
-            : `<div class="name" id="name2">${escapeHtml(data.settings.matchData.players[1].username)}</div>`;
-
-        team1.innerHTML = `
-        <img class="propic" alt="" id="propic1" src="${avatarOf(data.settings.matchData.players[0])}" />
-        ${playerOne}
-        `;
-        team2.innerHTML = `
-        <img class="propic" alt="" id="propic2" src="${avatarOf(data.settings.matchData.players[1])}" />
-        ${playerTwo}
-        `;
-
-        if (data.settings.matchSettings.ScoreReverse) {
-          score1.innerHTML = data.settings.matchData.scores.player2;
-          score2.innerHTML = data.settings.matchData.scores.player1;
-        } else {
-          score1.innerHTML = data.settings.matchData.scores.player1;
-          score2.innerHTML = data.settings.matchData.scores.player2;
-        }
-      }
-    }
-
-    /* When the match is ended */
-    if (data.settings.matchData && data.settings.matchSettings) {
-      if (data.settings.matchData.scores.isFinished === true) {
-        /* console.log("is finished: ", data.settings.matchData.scores.isFinished); */
-        isFinished = true;
-        /* If match is TeamVS or 1v1 */
-        if (data.settings.matchSettings.Stage !== "Qualifiers") {
-          winner.style.display = "flex";
-          match.style.display = "none";
-
-          if (!data.settings.displayerSettings.TransparentBackground) {
-            app.style.backgroundImage =
-              data.settings.matchData.scores.winner === 1
-                ? "url('img/winnerRed.png')"
-                : "url('img/winnerBlue.png')";
-          }
-
-          let dataHTML =
-            data.settings.matchSettings.MatchType === "1vs1"
-              ? `
-          <span>${escapeHtml(
-            data.settings.matchData.players[
-              data.settings.matchData.scores.winner - 1
-            ].username
-          )}</span> won the match!
-        `
-              : `
-            <span>${escapeHtml(
-              data.settings.matchData.teams[
-                data.settings.matchData.scores.winner - 1
-              ]
-            )}</span> won the match!
-          `;
-          winner.innerHTML = dataHTML;
-        }
-
-        return;
-      }
-      if (
-        data.settings.matchData.scores.isFinished === false &&
-        data.settings.matchSettings.Stage !== "Qualifiers"
-      ) {
-        isFinished = false;
-        data.settings.displayerSettings.TransparentBackground
-          ? (app.style.backgroundImage = "none")
-          : (app.style.backgroundImage = "url('img/redVSblue.png')");
-        app.style.backgroundPosition = "bottom";
-        match.style.display = "grid";
-        winner.style.display = "none";
-        return;
-      }
-    }
+    renderMatch(matchSettings, matchData);
   };
 
   ws.onclose = function () {
     setTimeout(initializeWebsocket, reconnectDelay);
     reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
   };
+}
+
+function applyDisplayer(displayer) {
+  var next = displayer.MatchLayout === "drift" ? "drift" : "aurora";
+  if (next !== layout) {
+    layout = next;
+    panel.classList.remove("aurora", "drift");
+    panel.classList.add(next);
+    amb.innerHTML = AMBIENT[next];
+    lastRender = "";
+  }
+  panel.classList.toggle("small", displayer.SmallDisplayer);
+  panel.classList.toggle("transparent", displayer.TransparentBackground);
+  panel.style.borderRadius = displayer.VisualizerStyle;
+}
+
+function show(view) {
+  message.hidden = view !== message;
+  match.hidden = view !== match;
+  qualifiers.hidden = view !== qualifiers;
+}
+
+function setLights(left, right, won, firstTo) {
+  // Each light reaches further in with its lead (as a share of first-to) and floods the box on a win.
+  var lead = (left - right) / firstTo;
+  var sr = won === 1 ? 3.6 : won === 2 ? 0.6 : 1 + Math.max(lead, 0) * 0.7 - Math.max(-lead, 0) * 0.35;
+  var sb = won === 2 ? 3.6 : won === 1 ? 0.6 : 1 + Math.max(-lead, 0) * 0.7 - Math.max(lead, 0) * 0.35;
+  panel.style.setProperty("--sr", sr.toFixed(3));
+  panel.style.setProperty("--sb", sb.toFixed(3));
+  panel.dataset.state = won ? `won-${won}` : left > right ? "lead-1" : right > left ? "lead-2" : "tie";
+}
+
+function showMessage(text) {
+  if (lastRender === text) return;
+  lastRender = text;
+  metaTop.innerHTML = "";
+  metaBottom.innerHTML = "";
+  message.textContent = text;
+  setLights(0, 0, 0, 1);
+  show(message);
+}
+
+function tournamentNameOf(matchData) {
+  var tournament = matchData.tournament;
+  if (!tournament || tournament.error) return "";
+  return tournament.tournamentName.length >= 22 ? tournament.acronym : tournament.tournamentName;
+}
+
+function teamPicture(matchData, index) {
+  var name = matchData.teams[index];
+  var country = isCountry(name);
+  if (country) return `<img class="flag" src="${FLAGS}/${country}.png" alt="" />`;
+  var image = matchData.teamImages?.[index];
+  if (isTeamImage(name, image?.name)) return `<img class="av" src="${escapeHtml(image.path)}" alt="" />`;
+  return `<img class="flag" src="${FLAGS}/__.png" alt="" />`;
+}
+
+/* Left side is always red, right side always blue. */
+function sidesOf(matchSettings, matchData) {
+  var scores = matchData.scores;
+  var reverse = matchSettings.ScoreReverse;
+  if (matchSettings.MatchType === "teamVS") {
+    var teams = [0, 1].map((i) => ({ name: matchData.teams[i], picture: teamPicture(matchData, i) }));
+    return {
+      left: reverse ? teams[1] : teams[0],
+      right: reverse ? teams[0] : teams[1],
+      leftScore: scores.team1,
+      rightScore: scores.team2,
+      winnerSide: reverse && scores.winner ? 3 - scores.winner : scores.winner,
+    };
+  }
+  var players = matchData.players.map((player) => ({
+    name: player.username,
+    picture: `<img class="av" src="${avatarOf(player)}" alt="" />`,
+  }));
+  return {
+    left: players[0],
+    right: players[1],
+    leftScore: reverse ? scores.player2 : scores.player1,
+    rightScore: reverse ? scores.player1 : scores.player2,
+    winnerSide: scores.winner,
+  };
+}
+
+function renderMatch(matchSettings, matchData) {
+  var sides = sidesOf(matchSettings, matchData);
+  var won = matchData.scores.isFinished === true ? sides.winnerSide || 0 : 0;
+  var key = JSON.stringify([layout, matchSettings.MatchType, matchSettings.Stage, matchSettings.BestOF, tournamentNameOf(matchData), sides, won]);
+  if (key === lastRender) return;
+  lastRender = key;
+
+  var left = Number(sides.leftScore) || 0;
+  var right = Number(sides.rightScore) || 0;
+  var bumpLeft = left > lastScores[0] ? "bump" : "";
+  var bumpRight = right > lastScores[1] ? "bump" : "";
+  lastScores = [left, right];
+
+  var bestOf = Number(matchSettings.BestOF) || 1;
+  var firstTo = Math.ceil(bestOf / 2);
+  setLights(left, right, won, firstTo);
+
+  var stage = escapeHtml(matchSettings.Stage);
+  var tournament = escapeHtml(tournamentNameOf(matchData));
+  var winnerName = won ? escapeHtml((won === 1 ? sides.left : sides.right).name) : "";
+
+  if (layout === "drift") {
+    metaTop.innerHTML = `<span class="ell">${tournament}</span><span>${stage}</span>`;
+    metaBottom.innerHTML = `<span class="ell">${won ? `${winnerName} advances` : `First to ${firstTo}`}</span><span>Best of ${bestOf}</span>`;
+    var row = (side, score, other, index, bump) => {
+      var state = won ? (won === index ? "" : "lose") : score < other ? "trail" : "";
+      return `<div class="row ${state}">${side.picture}<span class="name ell">${escapeHtml(side.name)}</span><span class="n"><span class="num ${bump}">${score}</span></span></div>`;
+    };
+    match.className = "match";
+    match.innerHTML = row(sides.left, left, right, 1, bumpLeft) + row(sides.right, right, left, 2, bumpRight);
+  } else {
+    metaTop.innerHTML = `<span>${stage}</span><span>Best of ${bestOf}</span>`;
+    metaBottom.innerHTML = `<span class="ell">${tournament}</span>`;
+    if (won) {
+      match.className = "match won";
+      match.innerHTML = `<b class="ell">${winnerName}</b><span>wins</span><span class="final">${Math.max(left, right)} - ${Math.min(left, right)}</span>`;
+    } else {
+      match.className = "match";
+      match.innerHTML = `
+        <div class="side left">${sides.left.picture}<span class="name ell">${escapeHtml(sides.left.name)}</span></div>
+        <div class="score">
+          <span class="${left < right ? "trail" : ""}"><span class="num ${bumpLeft}">${left}</span></span>
+          <span class="sep">-</span>
+          <span class="${right < left ? "trail" : ""}"><span class="num ${bumpRight}">${right}</span></span>
+        </div>
+        <div class="side right">${sides.right.picture}<span class="name ell">${escapeHtml(sides.right.name)}</span></div>`;
+    }
+  }
+  show(match);
+}
+
+function renderQualifiers(matchSettings, matchData) {
+  lastRender = "";
+  setLights(0, 0, 0, 1);
+  show(qualifiers);
+  metaTop.innerHTML = `<span>${escapeHtml(matchSettings.Stage)}</span>`;
+  metaBottom.innerHTML = `<span class="ell">${escapeHtml(tournamentNameOf(matchData))}</span>`;
+
+  let name =
+    matchData.player.username.length > 12
+      ? `<span>${escapeHtml(matchData.player.username)}</span>`
+      : escapeHtml(matchData.player.username);
+
+  userDiv.innerHTML = `
+  <img src="http://s.ppy.sh/a/${matchData.player.userid}" alt="${escapeHtml(matchData.player.username)}" />
+  <div class="name">${name}</div>
+  `;
+
+  infoDiv.innerHTML = `
+  <div class="item" id="counterMaps">
+    <div class="title">Maps</div>
+    <div class="number odometer">${matchData.scores.mapsPlayed}/${matchData.totalMaps}</div>
+  </div>
+  <div class="item" id="average">
+    <div class="title">Average</div>
+    <div class="number odometer">${formatNumber(matchData.scores.average)}</div>
+  </div>
+  `;
+
+  if (matchData.scores.list.length > 0) {
+    matchData.scores.list.forEach((sc) => {
+      if (!qualifiersScoresAlreadyDone.some((score) => score.score === sc.score)) {
+        let item = document.createElement("div");
+        item.classList.add("item");
+        let mods = "";
+        sc.mods.forEach((mod) => {
+          mods += `<img src="./img/modsIcons/${escapeHtml(mod)}.svg" height="18" alt="" />`;
+        });
+
+        item.innerHTML =
+          sc.mods.length > 2
+            ? `<div class="mods"><span>${mods}</span></div><div class="number">${formatNumber(sc.score)}</div>`
+            : `<div class="mods">${mods}</div><div class="number">${formatNumber(sc.score)}</div>`;
+
+        item.classList.add("show");
+        scoresDiv.appendChild(item);
+        qualifiersScoresAlreadyDone.push(sc);
+      }
+    });
+  } else {
+    scoresDiv.innerHTML = "";
+  }
+  mapsPlayedOld = matchData.scores.mapsPlayed;
 }
 
 function escapeHtml(value) {
@@ -525,11 +371,7 @@ function isCountry(name) {
     Venezuela: "VE",
     Vietnam: "VN",
   };
-  if (Object.keys(nationalities).includes(name)) {
-    return nationalities[name];
-  } else {
-    return false;
-  }
+  return Object.hasOwn(nationalities, name) ? nationalities[name] : false;
 }
 
 function isTeamImage(teamName, image) {

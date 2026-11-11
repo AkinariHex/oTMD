@@ -32,6 +32,7 @@ export interface DisplayerSettings {
   VisualizerStyle: string;
   SmallDisplayer: boolean;
   TransparentBackground: boolean;
+  MatchLayout: "aurora" | "drift";
   MapsStyle: OverlayStyle;
 }
 

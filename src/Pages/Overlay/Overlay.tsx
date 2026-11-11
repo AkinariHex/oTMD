@@ -12,7 +12,7 @@ import { SelectCard } from "@/Components/ui/select-card";
 import { Slider } from "@/Components/ui/slider";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
-import { BROADCAST_HEIGHT, BROADCAST_WIDTH, HEALTH_HEIGHT, MAPS_HEIGHT, OVERLAY_WIDTH, RATIO_HEIGHT, SCORE_HEIGHT, SMALL_SCORE_HEIGHT, withPadding } from "@/lib/overlays";
+import { BROADCAST_HEIGHT, BROADCAST_WIDTH, DRIFT_HEIGHT, HEALTH_HEIGHT, MAPS_HEIGHT, OVERLAY_WIDTH, RATIO_HEIGHT, SCORE_HEIGHT, SMALL_DRIFT_HEIGHT, SMALL_SCORE_HEIGHT, withPadding } from "@/lib/overlays";
 
 type OverlayKind = "match" | "ranked" | "broadcast";
 
@@ -49,6 +49,10 @@ const OVERLAYS: { id: OverlayKind; name: string }[] = [
 const BROADCAST_LOOKS = [
   { value: "table", label: "Table" },
   { value: "duel", label: "Duel" },
+];
+const MATCH_LAYOUTS = [
+  { value: "aurora", label: "Aurora" },
+  { value: "drift", label: "Drift" },
 ];
 const POINT_ANIMATIONS = [
   { value: "pop", label: "Pop" },
@@ -222,7 +226,8 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
   const rankedStyle = selected.id === "health" ? "Health" : selected.id === "ratio" ? "Ratio" : "Maps";
   const isMatchScore = kind === "match" && selected.id === "score";
   const activePadding = kind === "ranked" ? ranked[rankedStyle].padding : 0;
-  const sourceHeight = isMatchScore && settings.SmallDisplayer ? SMALL_SCORE_HEIGHT : selected.id === "maps" ? selected.height : withPadding(selected.height, activePadding);
+  const scoreHeight = settings.MatchLayout === "drift" ? (settings.SmallDisplayer ? SMALL_DRIFT_HEIGHT : DRIFT_HEIGHT) : settings.SmallDisplayer ? SMALL_SCORE_HEIGHT : SCORE_HEIGHT;
+  const sourceHeight = isMatchScore ? scoreHeight : selected.id === "maps" ? selected.height : withPadding(selected.height, activePadding);
   const sourceWidth = kind === "broadcast" ? BROADCAST_WIDTH : OVERLAY_WIDTH;
   const sampleQuery = previewData !== "sample" ? "" : kind === "broadcast" ? `&sample=1&count=${sampleCount}` : "&sample=1";
 
@@ -263,6 +268,11 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
           <div className="divide-y divide-line">
             {isMatchScore && (
               <>
+                <SettingRow compact label="Look">
+                  <div className="w-full">
+                    <Segmented small label="Look" value={settings.MatchLayout} onChange={(MatchLayout) => void change({ MatchLayout: MatchLayout as api.DisplayerSettings["MatchLayout"] })} options={MATCH_LAYOUTS} />
+                  </div>
+                </SettingRow>
                 <SettingRow compact label="Corners">
                   <div className="w-full">
                     <Select label="Corners" value={settings.VisualizerStyle} onChange={(VisualizerStyle) => void change({ VisualizerStyle })} options={CORNER_STYLES} />

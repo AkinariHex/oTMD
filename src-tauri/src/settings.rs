@@ -45,6 +45,7 @@ pub struct DisplayerSettings {
     pub VisualizerStyle: String,
     pub SmallDisplayer: bool,
     pub TransparentBackground: bool,
+    pub MatchLayout: String,
     pub MapsStyle: OverlayStyle,
 }
 
@@ -54,6 +55,7 @@ impl Default for DisplayerSettings {
             VisualizerStyle: "0px 0px 0px 0px".into(),
             SmallDisplayer: false,
             TransparentBackground: false,
+            MatchLayout: "aurora".into(),
             MapsStyle: OverlayStyle::maps(),
         }
     }
