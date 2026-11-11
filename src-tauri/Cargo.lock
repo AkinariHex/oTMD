@@ -2733,7 +2733,7 @@ dependencies = [
 
 [[package]]
 name = "otmd"
-version = "2.0.0"
+version = "3.0.0-beta.1"
 dependencies = [
  "axum",
  "base64 0.22.1",

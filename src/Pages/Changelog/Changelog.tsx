@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import PageHeader from "@/Components/PageHeader/PageHeader";
 import * as api from "@/lib/api";
 
-const CHANGELOG_URL = "https://raw.githubusercontent.com/AkinariHex/oTMD/main/CHANGELOG.md";
+const CHANGELOG_URL = "https://raw.githubusercontent.com/AkinariHex/oTMD/master/CHANGELOG.md";
 
 function Changelog() {
   const [changelog, setChangelog] = useState("");

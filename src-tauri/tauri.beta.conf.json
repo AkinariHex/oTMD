@@ -1,0 +1,9 @@
+{
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://raw.githubusercontent.com/AkinariHex/oTMD/master/updater/beta.json"
+      ]
+    }
+  }
+}

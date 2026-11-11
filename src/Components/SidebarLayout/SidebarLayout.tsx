@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { NAV, NAV_GROUPS } from "@/Components/AppShell/nav";
 import Avatar from "@/Components/Avatar/Avatar";
+import VersionLabel from "@/Components/VersionLabel/VersionLabel";
 import WindowControls from "@/Components/WindowControls/WindowControls";
 import type { User } from "@/lib/api";
 import { EASE_OUT } from "@/lib/motion";
@@ -80,7 +81,7 @@ function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps)
           <span className={cn("size-2 shrink-0 rounded-full", sources > 0 ? "bg-win" : "bg-ink-3")} />
           {sources} {sources === 1 ? "source" : "sources"} connected
         </button>
-        <div className="px-4 pt-0.5 pb-2.5 text-caption text-ink-3">v{version}</div>
+        <VersionLabel version={version} />
       </aside>
       <div className="relative min-w-0 flex-1 bg-panel">
         <div className="absolute top-0 right-0 z-20 h-8">

@@ -1,5 +1,6 @@
 import { HashRouter, Route, Routes, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import AppLogin from "@/Pages/AppLogin/AppLogin";
 import AppUpdate from "@/Pages/AppUpdate/AppUpdate";
 import AppShell from "@/Components/AppShell/AppShell";
@@ -12,7 +13,18 @@ function App() {
     const load = async () => {
       setIsUpdateAvailable(await api.isUpdateAvailable());
     };
+    const notifyPortableUpdate = async () => {
+      const update = await api.portableUpdate();
+      if (update) {
+        toast(`v${update.version} is available`, {
+          id: "portable-update",
+          description: "Download the new portable zip from GitHub.",
+          action: { label: "Download", onClick: () => void api.openExternal(update.url).catch(() => toast.error("Could not open the browser.")) },
+        });
+      }
+    };
     load();
+    notifyPortableUpdate();
     api.showWindowWhenReady();
     return api.onUpdateFailed(() => setIsUpdateAvailable(false));
   }, []);

@@ -303,6 +303,18 @@ export const setBroadcastEnabled = (enabled: boolean): Promise<void> => invoke("
 
 export const isUpdateAvailable = (): Promise<boolean> => invoke("check_update");
 
+export interface PortableUpdate {
+  version: string;
+  url: string;
+}
+
+// One check per launch, shared by the launch toast and the version label.
+let portableUpdateCheck: Promise<PortableUpdate | null> | undefined;
+export const portableUpdate = (): Promise<PortableUpdate | null> => {
+  portableUpdateCheck ??= invoke<PortableUpdate | null>("portable_update").catch(() => null);
+  return portableUpdateCheck;
+};
+
 export const onDownloadProgress = (
   listener: (progress: DownloadProgress) => void
 ): (() => void) => subscribe("download-progress", listener);

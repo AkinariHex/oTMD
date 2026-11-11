@@ -1,3 +1,30 @@
+## v3.0.0-beta.1
+
+### App
+
+- Rebuilt from scratch on Tauri: much smaller download, lower memory use, and nothing runs while the app sits in the tray.
+- Log in with your osu! account (no more API key); the session refreshes itself and never interrupts a stream.
+- New design, with sidebar or tabs layout.
+- Your display settings follow your osu! account across PCs.
+- Portable version: unzip and run, all data stays next to the app.
+
+### Dashboard
+
+- Saved matches, win rate, top tournaments and your recent ranked rooms in one place.
+
+### Ranked
+
+- Live overlay for osu!lazer Ranked Play, with life points, rounds and rating changes.
+
+### Broadcast
+
+- Stream someone else's tournament: up to 8 matches in a single overlay, added by MP link.
+
+### Overlay
+
+- Same URL as before (**<http://localhost:21086/visualizer>**), with new maps, ranked and broadcast pages.
+- Reconnects on its own if the app restarts.
+
 ## v2.0.0
 
 ### App

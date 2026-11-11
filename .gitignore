@@ -25,3 +25,6 @@ yarn-error.log*
 
 # graphify
 graphify-out/
+
+# release artifacts collected for scripts/release-manifest.mjs
+/release

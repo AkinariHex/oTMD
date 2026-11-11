@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Shell scripts run in WSL/macOS and break with CRLF
+*.sh text eol=lf

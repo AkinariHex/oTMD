@@ -368,6 +368,7 @@ and `latest.json` are uploaded by hand to the GitHub release.
 The maintainer generates the signing key and keeps it; only the public key goes in `plugins.updater.pubkey`.
 Portable mode checks GitHub releases and links to the zip.
 **Accept:** the documented local steps produce the Windows artifacts; installed app auto-updates from a test release.
+Steps, beta/stable channels and key storage: [RELEASING.md](RELEASING.md).
 
 ### Phase 12 - Hand-off from Electron
 Last Electron 2.x release whose update screen links to the v3 download. README update.
@@ -398,7 +399,7 @@ Delete the legacy `public/electron` and `public/osu` sources.
 - [x] Phase 7 - Redesign, login, animations
 - [x] Phase 8 - osu!lazer Ranked Play
 - [x] react-doctor baseline on the UI from Phases 6 to 10, before starting Phase 9
-- [ ] Phase 9 - Tournament broadcast mode
+- [x] Phase 9 - Tournament broadcast mode
 - [x] Phase 10 - Dashboard
 - [ ] Phase 11 - Packaging + manual releases
 - [ ] Phase 12 - Electron hand-off

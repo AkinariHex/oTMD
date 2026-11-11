@@ -16,6 +16,7 @@ use tauri_plugin_updater::{Update, UpdaterExt};
 
 const SAVE_FAILED: &str = "Could not save the settings.";
 const PROGRESS_INTERVAL: Duration = Duration::from_millis(250);
+const RELEASES_URL: &str = "https://github.com/AkinariHex/oTMD/releases";
 
 #[derive(Clone, Serialize)]
 struct DownloadProgress {
@@ -292,6 +293,31 @@ pub async fn check_update(app: AppHandle, state: State<'_, AppState>) -> Result<
 
     tauri::async_runtime::spawn(install_update(app, update));
     Ok(true)
+}
+
+#[derive(Serialize)]
+pub struct PortableUpdate {
+    version: String,
+    url: String,
+}
+
+// Portable copies cannot replace themselves: same channel file as the installer, but only the release page link comes back.
+#[tauri::command]
+pub async fn portable_update(app: AppHandle, state: State<'_, AppState>) -> Result<Option<PortableUpdate>, String> {
+    if cfg!(debug_assertions) || state.webview_data_dir.is_none() {
+        return Ok(None);
+    }
+
+    let Ok(updater) = app.updater() else {
+        return Ok(None);
+    };
+    let Ok(Some(update)) = updater.check().await else {
+        return Ok(None);
+    };
+    Ok(Some(PortableUpdate {
+        url: format!("{RELEASES_URL}/tag/v{}", update.version),
+        version: update.version,
+    }))
 }
 
 async fn install_update(app: AppHandle, update: Update) {

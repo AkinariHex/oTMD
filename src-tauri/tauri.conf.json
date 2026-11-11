@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "osu! Tourney Match Displayer",
   "mainBinaryName": "otmd",
-  "version": "2.0.0",
+  "version": "3.0.0-beta.1",
   "identifier": "com.akinari.osu-tourney-match-displayer",
   "build": {
     "frontendDist": "../dist",
@@ -18,7 +18,18 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
+    "targets": ["nsis", "appimage", "deb", "app", "dmg"],
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
+    "macOS": {
+      "signingIdentity": "-"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -29,9 +40,9 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEYyMzc4OTE3MDBDODA1M0YKUldRL0JjZ0FGNGszOGpnUjg5eFZhQnRYcHM1em9XbG5EbzFGb1c1ZUlEakIxVUhEMFl0bk5CVUgK",
       "endpoints": [
-        "https://github.com/AkinariHex/oTMD/releases/latest/download/latest.json"
+        "https://raw.githubusercontent.com/AkinariHex/oTMD/master/updater/stable.json"
       ]
     }
   }

@@ -1,6 +1,6 @@
 [package]
 name = "otmd"
-version = "2.0.0"
+version = "3.0.0-beta.1"
 description = "Displayer for osu! Tournament Matches"
 authors = ["Akinari"]
 license = "GPL-3.0"
