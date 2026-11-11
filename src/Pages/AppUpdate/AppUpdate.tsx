@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import TitleBar from "@/Components/TitleBar/TitleBar";
 import { Progress } from "@/Components/ui/progress";
 import * as api from "@/lib/api";
@@ -7,14 +9,22 @@ function AppUpdate() {
   const [downloadSpeed, setDownloadSpeed] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  useEffect(
-    () =>
-      api.onDownloadProgress((update) => {
-        setDownloadSpeed(update.speed);
-        setProgress(update.percent);
-      }),
-    []
-  );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const stopProgress = api.onDownloadProgress((update) => {
+      setDownloadSpeed(update.speed);
+      setProgress(update.percent);
+    });
+    const stopFailed = api.onUpdateFailed(() => {
+      toast.error("The update could not be installed. Try again later.");
+      navigate(-1);
+    });
+    return () => {
+      stopProgress();
+      stopFailed();
+    };
+  }, [navigate]);
 
   return (
     <div className="flex h-full flex-col">

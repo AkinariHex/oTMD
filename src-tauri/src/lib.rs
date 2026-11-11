@@ -212,7 +212,7 @@ pub fn run() {
             commands::save_broadcast_style,
             commands::set_broadcast_enabled,
             commands::check_update,
-            commands::portable_update,
+            commands::install_update,
             commands::close_app,
             commands::get_start_route,
             commands::window_ready,

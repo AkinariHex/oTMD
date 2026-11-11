@@ -1,10 +1,10 @@
 {
   "version": "3.0.0-beta.1",
   "notes": "https://github.com/AkinariHex/oTMD/releases/tag/v3.0.0-beta.1",
-  "pub_date": "2026-11-11T08:52:13.689Z",
+  "pub_date": "2026-11-11T09:20:48.826Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRL0JjZ0FGNGszOHVRZXkxeTd5Ry9rT09WM0FCenVVaWpuU1k3d2hsTkJJbDd0cTMwT2RYOEJna2E2ZndiWXpNZGhZbUhSSStyVC9xKzhVeXJ1eU9zellzWDB0bHRCSkFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mzg2NjI1CWZpbGU6b3N1ISBUb3VybmV5IE1hdGNoIERpc3BsYXllcl8zLjAuMC1iZXRhLjFfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjMuMC4wLWJldGEuMQo5TWFDWEVzT2UrK1c2d2I2amU4UGRoaWtGbVZXN2VEcUpiaDY2SEhXQ2dXeVlHeCtSMzJ4WjRKeW5WUUR0djhFajdBWVBtdyt2YmJrWTZ4SHBLOWFDQT09Cg==",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRL0JjZ0FGNGszOGlIM2JucTNpSUtVU215M1RsdkxZcEZPcHR0TENhZmxSTHU1Mi85UGFDNVdwaXFuT20xVmZDOEx6cE1EVysrbE12bXc2NkNZYkNvT1ptVS9LVWJTVGdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mzg4Nzg5CWZpbGU6b3N1ISBUb3VybmV5IE1hdGNoIERpc3BsYXllcl8zLjAuMC1iZXRhLjFfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjMuMC4wLWJldGEuMQp6VEdLZ1k5L1lxMzk5dlRLZDZBTThrVno4aUFCT0hvZURDaG5jRno0cDdQcFJpWjRralEvZSsyZ0I0NjdjZHJYekdTKzRMWW9ud1FWblVWdFNNaWVEQT09Cg==",
       "url": "https://github.com/AkinariHex/oTMD/releases/download/v3.0.0-beta.1/oTMD_3.0.0-beta.1_x64-setup.exe"
     }
   }

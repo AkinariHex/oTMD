@@ -1,46 +1,32 @@
 import { HashRouter, Route, Routes, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import AppLogin from "@/Pages/AppLogin/AppLogin";
 import AppUpdate from "@/Pages/AppUpdate/AppUpdate";
+import UpdateToast from "@/Components/UpdateToast/UpdateToast";
 import AppShell from "@/Components/AppShell/AppShell";
 import * as api from "@/lib/api";
 
 function App() {
-  const [isUpdateAvailable, setIsUpdateAvailable] = useState(null);
-
   useEffect(() => {
-    const load = async () => {
-      setIsUpdateAvailable(await api.isUpdateAvailable());
-    };
-    const notifyPortableUpdate = async () => {
-      const update = await api.portableUpdate();
+    const notifyUpdate = async () => {
+      const update = await api.availableUpdate();
       if (update) {
-        toast(`v${update.version} is available`, {
-          id: "portable-update",
-          description: "Download the new portable zip from GitHub.",
-          action: { label: "Download", onClick: () => void api.openExternal(update.url).catch(() => toast.error("Could not open the browser.")) },
-        });
+        toast.custom((id) => <UpdateToast id={id} update={update} />, { id: "app-update", duration: 10000 });
       }
     };
-    load();
-    notifyPortableUpdate();
+    notifyUpdate();
     api.showWindowWhenReady();
-    return api.onUpdateFailed(() => setIsUpdateAvailable(false));
   }, []);
 
   return (
     <HashRouter>
-      {isUpdateAvailable ? (
-        <AppUpdate />
-      ) : (
-        <Routes>
-          <Route path="/login" element={<AppLogin />} />
-          <Route path="/update" element={<AppUpdate />} />
-          <Route path="/app/*" element={<AppShell />} />
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      )}
+      <Routes>
+        <Route path="/login" element={<AppLogin />} />
+        <Route path="/update" element={<AppUpdate />} />
+        <Route path="/app/*" element={<AppShell />} />
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>
     </HashRouter>
   );
 }

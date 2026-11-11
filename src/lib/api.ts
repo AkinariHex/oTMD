@@ -301,23 +301,51 @@ export const saveBroadcastStyle = (style: BroadcastStyle): Promise<void> => invo
 
 export const setBroadcastEnabled = (enabled: boolean): Promise<void> => invoke("set_broadcast_enabled", { enabled });
 
-export const isUpdateAvailable = (): Promise<boolean> => invoke("check_update");
+// Dev-only preview of the update UI: VITE_PREVIEW_UPDATE=installed|portable. Stripped from release builds.
+const PREVIEW_UPDATE = import.meta.env.DEV ? import.meta.env.VITE_PREVIEW_UPDATE : undefined;
 
-export interface PortableUpdate {
+export interface AvailableUpdate {
   version: string;
   url: string;
+  portable: boolean;
 }
 
-// One check per launch, shared by the launch toast and the version label.
-let portableUpdateCheck: Promise<PortableUpdate | null> | undefined;
-export const portableUpdate = (): Promise<PortableUpdate | null> => {
-  portableUpdateCheck ??= invoke<PortableUpdate | null>("portable_update").catch(() => null);
-  return portableUpdateCheck;
+// One check per launch, shared by the launch toast and the sidebar button. Nothing installs until the user asks.
+let updateCheck: Promise<AvailableUpdate | null> | undefined;
+export const availableUpdate = (): Promise<AvailableUpdate | null> => {
+  updateCheck ??= PREVIEW_UPDATE
+    ? Promise.resolve({ version: "3.0.0-beta.2", url: "https://github.com/AkinariHex/oTMD/releases", portable: PREVIEW_UPDATE === "portable" })
+    : invoke<AvailableUpdate | null>("check_update").catch(() => null);
+  return updateCheck;
 };
 
-export const onDownloadProgress = (
-  listener: (progress: DownloadProgress) => void
-): (() => void) => subscribe("download-progress", listener);
+// Installed copies download in place and restart; portable copies open the release page.
+export const applyUpdate = async (update: AvailableUpdate): Promise<void> => {
+  if (update.portable) {
+    await openUrl(update.url);
+    return;
+  }
+  window.location.hash = "/update";
+  if (PREVIEW_UPDATE) return;
+  try {
+    await invoke("install_update");
+  } catch (error) {
+    window.history.back();
+    throw error;
+  }
+};
+
+export const onDownloadProgress = (listener: (progress: DownloadProgress) => void): (() => void) => {
+  if (PREVIEW_UPDATE === "installed") {
+    let percent = 0;
+    const timer = setInterval(() => {
+      percent = percent >= 100 ? 0 : percent + 2;
+      listener({ percent, speed: 4.2 });
+    }, 250);
+    return () => clearInterval(timer);
+  }
+  return subscribe("download-progress", listener);
+};
 
 export const onUpdateFailed = (listener: () => void): (() => void) =>
   subscribe("update-failed", listener);

@@ -277,50 +277,43 @@ pub fn close_app(app: AppHandle) {
     window::close(&app);
 }
 
-#[tauri::command]
-pub async fn check_update(app: AppHandle, state: State<'_, AppState>) -> Result<bool, String> {
-    // Portable installs are replaced by hand, and a dev build has nothing to update.
-    if cfg!(debug_assertions) || state.webview_data_dir.is_some() {
-        return Ok(false);
-    }
-
-    let Ok(updater) = app.updater() else {
-        return Ok(false);
-    };
-    let Ok(Some(update)) = updater.check().await else {
-        return Ok(false);
-    };
-
-    tauri::async_runtime::spawn(install_update(app, update));
-    Ok(true)
-}
-
 #[derive(Serialize)]
-pub struct PortableUpdate {
+pub struct AvailableUpdate {
     version: String,
     url: String,
+    portable: bool,
 }
 
-// Portable copies cannot replace themselves: same channel file as the installer, but only the release page link comes back.
-#[tauri::command]
-pub async fn portable_update(app: AppHandle, state: State<'_, AppState>) -> Result<Option<PortableUpdate>, String> {
-    if cfg!(debug_assertions) || state.webview_data_dir.is_none() {
-        return Ok(None);
+async fn find_update(app: &AppHandle) -> Option<Update> {
+    // A dev build has nothing to update.
+    if cfg!(debug_assertions) {
+        return None;
     }
+    app.updater().ok()?.check().await.ok()?
+}
 
-    let Ok(updater) = app.updater() else {
-        return Ok(None);
-    };
-    let Ok(Some(update)) = updater.check().await else {
-        return Ok(None);
-    };
-    Ok(Some(PortableUpdate {
+// Only looks: nothing is downloaded until the user asks, so an update never interrupts a stream.
+#[tauri::command]
+pub async fn check_update(app: AppHandle, state: State<'_, AppState>) -> Result<Option<AvailableUpdate>, String> {
+    Ok(find_update(&app).await.map(|update| AvailableUpdate {
         url: format!("{RELEASES_URL}/tag/v{}", update.version),
         version: update.version,
+        portable: state.webview_data_dir.is_some(),
     }))
 }
 
-async fn install_update(app: AppHandle, update: Update) {
+// Portable copies cannot replace themselves; the UI links them to the release page instead.
+#[tauri::command]
+pub async fn install_update(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    if state.webview_data_dir.is_some() {
+        return Err("Portable copies are updated by downloading the new zip.".into());
+    }
+    let update = find_update(&app).await.ok_or("No update is available right now.")?;
+    tauri::async_runtime::spawn(download_and_restart(app, update));
+    Ok(())
+}
+
+async fn download_and_restart(app: AppHandle, update: Update) {
     let emitter = app.clone();
     let started = Instant::now();
     let mut last_emit: Option<Instant> = None;

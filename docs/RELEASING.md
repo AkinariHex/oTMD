@@ -71,7 +71,8 @@ New-Item -ItemType File -Force "$portable\portable.txt" | Out-Null
 Compress-Archive -Force "$portable\*" "src-tauri\target\release\bundle\oTMD_${version}_x64_portable.zip"
 ```
 
-Portable copies do not update themselves: at launch they show a toast and a sidebar link to the new release page.
+No copy updates on its own. At launch the app only checks, then shows a toast and an "Update to vX" sidebar button.
+Installed copies download, install and restart when the user clicks it; portable copies open the release page instead.
 
 ### Linux (WSL on the Windows PC)
 
@@ -131,5 +132,6 @@ The app is ad-hoc signed (`signingIdentity: "-"`), not notarized: on first launc
 
 1. Install the current version with the setup exe.
 2. Release the next version (for example `3.0.0-beta.2`) as above.
-3. Start the installed app: the update screen downloads, installs and restarts on the new version.
+3. Start the installed app: the update toast and sidebar button appear. Click "Update now": the update screen
+   downloads, installs and restarts on the new version.
    raw.githubusercontent can cache the json for a few minutes.
