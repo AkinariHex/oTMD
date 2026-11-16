@@ -75,6 +75,20 @@ pub struct ExportMatches {
     pub apikey: String,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Obs {
+    pub host: String,
+    pub port: u16,
+    pub password: String,
+}
+
+impl Default for Obs {
+    fn default() -> Self {
+        Self { host: "127.0.0.1".into(), port: 4455, password: String::new() }
+    }
+}
+
 #[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TrayBehavior {
@@ -229,6 +243,7 @@ pub struct AppSettings {
     pub TextSize: u32,
     pub TrayBehavior: TrayBehavior,
     pub ExportMatches: ExportMatches,
+    pub Obs: Obs,
     pub Animations: bool,
     pub HardwareAcceleration: bool,
 }
@@ -242,6 +257,7 @@ impl Default for AppSettings {
             TextSize: 0,
             TrayBehavior: TrayBehavior::default(),
             ExportMatches: ExportMatches::default(),
+            Obs: Obs::default(),
             Animations: true,
             HardwareAcceleration: true,
         }
@@ -400,6 +416,8 @@ pub mod tests {
         assert_eq!(existing.rankedSettings.Ratio.padding, 16);
         assert_eq!(existing.displayerSettings.MapsStyle.padding, 8);
         assert!(existing.appSettings.PreviewBackground == PreviewBackground::Checker);
+        assert_eq!(existing.appSettings.Obs.host, "127.0.0.1");
+        assert_eq!(existing.appSettings.Obs.port, 4455);
         assert_eq!(existing.appSettings.TextSize, 0);
         let scene: Settings = serde_json::from_str(r#"{"appSettings":{"PreviewBackground":"lightScene"}}"#).unwrap();
         assert!(scene.appSettings.PreviewBackground == PreviewBackground::LightScene);

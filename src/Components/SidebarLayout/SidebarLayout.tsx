@@ -32,7 +32,7 @@ function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps)
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-full [--window-controls-inset:96px]">
+    <div className="flex h-full [--window-controls-inset:96px] [--window-controls-height:2rem]">
       <aside className="flex w-[188px] shrink-0 flex-col">
         <div data-tauri-drag-region className="flex h-10 shrink-0 items-center px-3 text-xs font-semibold text-ink">
           o!TMD

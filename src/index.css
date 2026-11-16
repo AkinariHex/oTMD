@@ -29,6 +29,7 @@
 :root {
   --text-scale: 1;
   --window-controls-inset: 0px;
+  --window-controls-height: 0px;
   --app: oklch(0.2 0.012 265);
   --panel: oklch(0.26 0.014 262);
   --raised: oklch(0.31 0.014 262);
@@ -77,6 +78,29 @@ body {
 html {
   scrollbar-color: oklch(1 0 0 / 0.22) transparent;
   scrollbar-width: thin;
+}
+
+/* WebKit pseudos instead of scrollbar-color: only they let the track start below the window controls. */
+.auto-scrollbar {
+  scrollbar-color: auto;
+}
+
+.auto-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.auto-scrollbar::-webkit-scrollbar-track {
+  margin-top: var(--window-controls-height);
+  background: transparent;
+}
+
+.auto-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: transparent;
+}
+
+.auto-scrollbar[data-scrolling]::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 0.22);
 }
 
 .no-scrollbar {

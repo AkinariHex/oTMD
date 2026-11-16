@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import CopyUrlButton from "@/Components/CopyUrlButton/CopyUrlButton";
+import ObsSource from "@/Components/ObsSource/ObsSource";
 import FontPicker from "@/Components/FontPicker/FontPicker";
 import OverlayPreview from "@/Components/OverlayPreview/OverlayPreview";
 import PageHeader from "@/Components/PageHeader/PageHeader";
@@ -12,7 +12,19 @@ import { SelectCard } from "@/Components/ui/select-card";
 import { Slider } from "@/Components/ui/slider";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
-import { BROADCAST_HEIGHT, BROADCAST_WIDTH, DRIFT_HEIGHT, HEALTH_HEIGHT, MAPS_HEIGHT, OVERLAY_WIDTH, RATIO_HEIGHT, SCORE_HEIGHT, SMALL_DRIFT_HEIGHT, SMALL_SCORE_HEIGHT, withPadding } from "@/lib/overlays";
+import {
+  BROADCAST_HEIGHT,
+  BROADCAST_WIDTH,
+  DRIFT_HEIGHT,
+  HEALTH_HEIGHT,
+  MAPS_HEIGHT,
+  OVERLAY_WIDTH,
+  RATIO_HEIGHT,
+  SCORE_HEIGHT,
+  SMALL_DRIFT_HEIGHT,
+  SMALL_SCORE_HEIGHT,
+  withPadding,
+} from "@/lib/overlays";
 
 type OverlayKind = "match" | "ranked" | "broadcast";
 
@@ -106,7 +118,7 @@ function OverlayThumbnail({ kind }: { kind: OverlayKind }) {
               <rect x="22" y="5" width="5" height="7" rx="1" fill="var(--loss)" />
               <rect x="29" y="5" width="5" height="7" rx="1" fill="var(--accent)" />
             </g>
-          ))
+          )),
         )}
     </svg>
   );
@@ -226,7 +238,8 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
   const rankedStyle = selected.id === "health" ? "Health" : selected.id === "ratio" ? "Ratio" : "Maps";
   const isMatchScore = kind === "match" && selected.id === "score";
   const activePadding = kind === "ranked" ? ranked[rankedStyle].padding : 0;
-  const scoreHeight = settings.MatchLayout === "drift" ? (settings.SmallDisplayer ? SMALL_DRIFT_HEIGHT : DRIFT_HEIGHT) : settings.SmallDisplayer ? SMALL_SCORE_HEIGHT : SCORE_HEIGHT;
+  const scoreHeight =
+    settings.MatchLayout === "drift" ? (settings.SmallDisplayer ? SMALL_DRIFT_HEIGHT : DRIFT_HEIGHT) : settings.SmallDisplayer ? SMALL_SCORE_HEIGHT : SCORE_HEIGHT;
   const sourceHeight = isMatchScore ? scoreHeight : selected.id === "maps" ? selected.height : withPadding(selected.height, activePadding);
   const sourceWidth = kind === "broadcast" ? BROADCAST_WIDTH : OVERLAY_WIDTH;
   const sampleQuery = previewData !== "sample" ? "" : kind === "broadcast" ? `&sample=1&count=${sampleCount}` : "&sample=1";
@@ -245,7 +258,7 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
           </SelectCard>
         ))}
       </div>
-      <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] gap-5">
+      <div className="grid min-h-0 flex-1 grid-cols-[340px_1fr] gap-5">
         <div className="-m-1 flex min-h-0 flex-col gap-2 overflow-y-auto p-1">
           {VIEWS[kind].length > 1 && (
             <Segmented
@@ -255,22 +268,19 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
               options={VIEWS[kind].map(({ id, label }) => ({ value: id, label }))}
             />
           )}
-          <div className="flex gap-1.5">
-            <Input readOnly value={selected.url} aria-label="Overlay URL" className="text-xs" />
-            <CopyUrlButton url={selected.url} label="Copy" />
-          </div>
-          <p className="flex items-center justify-between text-xs text-ink-3">
-            OBS browser source
-            <span className="font-medium tabular-nums text-ink-2">
-              {sourceWidth} x {sourceHeight}
-            </span>
-          </p>
+          <ObsSource name={`o!TMD ${OVERLAYS.find(({ id }) => id === kind)?.name} ${selected.label}`} url={selected.url} width={sourceWidth} height={sourceHeight} />
           <div className="divide-y divide-line">
             {isMatchScore && (
               <>
                 <SettingRow compact label="Look">
                   <div className="w-full">
-                    <Segmented small label="Look" value={settings.MatchLayout} onChange={(MatchLayout) => void change({ MatchLayout: MatchLayout as api.DisplayerSettings["MatchLayout"] })} options={MATCH_LAYOUTS} />
+                    <Segmented
+                      small
+                      label="Look"
+                      value={settings.MatchLayout}
+                      onChange={(MatchLayout) => void change({ MatchLayout: MatchLayout as api.DisplayerSettings["MatchLayout"] })}
+                      options={MATCH_LAYOUTS}
+                    />
                   </div>
                 </SettingRow>
                 <SettingRow compact label="Corners">
@@ -282,26 +292,40 @@ function Overlay({ sources }: { sources: api.OverlaySources }) {
                   <Switch aria-label="Small overlay" checked={settings.SmallDisplayer} onCheckedChange={(SmallDisplayer) => void change({ SmallDisplayer })} />
                 </SettingRow>
                 <SettingRow compact label="Transparent">
-                  <Switch aria-label="Transparent background" checked={settings.TransparentBackground} onCheckedChange={(TransparentBackground) => void change({ TransparentBackground })} />
+                  <Switch
+                    aria-label="Transparent background"
+                    checked={settings.TransparentBackground}
+                    onCheckedChange={(TransparentBackground) => void change({ TransparentBackground })}
+                  />
                 </SettingRow>
               </>
             )}
             {kind === "match" && selected.id === "maps" && (
               <StyleControls style={settings.MapsStyle} onChange={(update) => void change({ MapsStyle: { ...settings.MapsStyle, ...update } })} />
             )}
-            {kind === "ranked" && (
-              <StyleControls style={ranked[rankedStyle]} onChange={(update) => void changeRanked({ [rankedStyle]: { ...ranked[rankedStyle], ...update } })} />
-            )}
+            {kind === "ranked" && <StyleControls style={ranked[rankedStyle]} onChange={(update) => void changeRanked({ [rankedStyle]: { ...ranked[rankedStyle], ...update } })} />}
             {kind === "broadcast" && (
               <>
                 <SettingRow compact label="Look">
                   <div className="w-full">
-                    <Segmented small label="Look" value={broadcast.look} onChange={(look) => changeBroadcast({ look: look as api.BroadcastStyle["look"] })} options={BROADCAST_LOOKS} />
+                    <Segmented
+                      small
+                      label="Look"
+                      value={broadcast.look}
+                      onChange={(look) => changeBroadcast({ look: look as api.BroadcastStyle["look"] })}
+                      options={BROADCAST_LOOKS}
+                    />
                   </div>
                 </SettingRow>
                 <SettingRow compact label="Point animation">
                   <div className="w-full">
-                    <Segmented small label="Point animation" value={broadcast.pointAnimation} onChange={(pointAnimation) => changeBroadcast({ pointAnimation: pointAnimation as api.BroadcastStyle["pointAnimation"] })} options={POINT_ANIMATIONS} />
+                    <Segmented
+                      small
+                      label="Point animation"
+                      value={broadcast.pointAnimation}
+                      onChange={(pointAnimation) => changeBroadcast({ pointAnimation: pointAnimation as api.BroadcastStyle["pointAnimation"] })}
+                      options={POINT_ANIMATIONS}
+                    />
                   </div>
                 </SettingRow>
                 <SettingRow compact label="Single title" hint="One title above all matches">

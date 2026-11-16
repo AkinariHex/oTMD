@@ -101,6 +101,7 @@ export interface AppSettings {
   TextSize: number;
   TrayBehavior: "closeToTray" | "minimizeToTray";
   ExportMatches: { status: boolean; apikey: string };
+  Obs: { host: string; port: number; password: string };
   Animations: boolean;
   HardwareAcceleration: boolean;
 }

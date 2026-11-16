@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type UIEvent, useEffect, useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/Components/PageHeader/PageHeader";
@@ -10,6 +10,8 @@ import { SelectCard } from "@/Components/ui/select-card";
 import { Slider } from "@/Components/ui/slider";
 import { Switch } from "@/Components/ui/switch";
 import * as api from "@/lib/api";
+import { testObs } from "@/lib/obs";
+import { cn } from "@/lib/utils";
 import { applyPreferences } from "@/lib/preferences";
 
 const SITE_URL = "https://otmd.app";
@@ -27,10 +29,21 @@ const DEFAULT_FIXED_TEXT_SIZE = 100;
 
 // Outlives the page, so coming back to Settings does not ask the website again.
 let lastKeyCheck: { apikey: string; valid: boolean } | null = null;
+let lastObsCheck: { target: string; error: string | null } | null = null;
+const OBS_CHECK_DELAY_MS = 600;
+const SCROLLBAR_HIDE_MS = 800;
 
 const LAYOUTS: { id: api.Layout; name: string; hint: string }[] = [
-  { id: "sidebar", name: "Sidebar", hint: "Grouped menu with connected sources" },
-  { id: "tabs", name: "Tabs", hint: "Navigation in the title bar, more room for content" },
+  {
+    id: "sidebar",
+    name: "Sidebar",
+    hint: "Grouped menu with connected sources",
+  },
+  {
+    id: "tabs",
+    name: "Tabs",
+    hint: "Navigation in the title bar, more room for content",
+  },
 ];
 
 function LayoutThumbnail({ layout }: { layout: api.Layout }) {
@@ -80,6 +93,43 @@ function Settings() {
   const [settings, setSettings] = useState<api.AppSettings | null>(null);
   const [keyValid, setKeyValid] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
+  const [testingObs, setTestingObs] = useState(false);
+  // null while unknown, "" when connected, otherwise the reason it failed.
+  const [obsError, setObsError] = useState<string | null>(null);
+  const scrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const obsTarget = settings ? JSON.stringify(settings.Obs) : null;
+
+  const checkObs = async (target: string) => {
+    setTestingObs(true);
+    let error: string | null = "";
+    try {
+      await testObs(JSON.parse(target) as api.AppSettings["Obs"]);
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : "Could not reach OBS.";
+    }
+    lastObsCheck = { target, error };
+    setObsError(error);
+    setTestingObs(false);
+  };
+
+  useEffect(() => {
+    if (!obsTarget) return;
+    if (lastObsCheck?.target === obsTarget) {
+      setObsError(lastObsCheck.error);
+      return;
+    }
+    setObsError(null);
+    if ((JSON.parse(obsTarget) as api.AppSettings["Obs"]).host === "") return;
+    const timer = setTimeout(() => void checkObs(obsTarget), OBS_CHECK_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [obsTarget]);
+
+  const showScrollbar = (event: UIEvent<HTMLDivElement>) => {
+    const element = event.currentTarget;
+    element.dataset.scrolling = "";
+    clearTimeout(scrollTimer.current);
+    scrollTimer.current = setTimeout(() => delete element.dataset.scrolling, SCROLLBAR_HIDE_MS);
+  };
 
   const checkKey = async (apikey: string) => {
     setChecking(true);
@@ -123,81 +173,159 @@ function Settings() {
   };
 
   const { status, apikey } = settings.ExportMatches;
+  const { Obs: obs } = settings;
 
   return (
-    <div className="mx-auto flex max-w-[680px] flex-col gap-3 pb-1">
-      <PageHeader title="Settings" />
-      <section className="flex flex-col gap-2">
-        <h2 className="text-xs font-medium text-ink-3">Layout</h2>
-        <div role="radiogroup" aria-label="Layout" className="grid grid-cols-2 gap-2.5">
-          {LAYOUTS.map((layout) => (
-            <SelectCard key={layout.id} selected={settings.Layout === layout.id} onClick={() => void change({ Layout: layout.id })} className="flex items-center gap-3">
-              <span className="block w-32 shrink-0">
-                <LayoutThumbnail layout={layout.id} />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-ui font-semibold text-ink">{layout.name}</span>
-                <span className="block text-xs text-ink-3">{layout.hint}</span>
-              </span>
-            </SelectCard>
-          ))}
-        </div>
-      </section>
-      <div className="divide-y divide-line">
-        <SettingRow label="System tray" hint={TRAY_HINTS[settings.TrayBehavior]}>
-          <Segmented
-            label="System tray"
-            value={settings.TrayBehavior}
-            onChange={(value) => void change({ TrayBehavior: value as api.AppSettings["TrayBehavior"] })}
-            options={TRAY_OPTIONS}
-          />
-        </SettingRow>
-        <SettingRow label="Automatic text size" hint="Follows your screen resolution">
-          <Switch aria-label="Automatic text size" checked={settings.TextSize === 0} onCheckedChange={(automatic) => void change({ TextSize: automatic ? 0 : DEFAULT_FIXED_TEXT_SIZE })} />
-        </SettingRow>
-        {settings.TextSize > 0 && (
-          <SettingRow label={`Text size ${settings.TextSize}%`}>
-            <Slider label="Text size" min={80} max={140} step={5} value={settings.TextSize} onChange={(TextSize) => void change({ TextSize })} />
-          </SettingRow>
-        )}
-        <SettingRow label="Animations" hint="Motion in the interface">
-          <Switch aria-label="Animations" checked={settings.Animations} onCheckedChange={(Animations) => void change({ Animations })} />
-        </SettingRow>
-        {CAN_TOGGLE_HARDWARE_ACCELERATION && (
-          <SettingRow label="Hardware acceleration" hint="Takes effect the next time o!TMD starts">
-            <Switch aria-label="Hardware acceleration" checked={settings.HardwareAcceleration} onCheckedChange={(HardwareAcceleration) => void change({ HardwareAcceleration })} />
-          </SettingRow>
-        )}
-        <SettingRow label="Export matches" hint="Save finished matches to otmd.app">
-          <Switch aria-label="Export matches" checked={status} onCheckedChange={(checked) => void change({ ExportMatches: { status: checked, apikey } })} />
-        </SettingRow>
-        <div className="flex flex-col gap-1.5 py-2">
-          <div className="flex gap-1.5">
-            <Input
-              type="password"
-              value={apikey}
-              aria-label="o!TMD website API key"
-              placeholder="o!TMD website API key"
-              autoComplete="off"
-              spellCheck={false}
-              onChange={(event) => {
-                setKeyValid(null);
-                void change({ ExportMatches: { status, apikey: event.target.value } });
-              }}
-            />
-            <Button disabled={checking || apikey === ""} onClick={() => void checkKey(apikey)} className="w-28">
-              {checking ? <LoaderCircle size={14} strokeWidth={1.75} className="animate-spin" /> : "Check key"}
-            </Button>
+    <div data-fills-page onScroll={showScrollbar} className="auto-scrollbar -m-5 h-[calc(100%+2.5rem)] overflow-y-auto p-5">
+      <div className="mx-auto flex max-w-[680px] flex-col gap-3 pb-1">
+        <PageHeader title="Settings" />
+        <section className="flex flex-col gap-2">
+          <h2 className="text-xs font-medium text-ink-3">Layout</h2>
+          <div role="radiogroup" aria-label="Layout" className="grid grid-cols-2 gap-2.5">
+            {LAYOUTS.map((layout) => (
+              <SelectCard key={layout.id} selected={settings.Layout === layout.id} onClick={() => void change({ Layout: layout.id })} className="flex items-center gap-3">
+                <span className="block w-32 shrink-0">
+                  <LayoutThumbnail layout={layout.id} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-ui font-semibold text-ink">{layout.name}</span>
+                  <span className="block text-xs text-ink-3">{layout.hint}</span>
+                </span>
+              </SelectCard>
+            ))}
           </div>
-          <p className="text-xs text-ink-3">
-            {keyValid === true && <span className="text-win">The key is valid. </span>}
-            {keyValid === false && <span className="text-loss">The key is not valid. </span>}
-            Get it from the settings page on the{" "}
-            <button type="button" className="cursor-pointer font-medium text-accent" onClick={() => void api.openExternal(SITE_URL)}>
-              website
-            </button>
-            .
-          </p>
+        </section>
+        <div className="divide-y divide-line">
+          <SettingRow label="System tray" hint={TRAY_HINTS[settings.TrayBehavior]}>
+            <Segmented
+              label="System tray"
+              value={settings.TrayBehavior}
+              onChange={(value) =>
+                void change({
+                  TrayBehavior: value as api.AppSettings["TrayBehavior"],
+                })
+              }
+              options={TRAY_OPTIONS}
+            />
+          </SettingRow>
+          <SettingRow label="Automatic text size" hint="Follows your screen resolution">
+            <Switch
+              aria-label="Automatic text size"
+              checked={settings.TextSize === 0}
+              onCheckedChange={(automatic) =>
+                void change({
+                  TextSize: automatic ? 0 : DEFAULT_FIXED_TEXT_SIZE,
+                })
+              }
+            />
+          </SettingRow>
+          {settings.TextSize > 0 && (
+            <SettingRow label={`Text size ${settings.TextSize}%`}>
+              <Slider label="Text size" min={80} max={140} step={5} value={settings.TextSize} onChange={(TextSize) => void change({ TextSize })} />
+            </SettingRow>
+          )}
+          <SettingRow label="Animations" hint="Motion in the interface">
+            <Switch aria-label="Animations" checked={settings.Animations} onCheckedChange={(Animations) => void change({ Animations })} />
+          </SettingRow>
+          {CAN_TOGGLE_HARDWARE_ACCELERATION && (
+            <SettingRow label="Hardware acceleration" hint="Takes effect the next time o!TMD starts">
+              <Switch
+                aria-label="Hardware acceleration"
+                checked={settings.HardwareAcceleration}
+                onCheckedChange={(HardwareAcceleration) => void change({ HardwareAcceleration })}
+              />
+            </SettingRow>
+          )}
+          <SettingRow label="Export matches" hint="Save finished matches to otmd.app">
+            <Switch aria-label="Export matches" checked={status} onCheckedChange={(checked) => void change({ ExportMatches: { status: checked, apikey } })} />
+          </SettingRow>
+          <div className="flex flex-col gap-1.5 py-2">
+            <div className="flex gap-1.5">
+              <Input
+                type="password"
+                value={apikey}
+                aria-label="o!TMD website API key"
+                placeholder="o!TMD website API key"
+                autoComplete="off"
+                spellCheck={false}
+                onChange={(event) => {
+                  setKeyValid(null);
+                  void change({
+                    ExportMatches: { status, apikey: event.target.value },
+                  });
+                }}
+              />
+              <Button disabled={checking || apikey === ""} onClick={() => void checkKey(apikey)} className="w-28">
+                {checking ? <LoaderCircle size={14} strokeWidth={1.75} className="animate-spin" /> : "Check key"}
+              </Button>
+            </div>
+            <p className="text-xs text-ink-3">
+              {keyValid === true && <span className="text-win">The key is valid. </span>}
+              {keyValid === false && <span className="text-loss">The key is not valid. </span>}
+              Get it from the settings page on the{" "}
+              <button type="button" className="cursor-pointer font-medium text-accent" onClick={() => void api.openExternal(SITE_URL)}>
+                website
+              </button>
+              .
+            </p>
+          </div>
+          <div className="flex flex-col gap-1.5 py-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-ui font-medium text-ink">OBS</span>
+              <span className={cn("flex items-center gap-1.5 text-xs", obsError === "" ? "text-win" : obsError ? "text-loss" : "text-ink-3")}>
+                <span className="size-1.5 rounded-full bg-current" />
+                {testingObs ? "Checking..." : obsError === "" ? "Connected" : obsError ? "Not connected" : obs.host === "" ? "No address" : "Not checked"}
+              </span>
+            </div>
+            <div className="flex gap-1.5">
+              <Input
+                value={obs.host}
+                aria-label="OBS address"
+                placeholder="127.0.0.1"
+                spellCheck={false}
+                onChange={(event) =>
+                  void change({
+                    Obs: { ...obs, host: event.target.value.trim() },
+                  })
+                }
+              />
+              <Input
+                type="number"
+                min={1}
+                max={65535}
+                value={obs.port}
+                aria-label="OBS port"
+                className="w-24 tabular-nums"
+                onChange={(event) =>
+                  void change({
+                    Obs: { ...obs, port: Number(event.target.value) },
+                  })
+                }
+              />
+            </div>
+            <div className="flex gap-1.5">
+              <Input
+                type="password"
+                value={obs.password}
+                aria-label="OBS WebSocket password"
+                placeholder="OBS WebSocket password"
+                autoComplete="off"
+                spellCheck={false}
+                onChange={(event) =>
+                  void change({
+                    Obs: { ...obs, password: event.target.value },
+                  })
+                }
+              />
+              <Button disabled={testingObs || obs.host === ""} onClick={() => obsTarget && void checkObs(obsTarget)} className="w-28">
+                {testingObs ? <LoaderCircle size={14} strokeWidth={1.75} className="animate-spin" /> : "Retry"}
+              </Button>
+            </div>
+            <p className="text-xs text-ink-3">
+              {obsError && <span className="text-loss">{obsError} </span>}
+              In OBS open Tools, WebSocket Server Settings, enable the server and copy the password here.
+            </p>
+          </div>
         </div>
       </div>
     </div>
