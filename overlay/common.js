@@ -24,6 +24,27 @@ function applyFrameStyle(frame, style) {
   frame.style.fontFamily = style.fontFamily;
 }
 
+// Injected here so every overlay gets the same placeholder without its own stylesheet rule.
+// It fills the whole browser source, which is sized to the overlay, so it can be placed before any data arrives.
+const WAITING_CSS = `
+.overlay-waiting { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 12px; border-radius: 8px;
+  background: rgba(24, 24, 32, 0.85); color: rgba(255, 255, 255, 0.66); font: 800 16px Nunito, sans-serif; user-select: none; pointer-events: none; }
+.overlay-waiting[hidden] { display: none; }`;
+let waitingNode = null;
+
+// Shown instead of an empty source while there is nothing to draw; null hides it.
+function showWaiting(text, style) {
+  if (!waitingNode) {
+    document.head.append(make("style", "", WAITING_CSS));
+    waitingNode = make("div", "overlay-waiting");
+    document.body.append(waitingNode);
+  }
+  waitingNode.hidden = !text;
+  if (!text) return;
+  waitingNode.textContent = text;
+  if (style) applyFrameStyle(waitingNode, style);
+}
+
 function connectOverlay(source, onMessage) {
   let delay = RECONNECT_MIN_MS;
   const query = overlayParams.has("preview") ? "?preview=1" : source ? `?source=${source}` : "";

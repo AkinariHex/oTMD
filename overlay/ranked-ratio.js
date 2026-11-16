@@ -18,6 +18,7 @@ function resultsFrom(view, userId) {
 function renderRatio(user, results, style) {
   const frame = element("ratio");
   frame.hidden = !user;
+  showWaiting(user ? null : "Waiting for a ranked match", style);
   if (!user) return;
   applyFrameStyle(frame, style);
 

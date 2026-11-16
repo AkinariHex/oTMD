@@ -63,6 +63,7 @@ function renderPlayer(refs, player, isWinner) {
 
 function renderHealth(view, style) {
   frame.hidden = !view;
+  showWaiting(view ? null : "Waiting for a ranked match", style);
   if (!view) return;
   applyFrameStyle(frame, style);
   view.players.forEach((player, index) => renderPlayer(cards[index], player, view.winner !== null && view.winner === player.id));

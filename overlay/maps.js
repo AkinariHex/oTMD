@@ -117,6 +117,7 @@ function buildCard(map) {
 
 function renderMaps(maps, style) {
   frame.hidden = !maps?.length;
+  showWaiting(maps?.length ? null : maps ? "Waiting for the first map" : isRanked ? "Waiting for a ranked match" : "Waiting for a match", style);
   if (!maps?.length) return;
   applyFrameStyle(frame, style);
 

@@ -124,6 +124,7 @@ function titleOf(matches, style) {
 
 function render(matches, style) {
   board.hidden = matches.length === 0;
+  showWaiting(matches.length === 0 ? "Waiting for matches" : null);
   if (matches.length === 0) {
     rendered.clear();
     layoutKey = "";
