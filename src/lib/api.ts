@@ -245,7 +245,7 @@ export interface DashboardData {
 
 export interface FeedCursor {
   saved: number | null;
-  ranked: number;
+  ranked: number | null;
 }
 
 export interface FeedPage {

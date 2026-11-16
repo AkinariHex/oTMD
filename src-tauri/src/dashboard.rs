@@ -106,7 +106,8 @@ struct SupporterReply {
 #[serde(rename_all = "camelCase")]
 pub struct FeedCursor {
     saved: Option<usize>,
-    ranked: usize,
+    // None once osu! failed to list the rooms: later rooms would land below newer matches.
+    ranked: Option<usize>,
 }
 
 #[derive(Clone, Serialize)]
@@ -117,7 +118,7 @@ pub struct FeedPage {
     next: Option<FeedCursor>,
 }
 
-const FIRST_PAGE: FeedCursor = FeedCursor { saved: Some(0), ranked: 0 };
+const FIRST_PAGE: FeedCursor = FeedCursor { saved: Some(0), ranked: Some(0) };
 
 struct Cached<T> {
     key: String,
@@ -156,6 +157,7 @@ pub struct Dashboard {
     data_dir: PathBuf,
     cache: Mutex<Option<Cached<DashboardData>>>,
     first_page: Mutex<Option<Cached<FeedPage>>>,
+    rooms: Mutex<Option<Cached<Vec<RoomSummary>>>>,
     finished_rooms: Mutex<HashMap<u64, Option<RankedCard>>>,
 }
 
@@ -258,6 +260,7 @@ impl Dashboard {
             data_dir,
             cache: Mutex::new(None),
             first_page: Mutex::new(None),
+            rooms: Mutex::new(None),
             finished_rooms: Mutex::new(HashMap::new()),
         })
     }
@@ -287,15 +290,18 @@ impl Dashboard {
         response.json::<SupporterReply>().await.ok()?.supporter
     }
 
-    async fn ranked(&self, auth: &AuthManager) -> Option<RankedSummary> {
-        let (token, user) = (auth.access_token()?, auth.user()?);
-        let stats = self.osu.ranked_profile(&token, user.id).await.ok()?.stats?;
-        Some(RankedSummary {
+    // Err when osu! did not answer, so the caller knows not to cache the empty result.
+    async fn ranked(&self, auth: &AuthManager) -> Result<Option<RankedSummary>, OsuError> {
+        let (Some(token), Some(user)) = (auth.access_token(), auth.user()) else {
+            return Ok(None);
+        };
+        let stats = self.osu.ranked_profile(&token, user.id).await?.stats;
+        Ok(stats.map(|stats| RankedSummary {
             rank: stats.rank,
             rating: stats.rating,
             plays: stats.plays,
             first_placements: stats.first_placements,
-        })
+        }))
     }
 
     async fn saved_matches(&self, key: &str, offset: usize) -> Option<(Vec<Value>, bool)> {
@@ -310,16 +316,21 @@ impl Dashboard {
         Some((matches, body["hasMore"].as_bool().unwrap_or(false)))
     }
 
-    async fn played_rooms(&self, auth: &AuthManager) -> Vec<RoomSummary> {
-        let Some(token) = auth.access_token() else {
-            return Vec::new();
+    // None when osu! did not answer. Cached so every page pages through the same list.
+    async fn played_rooms(&self, auth: &AuthManager) -> Option<Vec<RoomSummary>> {
+        let (Some(token), Some(user)) = (auth.access_token(), auth.user()) else {
+            return Some(Vec::new());
         };
-        let Ok(mut rooms) = self.osu.recent_ranked_rooms(&token, MAX_ROOMS).await else {
-            return Vec::new();
-        };
+        let key = user.id.to_string();
+        let mut cache = self.rooms.lock().await;
+        if let Some(rooms) = Cached::fresh(&cache, &key) {
+            return Some(rooms);
+        }
+        let mut rooms = self.osu.recent_ranked_rooms(&token, MAX_ROOMS).await.ok()?;
         rooms.retain(|room| room.ends_at.is_some() && room.starts_at.as_deref().is_some_and(|start| start >= RULES_SINCE));
         rooms.sort_unstable_by_key(|room| Reverse(room.id));
-        rooms
+        *cache = Some(Cached { key, at: Instant::now(), data: rooms.clone() });
+        Some(rooms)
     }
 
     // A finished room never changes, so each one costs a single request for the whole session.
@@ -359,17 +370,26 @@ impl Dashboard {
         rooms.iter().filter_map(|room| finished.get(&room.id).cloned().flatten()).collect()
     }
 
-    async fn build_page(&self, auth: &AuthManager, key: &str, cursor: FeedCursor) -> FeedPage {
+    // The flag is false when a source failed, so the page must not be cached.
+    async fn build_page(&self, auth: &AuthManager, key: &str, cursor: FeedCursor) -> (FeedPage, bool) {
         let saved_request = async {
             match cursor.saved {
                 Some(offset) => self.saved_matches(key, offset).await,
                 None => None,
             }
         };
-        let (saved_page, rooms) = tokio::join!(saved_request, self.played_rooms(auth));
+        let rooms_request = async {
+            match cursor.ranked {
+                Some(_) => self.played_rooms(auth).await,
+                None => Some(Vec::new()),
+            }
+        };
+        let (saved_page, rooms) = tokio::join!(saved_request, rooms_request);
         let site_answered = saved_page.is_some();
+        let osu_answered = rooms.is_some();
+        let rooms = rooms.unwrap_or_default();
         let (mut saved, saved_has_more) = saved_page.unwrap_or_default();
-        let remaining = rooms.get(cursor.ranked..).unwrap_or_default();
+        let remaining = rooms.get(cursor.ranked.unwrap_or(0)..).unwrap_or_default();
 
         let (from_saved, from_rooms) = plan_page(&saved, remaining);
         let saved_left = saved.len() > from_saved || saved_has_more;
@@ -377,27 +397,30 @@ impl Dashboard {
         let ranked_matches = self.ranked_cards(auth, &remaining[..from_rooms]).await;
 
         let next_saved = cursor.saved.filter(|_| site_answered && saved_left).map(|offset| offset + from_saved);
-        let next_ranked = cursor.ranked + from_rooms;
-        FeedPage {
+        let next_ranked = cursor.ranked.filter(|_| osu_answered).map(|offset| offset + from_rooms).filter(|&offset| offset < rooms.len());
+        let page = FeedPage {
             matches: saved,
             ranked_matches,
-            next: (next_saved.is_some() || next_ranked < rooms.len()).then_some(FeedCursor { saved: next_saved, ranked: next_ranked }),
-        }
+            next: (next_saved.is_some() || next_ranked.is_some()).then_some(FeedCursor { saved: next_saved, ranked: next_ranked }),
+        };
+        (page, osu_answered && (site_answered || key.is_empty()))
     }
 
     // Only the first page is cached: it is the one every visit to the Dashboard asks for.
     pub async fn feed(&self, auth: &AuthManager, settings: &SettingsStore, cursor: FeedCursor) -> FeedPage {
         let key = settings.read(|settings| settings.appSettings.ExportMatches.apikey.clone());
         if cursor != FIRST_PAGE {
-            return self.build_page(auth, &key, cursor).await;
+            return self.build_page(auth, &key, cursor).await.0;
         }
 
         let mut first_page = self.first_page.lock().await;
         if let Some(page) = Cached::fresh(&first_page, &key) {
             return page;
         }
-        let data = self.build_page(auth, &key, cursor).await;
-        *first_page = Some(Cached { key, at: Instant::now(), data: data.clone() });
+        let (data, complete) = self.build_page(auth, &key, cursor).await;
+        if complete {
+            *first_page = Some(Cached { key, at: Instant::now(), data: data.clone() });
+        }
         data
     }
 
@@ -446,8 +469,11 @@ impl Dashboard {
         }
 
         let ((site_status, stats), ranked, supporter) = tokio::join!(self.site_stats(&key), self.ranked(auth), self.supporter(auth));
-        let data = DashboardData { site_status, stats, ranked, supporter };
-        *cache = Some(Cached { key, at: Instant::now(), data: data.clone() });
+        let complete = ranked.is_ok() && site_status != SiteStatus::Unavailable;
+        let data = DashboardData { site_status, stats, ranked: ranked.ok().flatten(), supporter };
+        if complete {
+            *cache = Some(Cached { key, at: Instant::now(), data: data.clone() });
+        }
         data
     }
 }

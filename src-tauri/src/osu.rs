@@ -8,7 +8,7 @@ pub const OSU_API_URL: &str = "https://osu.ppy.sh/api/v2";
 const PAGE_SIZE: &str = "101";
 const TIMEOUT: Duration = Duration::from_secs(15);
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct RoomSummary {
     pub id: u64,
     #[serde(default)]
