@@ -239,6 +239,7 @@ export interface DashboardData {
   siteStatus: "ok" | "noKey" | "invalidKey" | "unavailable";
   stats: DashboardStats | null;
   ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number } | null;
+  supporter: { donations: number; total: number; lastDonatedAt: string } | null;
 }
 
 export interface FeedCursor {

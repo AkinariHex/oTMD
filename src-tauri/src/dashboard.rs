@@ -86,6 +86,20 @@ pub struct DashboardData {
     site_status: SiteStatus,
     stats: Option<Value>,
     ranked: Option<RankedSummary>,
+    supporter: Option<Supporter>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Supporter {
+    donations: u32,
+    total: f64,
+    last_donated_at: String,
+}
+
+#[derive(Deserialize)]
+struct SupporterReply {
+    supporter: Option<Supporter>,
 }
 
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -264,6 +278,15 @@ impl Dashboard {
         }
     }
 
+    async fn supporter(&self, auth: &AuthManager) -> Option<Supporter> {
+        let token = auth.access_token()?;
+        let response = self.http.get(format!("{}/api/app/supporter", self.site)).bearer_auth(token).send().await.ok()?;
+        if !response.status().is_success() {
+            return None;
+        }
+        response.json::<SupporterReply>().await.ok()?.supporter
+    }
+
     async fn ranked(&self, auth: &AuthManager) -> Option<RankedSummary> {
         let (token, user) = (auth.access_token()?, auth.user()?);
         let stats = self.osu.ranked_profile(&token, user.id).await.ok()?.stats?;
@@ -422,8 +445,8 @@ impl Dashboard {
             return data;
         }
 
-        let ((site_status, stats), ranked) = tokio::join!(self.site_stats(&key), self.ranked(auth));
-        let data = DashboardData { site_status, stats, ranked };
+        let ((site_status, stats), ranked, supporter) = tokio::join!(self.site_stats(&key), self.ranked(auth), self.supporter(auth));
+        let data = DashboardData { site_status, stats, ranked, supporter };
         *cache = Some(Cached { key, at: Instant::now(), data: data.clone() });
         data
     }

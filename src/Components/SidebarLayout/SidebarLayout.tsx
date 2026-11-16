@@ -5,7 +5,9 @@ import { NAV, NAV_GROUPS } from "@/Components/AppShell/nav";
 import Avatar from "@/Components/Avatar/Avatar";
 import VersionLabel from "@/Components/VersionLabel/VersionLabel";
 import WindowControls from "@/Components/WindowControls/WindowControls";
-import type { User } from "@/lib/api";
+import { Heart } from "lucide-react";
+import { toast } from "sonner";
+import { openExternal, type User } from "@/lib/api";
 import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +17,16 @@ interface SidebarLayoutProps {
   sources: number;
   children: ReactNode;
 }
+
+const DONATE_URL = "https://ko-fi.com/Akinari";
+
+const openDonate = async () => {
+  try {
+    await openExternal(DONATE_URL);
+  } catch {
+    toast.error("Couldn't open the browser");
+  }
+};
 
 function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps) {
   const navigate = useNavigate();
@@ -80,6 +92,14 @@ function SidebarLayout({ user, version, sources, children }: SidebarLayoutProps)
         >
           <span className={cn("size-2 shrink-0 rounded-full", sources > 0 ? "bg-win" : "bg-ink-3")} />
           {sources} {sources === 1 ? "source" : "sources"} connected
+        </button>
+        <button
+          type="button"
+          onClick={openDonate}
+          className="mx-2 flex h-7 items-center gap-2 rounded-md px-2 text-xs text-ink-2 transition-colors duration-150 hover:bg-white/5 hover:text-ink"
+        >
+          <Heart size={14} strokeWidth={1.75} />
+          Support o!TMD
         </button>
         <VersionLabel version={version} />
       </aside>

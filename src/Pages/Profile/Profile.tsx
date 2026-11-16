@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Avatar from "@/Components/Avatar/Avatar";
 import RecentMatches from "@/Components/RecentMatches/RecentMatches";
+import SupporterChip from "@/Components/SupporterChip/SupporterChip";
 import { Button } from "@/Components/ui/button";
 import { Skeleton } from "@/Components/ui/skeleton";
 import * as api from "@/lib/api";
@@ -83,6 +84,7 @@ function Profile({ user }: { user: api.User | null }) {
 
   const stats = data?.stats ?? null;
   const ranked = data?.ranked ?? null;
+  const supporter = data?.supporter ?? null;
   const duels = stats ? stats.oneVsOne.wins + stats.oneVsOne.losses : 0;
   const siteMessage = data && data.siteStatus !== "ok" ? SITE_MESSAGES[data.siteStatus] : null;
 
@@ -96,6 +98,7 @@ function Profile({ user }: { user: api.User | null }) {
             <div className="flex items-center gap-2">
               <h1 className="truncate text-lg font-semibold tracking-tight text-ink">{user.username}</h1>
               <img src={`${FLAGS_URL}/${user.country}.png`} alt={user.country} className="h-3.5 w-auto" />
+              {supporter && <SupporterChip supporter={supporter} />}
             </div>
           ) : (
             <Skeleton className="h-6 w-40" />
