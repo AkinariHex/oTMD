@@ -1,8 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import Avatar from "@/Components/Avatar/Avatar";
+import MatchStats from "@/Components/MatchStats/MatchStats";
 import RankedTier from "@/Components/RankedTier/RankedTier";
 import RecentMatches from "@/Components/RecentMatches/RecentMatches";
 import SupporterChip from "@/Components/SupporterChip/SupporterChip";
@@ -39,19 +40,6 @@ function StatTile({ label, value, detail, loading }: { label: string; value: str
       )}
     </div>
   );
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex min-h-0 flex-col gap-1">
-      <h2 className="text-xs font-medium text-ink-3">{title}</h2>
-      <div className="divide-y divide-line">{children}</div>
-    </section>
-  );
-}
-
-function EmptyLine({ children }: { children: ReactNode }) {
-  return <p className="py-2 text-xs text-ink-3">{children}</p>;
 }
 
 function Profile({ user }: { user: api.User | null }) {
@@ -146,16 +134,7 @@ function Profile({ user }: { user: api.User | null }) {
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_280px] grid-rows-[minmax(0,1fr)] gap-6">
         <RecentMatches />
 
-        <Section title="Top tournaments">
-          {stats?.topTournaments.map((tournament) => (
-            <div key={tournament.acronym} className="flex h-9 items-center justify-between gap-2 text-xs">
-              <span className="min-w-0 truncate font-medium text-ink">{tournament.name || tournament.acronym}</span>
-              <span className="shrink-0 tabular-nums text-ink-3">{tournament.count}</span>
-            </div>
-          ))}
-          {loading && [0, 1, 2].map((row) => <Skeleton key={row} className="my-2.5 h-4" />)}
-          {!loading && (!stats || stats.topTournaments.length === 0) && <EmptyLine>No tournaments yet.</EmptyLine>}
-        </Section>
+        <MatchStats stats={stats} ranked={ranked} loading={loading} />
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ pub struct RankedSummary {
     rooms: Vec<RankedCard>,
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct RankedPlayer {
     id: u64,
@@ -55,7 +55,7 @@ struct RankedPlayer {
     rounds_won: u32,
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct RankedRound {
     round: usize,
@@ -73,7 +73,7 @@ struct RankedRound {
 }
 
 // Players are always [me, opponent], so a side index means the same thing everywhere.
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RankedCard {
     room_id: u64,
@@ -154,6 +154,37 @@ pub struct TournamentProposal {
     acronym: String,
     name: String,
     link: String,
+}
+
+// Finished rooms never change, so their cards survive restarts. Bump the version when card building changes.
+const CARDS_FILE: &str = "ranked-cards.json";
+const CARDS_VERSION: u32 = 1;
+const TOP_OPPONENTS: usize = 8;
+
+#[derive(Serialize, Deserialize)]
+struct StoredCards {
+    version: u32,
+    rules: RankedRules,
+    cards: HashMap<u64, Option<RankedCard>>,
+}
+
+fn read_cards(data_dir: &std::path::Path, rules: &RankedRules) -> HashMap<u64, Option<RankedCard>> {
+    std::fs::read(data_dir.join(CARDS_FILE))
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<StoredCards>(&bytes).ok())
+        .filter(|stored| stored.version == CARDS_VERSION && stored.rules == *rules)
+        .map(|stored| stored.cards)
+        .unwrap_or_default()
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Opponent {
+    id: u64,
+    username: String,
+    matches: u32,
+    wins: u32,
+    losses: u32,
 }
 
 pub struct Dashboard {
@@ -358,6 +389,10 @@ impl Dashboard {
             return Vec::new();
         };
         let mut finished = self.finished_rooms.lock().await;
+        let rules = saved_rules(&self.data_dir);
+        if finished.is_empty() {
+            *finished = read_cards(&self.data_dir, &rules);
+        }
 
         // A few at a time: a fresh page of 20 rooms must not hit osu! as one burst.
         let missing: Vec<u64> = rooms.iter().copied().filter(|id| !finished.contains_key(id)).collect();
@@ -371,18 +406,26 @@ impl Dashboard {
             spawn(&mut requests, id);
         }
 
-        let rules = saved_rules(&self.data_dir);
         let mut stop = false;
+        let mut added = false;
         while let Some(done) = requests.join_next().await {
             match done {
                 Ok((id, Ok(events))) if is_finished(&events) => {
                     finished.insert(id, ranked_card(&rules, user.id, id, &events));
+                    added = true;
                 }
                 Ok((_, Err(OsuError::RateLimited(_) | OsuError::Unauthorized))) => stop = true,
                 _ => {}
             }
             if !stop && let Some(id) = pending.next() {
                 spawn(&mut requests, id);
+            }
+        }
+
+        if added {
+            let stored = StoredCards { version: CARDS_VERSION, rules, cards: finished.clone() };
+            if let Ok(bytes) = serde_json::to_vec(&stored) {
+                let _ = std::fs::write(self.data_dir.join(CARDS_FILE), bytes);
             }
         }
 
@@ -481,6 +524,27 @@ impl Dashboard {
     }
 
     // Runs only while the page is open, and the cache keeps page changes from refetching.
+    // Everyone met in Ranked Play, most matches first. The first call reads every room once; later ones come from disk.
+    pub async fn opponents(&self, auth: &AuthManager) -> Result<Vec<Opponent>, String> {
+        let rooms = self.played_rooms(auth).await.ok_or("osu! did not answer. Try again in a moment.")?;
+        let ids: Vec<u64> = rooms.iter().map(|room| room.id).collect();
+        let mut by_id: HashMap<u64, Opponent> = HashMap::new();
+        for card in self.ranked_cards(auth, &ids).await {
+            let player = &card.players[1];
+            let entry = by_id.entry(player.id).or_insert_with(|| Opponent { id: player.id, username: player.username.clone(), matches: 0, wins: 0, losses: 0 });
+            entry.matches += 1;
+            match card.winner {
+                Some(0) => entry.wins += 1,
+                Some(_) => entry.losses += 1,
+                None => {}
+            }
+        }
+        let mut opponents: Vec<Opponent> = by_id.into_values().collect();
+        opponents.sort_by(|first, second| second.matches.cmp(&first.matches).then(second.wins.cmp(&first.wins)).then(first.username.cmp(&second.username)));
+        opponents.truncate(TOP_OPPONENTS);
+        Ok(opponents)
+    }
+
     pub async fn get(&self, auth: &AuthManager, settings: &SettingsStore) -> DashboardData {
         let key = settings.read(|settings| settings.appSettings.ExportMatches.apikey.clone());
         let mut cache = self.cache.lock().await;
@@ -518,7 +582,7 @@ mod tests {
     }
 
     fn rooms(dates: &[&str]) -> Vec<RoomSummary> {
-        dates.iter().enumerate().map(|(index, date)| RoomSummary { id: index as u64, starts_at: None, ends_at: Some((*date).into()) }).collect()
+        dates.iter().enumerate().map(|(index, date)| RoomSummary { id: index as u64, ends_at: Some((*date).into()) }).collect()
     }
 
     #[test]

@@ -3,7 +3,7 @@ import RankedRecord from "@/Components/RankedRecord/RankedRecord";
 import RatingChart from "@/Components/RatingChart/RatingChart";
 import { Skeleton } from "@/Components/ui/skeleton";
 import type { DashboardData } from "@/lib/api";
-import { addRankedRooms } from "@/lib/rankedRooms";
+import { addRankedRooms, setRatingHistory } from "@/lib/rankedRooms";
 
 const BADGES = Object.fromEntries(
   Object.entries(import.meta.glob<string>("@/Images/ranked-tiers/*.png", { eager: true, import: "default" })).map(([path, url]) => [path.split("/").pop()!.replace(".png", ""), url]),
@@ -45,7 +45,10 @@ PREVIEW.push({ rating: 1000, rank: -1, provisional: true });
 
 export default function RankedTier({ ranked, loading }: { ranked: Ranked | null; loading: boolean }) {
   const [preview, setPreview] = useState(-1);
-  useEffect(() => addRankedRooms(ranked?.rooms ?? []), [ranked]);
+  useEffect(() => {
+    addRankedRooms(ranked?.rooms ?? []);
+    setRatingHistory(ranked?.history ?? []);
+  }, [ranked]);
   const shown = preview >= 0 ? { ...ranked, ...PREVIEW[preview] } : ranked;
   const placed = shown?.rating != null && !shown.provisional && shown.rank != null && shown.rank !== -1;
   const tier = placed ? tierOf(shown.rating!) : null;

@@ -201,6 +201,7 @@ pub fn run() {
             commands::get_overlay_sources,
             commands::get_dashboard,
             commands::get_match_feed,
+            commands::get_opponents,
             commands::get_system_fonts,
             commands::get_popular_fonts,
             commands::get_tournaments,

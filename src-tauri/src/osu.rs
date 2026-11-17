@@ -12,8 +12,6 @@ const TIMEOUT: Duration = Duration::from_secs(15);
 pub struct RoomSummary {
     pub id: u64,
     #[serde(default)]
-    pub starts_at: Option<String>,
-    #[serde(default)]
     pub ends_at: Option<String>,
 }
 

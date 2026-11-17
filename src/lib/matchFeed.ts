@@ -1,3 +1,4 @@
+import { Handshake, Swords, Trophy, type LucideIcon } from "lucide-react";
 import type { MatchSide, RankedMatch, SavedMatch, SideIndex } from "@/lib/api";
 
 interface FeedEntry {
@@ -59,3 +60,16 @@ export function buildFeed(saved: SavedMatch[], ranked: RankedMatch[]): FeedItem[
   const items = [...saved.filter((match) => Array.isArray(match.sides)).map(savedItem), ...ranked.map(rankedItem)];
   return items.sort((first, second) => timeOf(second) - timeOf(first));
 }
+
+export type MatchKind = "ranked" | "friendly" | "saved";
+
+export const KIND: Record<MatchKind, { label: string; icon: LucideIcon; text: string; bg: string }> = {
+  ranked: { label: "Ranked Play", icon: Swords, text: "text-accent", bg: "bg-accent" },
+  friendly: { label: "Friendly Ranked", icon: Handshake, text: "text-heart", bg: "bg-heart" },
+  saved: { label: "Saved Match", icon: Trophy, text: "text-(--tier-patron)", bg: "bg-(--tier-patron)" },
+};
+
+// ponytail: osu! exposes no field that tells a friendly duel from a ranked room yet, so every room counts as ranked until one is found.
+const isFriendly = (_item: RankedFeedItem): boolean => false;
+
+export const kindOf = (item: FeedItem): MatchKind => (item.kind === "saved" ? "saved" : isFriendly(item) ? "friendly" : "ranked");

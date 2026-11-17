@@ -1,21 +1,15 @@
 import { memo, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Trophy } from "lucide-react";
 import Avatar from "@/Components/Avatar/Avatar";
-import HealthBar from "@/Components/HealthBar/HealthBar";
 import RankedRounds from "@/Components/RankedRounds/RankedRounds";
-import TournamentChip from "@/Components/TournamentChip/TournamentChip";
-import type { MatchSide, SideIndex } from "@/lib/api";
-import type { FeedItem, RankedFeedItem, SavedFeedItem } from "@/lib/matchFeed";
+import type { MatchSide } from "@/lib/api";
+import { KIND, kindOf, type FeedItem, type SavedFeedItem } from "@/lib/matchFeed";
+import { useRatingChange } from "@/lib/rankedRooms";
 import { cn } from "@/lib/utils";
 
-const dates = new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" });
-const FADE_TO_BOTTOM = "[mask-image:linear-gradient(to_bottom,black_20%,transparent)]";
-const SLANT = 12;
-
-function formatDate(value: string): string {
-  const time = Date.parse(value);
-  return Number.isNaN(time) ? "" : dates.format(time);
-}
+const time = new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit" });
+const signed = new Intl.NumberFormat("en-US", { signDisplay: "exceptZero" });
+const SLANT = 10;
 
 // Banners are URLs typed by tournament hosts, so anything that could reach the local network is refused.
 function safeBanner(value: string | null): string | null {
@@ -41,95 +35,61 @@ function sliceStyle(index: number, count: number): CSSProperties {
   };
 }
 
-function MapSlices({ covers }: { covers: string[] }) {
-  return (
-    <span aria-hidden="true" className={cn("absolute inset-0 opacity-70", FADE_TO_BOTTOM)}>
-      {covers.map((cover, index) => (
-        <span key={index} data-map-slice className="absolute inset-y-0" style={sliceStyle(index, covers.length)}>
-          <img src={cover} alt="" loading="lazy" draggable={false} className="size-full object-cover" />
-        </span>
-      ))}
-    </span>
-  );
-}
+const IMAGE = "size-full object-cover opacity-45 transition-opacity duration-150 ease-out group-hover:opacity-60";
 
-function nameTone(winner: boolean): string {
-  return winner ? "font-semibold text-ink" : "font-medium text-ink-2";
-}
-
-function scoreTone(item: FeedItem, index: SideIndex): string {
-  if (item.winner !== index) return "text-ink-2";
-  if (item.won === null) return "text-ink";
-  return item.won ? "text-win" : "text-loss";
-}
-
-function Score({ item, size, dash }: { item: FeedItem; size: string; dash: string }) {
-  return (
-    <span className={cn("flex items-center gap-1.5 leading-none font-bold tabular-nums", size)}>
-      <span className={scoreTone(item, 0)}>{item.sides[0].score}</span>
-      <span className={cn("font-medium text-ink-3", dash)}>-</span>
-      <span className={scoreTone(item, 1)}>{item.sides[1].score}</span>
-    </span>
-  );
-}
-
-function RankedHeadSide({ item, index }: { item: RankedFeedItem; index: SideIndex }) {
-  const { match } = item;
-  const player = match.players[index];
-  const final = match.rounds[match.rounds.length - 1];
-
-  return (
-    <span className="flex min-w-0 flex-col gap-1">
-      <span className={cn("flex min-w-0 items-center gap-1.5 text-sm", nameTone(item.winner === index), index === 1 && "flex-row-reverse")}>
-        <Avatar userId={player.id} username={player.username} size={22} />
-        <span title={player.username} className="min-w-0 truncate">
-          {player.username}
-        </span>
-      </span>
-      <span className="px-1">
-        <HealthBar life={final.life[index]} maxLife={match.maxLife} side={index} height={14} />
-      </span>
-    </span>
-  );
-}
-
-function SavedSideName({ side, winner, align }: { side: MatchSide; winner: boolean; align: "left" | "right" }) {
-  return (
-    <span title={side.name} className={cn("block min-w-0 truncate text-sm", nameTone(winner), align === "right" ? "text-right" : "text-left")}>
-      {side.name}
-    </span>
-  );
-}
-
-function CardHead({ item, open, expandable }: { item: FeedItem; open: boolean; expandable: boolean }) {
+// The maps (or the tournament banner) fill the whole card behind a scrim that keeps the text readable.
+function Backdrop({ item }: { item: FeedItem }) {
+  const covers = item.kind === "ranked" ? item.match.rounds.flatMap((round) => (round.cover ? [round.cover] : [])) : [];
   const banner = safeBanner(item.banner);
-  const details = [item.stage, formatDate(item.date)].filter(Boolean).join(" - ");
 
   return (
     <>
-      {item.kind === "ranked" && <MapSlices covers={item.match.rounds.flatMap((round) => (round.cover ? [round.cover] : []))} />}
-      {banner && <img src={banner} alt="" loading="lazy" draggable={false} referrerPolicy="no-referrer" className={cn("absolute inset-0 size-full object-cover opacity-70", FADE_TO_BOTTOM)} />}
-      <span className="relative flex items-center gap-2 px-3 pt-2 text-xs">
-        <TournamentChip full={item.title} short={item.acronym} />
-        <span className="shrink-0 rounded bg-black/55 px-1.5 py-0.5 whitespace-nowrap text-ink-2 backdrop-blur-sm">{details}</span>
-      </span>
-      <span className="relative flex items-center gap-2 px-3 pt-5 pb-2.5">
-        {item.kind === "ranked" ? (
-          <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3">
-            <RankedHeadSide item={item} index={0} />
-            <Score item={item} size="text-2xl" dash="text-base" />
-            <RankedHeadSide item={item} index={1} />
+      <span aria-hidden="true" className="absolute inset-0">
+        {covers.map((cover, index) => (
+          <span key={index} className="absolute inset-y-0" style={sliceStyle(index, covers.length)}>
+            <img src={cover} alt="" loading="lazy" draggable={false} className={IMAGE} />
           </span>
-        ) : (
-          <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
-            <SavedSideName side={item.sides[0]} winner={item.winner === 0} align="right" />
-            <Score item={item} size="text-3xl" dash="text-lg" />
-            <SavedSideName side={item.sides[1]} winner={item.winner === 1} align="left" />
+        ))}
+        {covers.length === 0 && banner && <img src={banner} alt="" loading="lazy" draggable={false} referrerPolicy="no-referrer" className={IMAGE} />}
+        {covers.length === 0 && !banner && (
+          <span className="flex size-full items-center justify-end gap-1.5 bg-gradient-to-l from-(--tier-patron)/15 to-transparent pr-10 text-(--tier-patron)">
+            <Trophy size={14} strokeWidth={1.75} />
+            <span className="text-sm font-bold tracking-tight">{item.acronym}</span>
           </span>
         )}
-        <ChevronDown aria-hidden="true" size={14} strokeWidth={1.75} className={cn("shrink-0 text-ink-2 transition-transform duration-200 ease-out", open && "rotate-180", !expandable && "invisible")} />
       </span>
+      <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-app/95 via-app/70 to-app/10" />
     </>
+  );
+}
+
+function EntryText({ item }: { item: FeedItem }) {
+  const kind = KIND[kindOf(item)];
+  const ratingChange = useRatingChange(item.kind === "ranked" ? item.match.roomId : null);
+  const result = item.won === null ? "none" : item.won ? "win" : "loss";
+  const opponent = item.kind === "ranked" ? `vs ${item.match.players[1].username}` : `${item.sides[0].name} vs ${item.sides[1].name}`;
+  const date = Date.parse(item.date);
+
+  return (
+    <span className="relative min-w-0 flex-1">
+      <span className="flex items-baseline gap-2">
+        <span className={cn("shrink-0 text-sm font-semibold", result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-ink-2")}>
+          {result === "win" ? "Victory" : result === "loss" ? "Defeat" : "Finished"}
+        </span>
+        <span title={opponent} className="min-w-0 truncate text-sm text-ink">
+          {opponent}
+        </span>
+        <span className="shrink-0 text-sm font-bold tabular-nums text-ink-2">
+          {item.sides[0].score}-{item.sides[1].score}
+        </span>
+      </span>
+      <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-caption text-ink-3">
+        <span className={cn("truncate", kind.text)}>{item.kind === "saved" ? item.title : kind.label}</span>
+        {item.stage && <span className="shrink-0">{item.stage}</span>}
+        {!Number.isNaN(date) && <span className="shrink-0">{time.format(date)}</span>}
+        {ratingChange !== null && <span className={cn("shrink-0 font-semibold tabular-nums", ratingChange >= 0 ? "text-win" : "text-loss")}>{signed.format(ratingChange)}</span>}
+      </span>
+    </span>
   );
 }
 
@@ -173,6 +133,9 @@ function Collapse({ open, id, children }: { open: boolean; id: string; children:
 
 const canExpand = (item: FeedItem): boolean => item.kind === "ranked" || item.sides.some((side) => side.players.length > 0);
 
+// The header is h-16: the timeline node in RecentMatches sits on its middle.
+const HEADER = "group relative flex h-16 w-full items-center gap-3 overflow-hidden px-3 text-left";
+
 function MatchCard({ item, open, onToggle }: { item: FeedItem; open: boolean; onToggle: (id: string) => void }) {
   const expandable = canExpand(item);
   const panelId = `panel-${item.id}`;
@@ -182,16 +145,21 @@ function MatchCard({ item, open, onToggle }: { item: FeedItem; open: boolean; on
 
   if (!expandable) {
     return (
-      <article className="relative overflow-hidden rounded-lg bg-black/20 ring-1 ring-line">
-        <CardHead item={item} open={false} expandable={false} />
+      <article className="overflow-hidden rounded-lg bg-white/4 ring-1 ring-line">
+        <div className={HEADER}>
+          <Backdrop item={item} />
+          <EntryText item={item} />
+        </div>
       </article>
     );
   }
 
   return (
-    <article className="overflow-hidden rounded-lg bg-black/20 ring-1 ring-line">
-      <button type="button" aria-expanded={open} aria-controls={panelId} onClick={() => onToggle(item.id)} className="relative block w-full outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-inset">
-        <CardHead item={item} open={open} expandable />
+    <article className="overflow-hidden rounded-lg bg-white/4 ring-1 ring-line">
+      <button type="button" aria-expanded={open} aria-controls={panelId} onClick={() => onToggle(item.id)} className={cn(HEADER, "outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-inset")}>
+        <Backdrop item={item} />
+        <EntryText item={item} />
+        <ChevronDown aria-hidden="true" size={14} strokeWidth={1.75} className={cn("relative shrink-0 text-ink-2 transition-transform duration-200 ease-out", open && "rotate-180")} />
       </button>
       <Collapse open={open} id={panelId}>
         {panelRendered && <div className="border-t border-line">{item.kind === "ranked" ? <RankedRounds match={item.match} /> : <Rosters item={item} />}</div>}

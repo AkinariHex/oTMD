@@ -185,7 +185,8 @@ export const onOverlayChanged = (listener: (sources: OverlaySources) => void): (
 export interface DashboardStats {
   totals: { all: number; oneVsOne: number; teamVS: number; qualifiers: number };
   oneVsOne: { wins: number; losses: number };
-  topTournaments: { acronym: string; name: string; count: number }[];
+  // wins and losses only when the site sends them.
+  topTournaments: { acronym: string; name: string; count: number; wins?: number; losses?: number }[];
 }
 
 export type SideIndex = 0 | 1;
@@ -284,6 +285,16 @@ export const proposeTournament = (proposal: TournamentEntry & { link: string }):
 export const onSettingsReplaced = (listener: () => void): (() => void) => subscribe("settings-replaced", listener);
 
 export const getDashboard = (): Promise<DashboardData> => invoke("get_dashboard");
+
+export interface Opponent {
+  id: number;
+  username: string;
+  matches: number;
+  wins: number;
+  losses: number;
+}
+
+export const getOpponents = (): Promise<Opponent[]> => invoke("get_opponents");
 
 export const getRankedStatus = (): Promise<RankedStatus> => invoke("get_ranked_status");
 

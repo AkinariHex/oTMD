@@ -151,6 +151,11 @@ pub async fn get_dashboard(state: State<'_, AppState>) -> Result<DashboardData, 
 }
 
 #[tauri::command]
+pub async fn get_opponents(state: State<'_, AppState>) -> Result<Vec<crate::dashboard::Opponent>, String> {
+    state.dashboard.opponents(&state.auth).await
+}
+
+#[tauri::command]
 pub async fn get_match_feed(state: State<'_, AppState>, cursor: FeedCursor) -> Result<FeedPage, String> {
     Ok(state.dashboard.feed(&state.auth, &state.settings, cursor).await)
 }
