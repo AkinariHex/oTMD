@@ -99,6 +99,7 @@ pub struct RankedStats {
     pub rating: Option<i64>,
     pub plays: i64,
     pub first_placements: i64,
+    pub provisional: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -224,6 +225,7 @@ impl OsuClient {
                 rating: stats["rating"].as_i64(),
                 plays: stats["plays"].as_i64().unwrap_or(0),
                 first_placements: stats["first_placements"].as_i64().unwrap_or(0),
+                provisional: stats["is_rating_provisional"].as_bool().unwrap_or(false),
             }),
         })
     }

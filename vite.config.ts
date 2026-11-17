@@ -10,7 +10,7 @@ export default defineConfig({
   clearScreen: false,
   // The CSP allows fonts from 'self' only, so small font files must not become data: URIs.
   build: { assetsInlineLimit: 0 },
-  server: { port: 1420, strictPort: true },
+  server: { port: 1430, strictPort: true },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },

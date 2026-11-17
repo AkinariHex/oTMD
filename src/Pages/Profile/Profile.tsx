@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Avatar from "@/Components/Avatar/Avatar";
+import RankedTier from "@/Components/RankedTier/RankedTier";
 import RecentMatches from "@/Components/RecentMatches/RecentMatches";
 import SupporterChip from "@/Components/SupporterChip/SupporterChip";
 import { Button } from "@/Components/ui/button";
@@ -113,7 +114,7 @@ function Profile({ user }: { user: api.User | null }) {
       <div className="grid shrink-0 grid-cols-4 gap-3">
         <StatTile label="Saved matches" value={stats ? numbers.format(stats.totals.all) : "-"} detail={stats ? `${stats.totals.teamVS} team, ${stats.totals.qualifiers} qualifiers` : "On otmd.app"} loading={loading} />
         <StatTile label="1vs1 win rate" value={stats ? percentOf(stats.oneVsOne.wins, duels) : "-"} detail={stats ? `${stats.oneVsOne.wins} wins, ${stats.oneVsOne.losses} losses` : "Saved 1vs1 matches"} loading={loading} />
-        <StatTile label="Ranked rating" value={ranked?.rating != null ? numbers.format(ranked.rating) : "-"} detail={ranked?.rank != null ? `#${numbers.format(ranked.rank)}` : "Ranked Play"} loading={loading} />
+        <RankedTier ranked={ranked} loading={loading} />
         <StatTile label="Ranked win rate" value={ranked ? percentOf(ranked.firstPlacements, ranked.plays) : "-"} detail={ranked ? `${ranked.firstPlacements} wins in ${ranked.plays} plays` : "Ranked Play"} loading={loading} />
       </div>
 

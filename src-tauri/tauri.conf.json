@@ -6,7 +6,7 @@
   "identifier": "com.akinari.osu-tourney-match-displayer",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:1430",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },

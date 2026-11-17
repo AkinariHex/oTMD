@@ -43,6 +43,7 @@ pub struct RankedSummary {
     rating: Option<i64>,
     plays: i64,
     first_placements: i64,
+    provisional: bool,
 }
 
 #[derive(Clone, Serialize)]
@@ -301,6 +302,7 @@ impl Dashboard {
             rating: stats.rating,
             plays: stats.plays,
             first_placements: stats.first_placements,
+            provisional: stats.provisional,
         }))
     }
 

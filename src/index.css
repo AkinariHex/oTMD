@@ -48,6 +48,13 @@
   --tier-patron: oklch(0.84 0.11 75);
   --tier-champion: oklch(0.83 0.1 195);
   --tier-legend: oklch(0.78 0.15 300);
+  --ranked-bronze: oklch(0.683 0.058 48.4), oklch(0.513 0.063 48);
+  --ranked-silver: oklch(0.91 0.015 286.1), oklch(0.726 0.045 285.2);
+  --ranked-gold: oklch(0.914 0.078 98.2), oklch(0.833 0.139 98.3);
+  --ranked-platinum: oklch(0.908 0.071 194.9), oklch(0.831 0.12 194.4);
+  --ranked-rhodium: oklch(0.947 0.059 140.6), oklch(0.807 0.093 140.1);
+  --ranked-radiant: oklch(0.861 0.085 231), oklch(0.769 0.201 321.7);
+  --ranked-lustrous: oklch(0.917 0.192 101.4), oklch(0.769 0.201 321.7);
   --health-red-high: oklch(0.59 0.195 9.3);
   --health-red-mid: oklch(0.471 0.166 4.2);
   --health-red-low: oklch(0.336 0.134 14.5);
@@ -447,3 +454,17 @@ input::-webkit-inner-spin-button {
     animation: none !important;
   }
 }
+
+/* Ranked Play rank number, gradient per tier like osu-web's rank-value. */
+.ranked-rank {
+  background-image: linear-gradient(var(--ranked));
+  background-clip: text;
+  color: transparent;
+}
+.ranked-rank[data-tier="bronze"] { --ranked: var(--ranked-bronze); }
+.ranked-rank[data-tier="silver"] { --ranked: var(--ranked-silver); }
+.ranked-rank[data-tier="gold"] { --ranked: var(--ranked-gold); }
+.ranked-rank[data-tier="platinum"] { --ranked: var(--ranked-platinum); }
+.ranked-rank[data-tier="rhodium"] { --ranked: var(--ranked-rhodium); }
+.ranked-rank[data-tier="radiant"] { --ranked: var(--ranked-radiant); }
+.ranked-rank[data-tier="lustrous"] { --ranked: var(--ranked-lustrous); }
