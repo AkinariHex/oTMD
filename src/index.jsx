@@ -5,7 +5,10 @@ import "./index.css";
 import App from "./App";
 import MotionProvider from "./Components/MotionProvider/MotionProvider";
 import * as api from "@/lib/api";
+import { lockDownWebview } from "@/lib/lockdown";
 import { applyPreferences } from "@/lib/preferences";
+
+if (!import.meta.env.DEV) lockDownWebview();
 
 const start = async () => {
   try {
