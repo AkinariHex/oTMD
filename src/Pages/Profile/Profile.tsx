@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import Avatar from "@/Components/Avatar/Avatar";
 import RankedTier from "@/Components/RankedTier/RankedTier";
@@ -7,6 +8,7 @@ import RecentMatches from "@/Components/RecentMatches/RecentMatches";
 import SupporterChip from "@/Components/SupporterChip/SupporterChip";
 import { Button } from "@/Components/ui/button";
 import { Skeleton } from "@/Components/ui/skeleton";
+import { Tooltip } from "@/Components/ui/tooltip";
 import * as api from "@/lib/api";
 
 const FLAGS_URL = "https://raw.githubusercontent.com/ppy/osu-resources/master/osu.Game.Resources/Textures/Flags";
@@ -92,30 +94,44 @@ function Profile({ user }: { user: api.User | null }) {
   return (
     // The list runs to the edge of the app, so the page entrance would otherwise flash a scrollbar.
     <div data-fills-page className="flex h-full min-h-0 flex-col gap-4">
-      <header data-tauri-drag-region className="flex shrink-0 items-center gap-4 pr-(--window-controls-inset)">
+      <header data-tauri-drag-region className="flex shrink-0 items-center gap-4">
         {user ? <Avatar userId={user.id} username={user.username} size={56} /> : <Skeleton className="size-14 shrink-0 rounded-full" />}
         <div className="min-w-0 flex-1">
           {user ? (
             <div className="flex items-center gap-2">
               <h1 className="truncate text-lg font-semibold tracking-tight text-ink">{user.username}</h1>
               <img src={`${FLAGS_URL}/${user.country}.png`} alt={user.country} className="h-3.5 w-auto" />
-              {supporter && <SupporterChip supporter={supporter} />}
             </div>
           ) : (
             <Skeleton className="h-6 w-40" />
           )}
-          {status?.enabled && <p className="text-xs text-ink-3">Tracking ranked play</p>}
+          <div className="mt-1 flex items-center gap-2">
+            {supporter && <SupporterChip supporter={supporter} />}
+            {status?.enabled && <span className="text-xs text-ink-3">Tracking ranked play</span>}
+          </div>
         </div>
-        <Button tone="danger" disabled={isLoggingOut} onClick={() => void logout()}>
-          Log out
-        </Button>
+        {/* Bottom aligned so it clears the window controls above it. */}
+        <div className="self-end">
+          <Tooltip content="Log out of o!TMD">
+            <button
+              type="button"
+              aria-label="Log out"
+              disabled={isLoggingOut}
+              onClick={() => void logout()}
+              className="flex size-7 items-center justify-center rounded-md text-ink-3 transition-[background-color,color,transform] duration-150 ease-out outline-none hover:bg-loss/15 hover:text-loss focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.97] disabled:opacity-50"
+            >
+              <LogOut size={14} strokeWidth={1.75} />
+            </button>
+          </Tooltip>
+        </div>
       </header>
 
       <div className="grid shrink-0 grid-cols-4 gap-3">
-        <StatTile label="Saved matches" value={stats ? numbers.format(stats.totals.all) : "-"} detail={stats ? `${stats.totals.teamVS} team, ${stats.totals.qualifiers} qualifiers` : "On otmd.app"} loading={loading} />
-        <StatTile label="1vs1 win rate" value={stats ? percentOf(stats.oneVsOne.wins, duels) : "-"} detail={stats ? `${stats.oneVsOne.wins} wins, ${stats.oneVsOne.losses} losses` : "Saved 1vs1 matches"} loading={loading} />
+        <div className="grid gap-3">
+          <StatTile label="Saved matches" value={stats ? numbers.format(stats.totals.all) : "-"} detail={stats ? `${stats.totals.teamVS} team, ${stats.totals.qualifiers} qualifiers` : "On otmd.app"} loading={loading} />
+          <StatTile label="1vs1 win rate" value={stats ? percentOf(stats.oneVsOne.wins, duels) : "-"} detail={stats ? `${stats.oneVsOne.wins} wins, ${stats.oneVsOne.losses} losses` : "Saved 1vs1 matches"} loading={loading} />
+        </div>
         <RankedTier ranked={ranked} loading={loading} />
-        <StatTile label="Ranked win rate" value={ranked ? percentOf(ranked.firstPlacements, ranked.plays) : "-"} detail={ranked ? `${ranked.firstPlacements} wins in ${ranked.plays} plays` : "Ranked Play"} loading={loading} />
       </div>
 
       {siteMessage && (

@@ -236,10 +236,18 @@ export interface RankedMatch {
   rounds: RankedMatchRound[];
 }
 
+// Newest first, at most ten.
+export interface RankedResult {
+  roomId: number;
+  result: "win" | "loss" | "draw";
+  ratingAfter: number;
+  date: string;
+}
+
 export interface DashboardData {
   siteStatus: "ok" | "noKey" | "invalidKey" | "unavailable";
   stats: DashboardStats | null;
-  ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number; provisional: boolean } | null;
+  ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number; provisional: boolean; history: RankedResult[] } | null;
   supporter: { donations: number; total: number; lastDonatedAt: string } | null;
 }
 

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
+import RankedRecord from "@/Components/RankedRecord/RankedRecord";
+import RatingChart from "@/Components/RatingChart/RatingChart";
 import { Skeleton } from "@/Components/ui/skeleton";
 import type { DashboardData } from "@/lib/api";
 
@@ -22,60 +24,104 @@ export function tierOf(rating: number): { id: string; title: string; image: stri
   return { id: tier.toLowerCase(), title: `${tier} ${division}`, image: badge(`${tier}-${division}`) };
 }
 
-// Dev only: clicking the card cycles every tier, then placements, then the real data.
-const PREVIEW: Ranked[] = [...Array.from({ length: 19 }, (_, step) => 600 + step * 100), 2400].map((rating, index) => ({
+// Platinum and up: rising specks. Radiant and Lustrous: a glint across the badge.
+const MOTE_COUNT: Record<string, number> = { platinum: 3, rhodium: 4, radiant: 6, lustrous: 12 };
+const GLINT = new Set(["radiant", "lustrous"]);
+// Fixed spread so the specks never clump.
+const MOTES = Array.from({ length: 12 }, (_, index) => ({
+  left: `${12 + ((index * 37) % 76)}%`,
+  delay: `${(index * 0.61) % 3.6}s`,
+  drift: `${((index * 13) % 17) - 8}px`,
+}));
+
+// Dev only: clicking the badge cycles every tier, then placements, then the real data.
+const PREVIEW = [...Array.from({ length: 19 }, (_, step) => 600 + step * 100), 2400].map((rating, index) => ({
   rating,
   rank: 1000 - index * 50,
-  plays: 0,
-  firstPlacements: 0,
   provisional: false,
 }));
-PREVIEW.push({ rating: 1000, rank: -1, plays: 0, firstPlacements: 0, provisional: true });
+PREVIEW.push({ rating: 1000, rank: -1, provisional: true });
 
-export default function RankedTier({ ranked: real, loading }: { ranked: Ranked | null; loading: boolean }) {
+export default function RankedTier({ ranked, loading }: { ranked: Ranked | null; loading: boolean }) {
   const [preview, setPreview] = useState(-1);
-  const ranked = preview >= 0 ? PREVIEW[preview] : real;
-  const placed = ranked?.rating != null && !ranked.provisional && ranked.rank != null && ranked.rank !== -1;
-  const tier = placed ? tierOf(ranked.rating!) : null;
+  const shown = preview >= 0 ? { ...ranked, ...PREVIEW[preview] } : ranked;
+  const placed = shown?.rating != null && !shown.provisional && shown.rank != null && shown.rank !== -1;
+  const tier = placed ? tierOf(shown.rating!) : null;
+  const history = ranked?.history ?? [];
+  const wins = ranked?.firstPlacements ?? 0;
+
+  if (loading) {
+    return (
+      <div className="col-span-3 flex items-center gap-4 rounded-lg bg-white/4 p-4 ring-1 ring-line">
+        <Skeleton className="h-20 w-24" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-7 w-28" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="relative rounded-lg bg-white/4 p-3 ring-1 ring-line"
-      onClick={import.meta.env.DEV ? () => setPreview((index) => (index + 1 < PREVIEW.length ? index + 1 : -1)) : undefined}
-    >
-      <div className="text-xs text-ink-3">Ranked rating</div>
-      {loading ? (
-        <>
-          <Skeleton className="mt-1.5 h-6 w-16" />
-          <Skeleton className="mt-2 h-3 w-24" />
-        </>
-      ) : (
-        <>
-          <div className="mt-1 text-xl font-semibold tabular-nums text-ink">
-            {ranked?.rating != null ? numbers.format(ranked.rating) : "-"}
-            {ranked?.provisional && <span title="Provisional rating">*</span>}
-          </div>
-          <div className="flex items-center gap-1.5 truncate text-xs text-ink-3 pr-14">
-            {tier ? (
-              <>
-                <span className="text-ink-2">{tier.title}</span>
-                <span data-tier={tier.id} className="ranked-rank font-bold tabular-nums">
-                  #{numbers.format(ranked!.rank!)}
-                </span>
-              </>
-            ) : (
-              <span>{ranked ? "Placement matches" : "Ranked Play"}</span>
+    <section data-rank={tier?.id} className="ranked-card relative col-span-3 overflow-hidden rounded-lg ring-1 ring-line">
+      <RatingChart
+        history={history}
+        colour={tier ? "var(--rk-b)" : "var(--accent)"}
+        pointsRight={95}
+        pointsBottom={55}
+        hoverFrom={15}
+        className="absolute top-3 right-0 bottom-0 left-[30%] [mask-image:linear-gradient(to_right,transparent,black_55%)]"
+      />
+
+      <div className="pointer-events-none relative flex h-full items-center p-4">
+        <div className="flex items-stretch gap-4">
+          {/* Stretches to the height of the text beside it; width follows the badge ratio. */}
+          <div
+            className="pointer-events-auto relative aspect-[160/134] shrink-0"
+            onClick={import.meta.env.DEV ? () => setPreview((index) => (index + 1 < PREVIEW.length ? index + 1 : -1)) : undefined}
+          >
+            {tier &&
+              MOTES.slice(0, MOTE_COUNT[tier.id] ?? 0).map((mote, index) => (
+                <span key={index} aria-hidden="true" className="ranked-mote" style={{ left: mote.left, animationDelay: mote.delay, "--drift": mote.drift } as CSSProperties} />
+              ))}
+            <img src={tier?.image ?? badge("Placeholder")} alt={tier?.title ?? "Unranked"} width={160} height={134} className="relative size-full object-contain" />
+            {tier && GLINT.has(tier.id) && (
+              // The badge itself is the mask, so the light only crosses the medal.
+              <span className="ranked-glint" aria-hidden="true" style={{ maskImage: `url(${tier.image})` }}>
+                <span />
+              </span>
             )}
           </div>
-          <img
-            src={tier?.image ?? badge("Placeholder")}
-            alt={tier?.title ?? "Unranked"}
-            width={160}
-            height={134}
-            className="absolute top-1/2 right-3 h-14 w-auto -translate-y-1/2"
-          />
-        </>
+          <div className="min-w-0">
+            <div className="text-xs text-ink-3">Ranked Play</div>
+            {tier ? (
+              <div data-tier={tier.id} className="ranked-rank text-3xl font-bold tracking-tight">
+                {tier.title}
+              </div>
+            ) : (
+              <div className="text-3xl font-bold tracking-tight text-ink-2">{shown ? "Placements" : "Unranked"}</div>
+            )}
+            <div className="mt-0.5 flex items-baseline gap-2 text-sm text-ink-3">
+              <span className="tabular-nums text-ink-2">
+                {shown?.rating != null ? numbers.format(shown.rating) : "-"}
+                {shown?.provisional && <span title="Provisional rating">*</span>}
+              </span>
+              {tier && (
+                <span data-tier={tier.id} className="ranked-rank font-bold tabular-nums">
+                  #{numbers.format(shown!.rank!)}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {ranked && (
+        <div className="absolute right-3 bottom-3">
+          <RankedRecord history={history} wins={wins} losses={ranked.plays - wins} />
+        </div>
       )}
-    </div>
+    </section>
   );
 }

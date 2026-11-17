@@ -1,6 +1,6 @@
 use crate::scoring::{MatchResponse, MatchUser, OSU_API_VERSION};
 use reqwest::{Client, StatusCode, Url, header::RETRY_AFTER};
-use serde::{Deserialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::Value;
 use std::time::Duration;
 
@@ -102,10 +102,21 @@ pub struct RankedStats {
     pub provisional: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RankedResult {
+    pub room_id: i64,
+    pub result: String,
+    pub rating_after: i64,
+    pub date: String,
+}
+
 #[derive(Debug, PartialEq)]
 pub struct RankedProfile {
     pub username: String,
     pub stats: Option<RankedStats>,
+    // Newest first, at most ten, straight from osu!'s recent_history.
+    pub history: Vec<RankedResult>,
 }
 
 #[derive(Deserialize)]
@@ -218,7 +229,23 @@ impl OsuClient {
             })
         });
 
+        let history = stats
+            .and_then(|stats| stats["recent_history"].as_array())
+            .map(|entries| {
+                entries
+                    .iter()
+                    .map(|entry| RankedResult {
+                        room_id: entry["room_id"].as_i64().unwrap_or(0),
+                        result: entry["result"].as_str().unwrap_or_default().to_string(),
+                        rating_after: entry["elo_after"].as_i64().unwrap_or(0),
+                        date: entry["created_at"].as_str().unwrap_or_default().to_string(),
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
         Ok(RankedProfile {
+            history,
             username: profile["username"].as_str().unwrap_or_default().to_string(),
             stats: stats.map(|stats| RankedStats {
                 rank: stats["rank"].as_i64(),

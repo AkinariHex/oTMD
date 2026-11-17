@@ -1,5 +1,5 @@
-import { Heart } from "lucide-react";
 import { Tooltip } from "@/Components/ui/tooltip";
+import Logo from "@/Images/otmd.ico";
 import type { DashboardData } from "@/lib/api";
 
 // Minimum total in EUR for each tier, highest first.
@@ -17,13 +17,15 @@ function SupporterChip({ supporter }: { supporter: NonNullable<DashboardData["su
   const count = supporter.donations === 1 ? "1 donation" : `${supporter.donations} donations`;
 
   return (
-    <Tooltip content={`Thank you! ${count}, ${euros.format(supporter.total)} total.`}>
+    <Tooltip content={`Supporting o!TMD, the app. Thank you! ${count}, ${euros.format(supporter.total)} total.`}>
       <span
         tabIndex={0}
         data-tier={tier.id}
-        className="supporter-chip inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full pr-2 pl-1.5 text-caption font-medium text-ink outline-none focus-visible:ring-2 focus-visible:ring-ink-3"
+        className="supporter-chip inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full pr-2 pl-1 text-caption font-medium text-ink outline-none focus-visible:ring-2 focus-visible:ring-ink-3"
       >
-        <Heart size={11} strokeWidth={2} className="supporter-chip-icon" />
+        {/* The app logo, not a heart, so it never reads as osu!supporter. */}
+        <img src={Logo} alt="" width={14} height={14} className="supporter-chip-icon" />
+        <span className="text-ink-3">o!TMD</span>
         {tier.name}
         {tier.id === "legend" && <span className="supporter-chip-sheen" />}
       </span>

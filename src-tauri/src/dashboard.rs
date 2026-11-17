@@ -1,7 +1,7 @@
 use crate::{
     auth::AuthManager,
     maps::safe_cover,
-    osu::{OsuClient, OsuError, RoomEvents, RoomItem, RoomSummary},
+    osu::{OsuClient, OsuError, RankedResult, RoomEvents, RoomItem, RoomSummary},
     ranked::{self, RankedRules},
     ranked_watch::{completed_rounds, is_finished, saved_rules},
     settings::SettingsStore,
@@ -44,6 +44,7 @@ pub struct RankedSummary {
     plays: i64,
     first_placements: i64,
     provisional: bool,
+    history: Vec<RankedResult>,
 }
 
 #[derive(Clone, Serialize)]
@@ -296,8 +297,10 @@ impl Dashboard {
         let (Some(token), Some(user)) = (auth.access_token(), auth.user()) else {
             return Ok(None);
         };
-        let stats = self.osu.ranked_profile(&token, user.id).await?.stats;
-        Ok(stats.map(|stats| RankedSummary {
+        let profile = self.osu.ranked_profile(&token, user.id).await?;
+        let history = profile.history;
+        Ok(profile.stats.map(|stats| RankedSummary {
+            history,
             rank: stats.rank,
             rating: stats.rating,
             plays: stats.plays,
