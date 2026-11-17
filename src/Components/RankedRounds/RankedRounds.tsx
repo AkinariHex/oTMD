@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Star } from "lucide-react";
 import Avatar from "@/Components/Avatar/Avatar";
 import HealthBar from "@/Components/HealthBar/HealthBar";
 import type { RankedMatch, RankedMatchRound, SideIndex } from "@/lib/api";
@@ -6,6 +6,47 @@ import { cn } from "@/lib/utils";
 
 const SHADOW = "[text-shadow:0_1px_3px_rgb(0_0_0/0.8)]";
 const numbers = new Intl.NumberFormat("en-US");
+const decimals = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+
+// The same short names osu! uses on beatmap pages, with the full name on hover.
+function MapValue({ name, label, value }: { name: string; label: string; value: number | null }) {
+  if (value === null) return null;
+  return (
+    <span title={label} className="flex shrink-0 items-baseline gap-0.5">
+      <span className="font-semibold text-ink-3">{name}</span>
+      <span className="tabular-nums">{decimals.format(value)}</span>
+    </span>
+  );
+}
+
+// Two short lines: the difficulty with stars and BPM, then the four map settings.
+function MapValues({ round }: { round: RankedMatchRound }) {
+  return (
+    <>
+      <span className="flex min-w-0 items-center gap-2 text-caption text-ink">
+        <span className="min-w-0 truncate text-ink-2">{round.version}</span>
+        <span title="Star rating" className="flex shrink-0 items-center gap-0.5">
+          <Star aria-label="Star rating" size={10} strokeWidth={2.25} className="fill-current text-ink-2" />
+          <span className="tabular-nums">{decimals.format(round.stars)}</span>
+        </span>
+        <MapValue name="BPM" label="Beats per minute" value={round.bpm} />
+      </span>
+      <MapSettings round={round} />
+    </>
+  );
+}
+
+function MapSettings({ round }: { round: RankedMatchRound }) {
+  if (round.cs === null) return null;
+  return (
+    <span className="flex min-w-0 items-center gap-2 text-caption text-ink">
+      <MapValue name="CS" label="Circle size" value={round.cs} />
+      <MapValue name="AR" label="Approach rate" value={round.ar} />
+      <MapValue name="OD" label="Overall difficulty" value={round.od} />
+      <MapValue name="HP" label="HP drain" value={round.hp} />
+    </span>
+  );
+}
 
 const lifeBefore = (match: RankedMatch, round: RankedMatchRound, side: SideIndex) => (round.round === 1 ? match.maxLife : match.rounds[round.round - 2].life[side]);
 
@@ -45,11 +86,14 @@ function RoundDamage({ round }: { round: RankedMatchRound }) {
   const pointsLeft = round.winner === 1;
   const Chevron = pointsLeft ? ChevronLeft : ChevronRight;
 
+  const gap = Math.abs(round.scores[0] - round.scores[1]);
+
   return (
     <span className={cn("relative flex flex-col items-center text-xs tabular-nums", SHADOW)}>
       <span className="font-bold text-damage">-{numbers.format(round.damage)}</span>
-      <span className="relative text-caption text-ink-2">
-        x{round.multiplier}
+      <span title={`Score difference ${numbers.format(gap)}, times the x${round.multiplier} multiplier`} className="relative whitespace-nowrap text-caption text-ink-2">
+        <span className="text-ink">{numbers.format(gap)}</span>
+        <span className="ml-1.5">x{round.multiplier}</span>
         <Chevron aria-hidden="true" size={14} strokeWidth={2} className={cn("absolute top-1/2 -translate-y-1/2", pointsLeft ? "right-full mr-1" : "left-full ml-1")} />
       </span>
     </span>
@@ -65,9 +109,7 @@ function RoundRow({ match, round }: { match: RankedMatch; round: RankedMatchRoun
           <span className="mr-1.5 text-ink-2 tabular-nums">{round.round}</span>
           {round.title}
         </span>
-        <span className="block truncate text-caption text-ink">
-          {round.version} - {round.stars.toFixed(2)} stars
-        </span>
+        <MapValues round={round} />
       </span>
       <RoundSide match={match} round={round} index={0} />
       <RoundDamage round={round} />

@@ -222,6 +222,12 @@ export interface RankedMatchRound {
   life: [number, number];
   // A player was not ready in time, so the map was never played. It still raised the round multiplier.
   skipped: boolean;
+  // Base map values without mods; null when osu! did not return them.
+  ar: number | null;
+  cs: number | null;
+  od: number | null;
+  hp: number | null;
+  bpm: number | null;
 }
 
 export interface RankedMatchPlayer {

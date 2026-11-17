@@ -1,7 +1,7 @@
 use crate::{
     auth::AuthManager,
     maps::safe_cover,
-    osu::{OsuClient, OsuError, RankedResult, RoomEvents, RoomItem, RoomSummary},
+    osu::{BEATMAPS_PER_LOOKUP, BeatmapStats, OsuClient, OsuError, RankedResult, RoomEvents, RoomItem, RoomSummary},
     ranked::{self, RankedRules},
     ranked_watch::{completed_rounds, is_finished, saved_rules},
     settings::SettingsStore,
@@ -70,6 +70,12 @@ struct RankedRound {
     life: [i64; 2],
     // Nobody played it: a player was not ready in time. The 100K timeout damage is not in the room data.
     skipped: bool,
+    // Base map values without mods; None when the beatmap lookup failed.
+    ar: Option<f64>,
+    cs: Option<f64>,
+    od: Option<f64>,
+    hp: Option<f64>,
+    bpm: Option<f64>,
 }
 
 // Players are always [me, opponent], so a side index means the same thing everywhere.
@@ -158,7 +164,7 @@ pub struct TournamentProposal {
 
 // Finished rooms never change, so their cards survive restarts. Bump the version when card building changes.
 const CARDS_FILE: &str = "ranked-cards.json";
-const CARDS_VERSION: u32 = 1;
+const CARDS_VERSION: u32 = 3;
 const TOP_OPPONENTS: usize = 8;
 
 #[derive(Serialize, Deserialize)]
@@ -222,7 +228,7 @@ fn score_of(item: &RoomItem, player: u64) -> i64 {
     item.scores.iter().find(|score| score.user_id == player).map_or(0, |score| score.total_score)
 }
 
-fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> Option<RankedCard> {
+fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents, stats: &HashMap<u64, BeatmapStats>) -> Option<RankedCard> {
     if !is_finished(events) {
         return None;
     }
@@ -257,6 +263,7 @@ fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> 
         .map(|(index, (item, result))| {
             let beatmap = events.beatmaps.iter().find(|beatmap| beatmap.id == item.beatmap_id);
             let set = beatmap.and_then(|beatmap| events.beatmapsets.iter().find(|set| set.id == beatmap.beatmapset_id));
+            let values = stats.get(&item.beatmap_id);
             RankedRound {
                 round: index + 1,
                 title: set.map_or_else(String::new, |set| set.title.clone()),
@@ -269,6 +276,11 @@ fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> 
                 multiplier: result.multiplier,
                 life: result.lives,
                 skipped: item.played_at.is_none(),
+                ar: values.map(|values| values.ar),
+                cs: values.map(|values| values.cs),
+                od: values.map(|values| values.accuracy),
+                hp: values.map(|values| values.drain),
+                bpm: values.and_then(|values| values.bpm),
             }
         })
         .collect();
@@ -407,13 +419,10 @@ impl Dashboard {
         }
 
         let mut stop = false;
-        let mut added = false;
+        let mut done_rooms: Vec<(u64, RoomEvents)> = Vec::new();
         while let Some(done) = requests.join_next().await {
             match done {
-                Ok((id, Ok(events))) if is_finished(&events) => {
-                    finished.insert(id, ranked_card(&rules, user.id, id, &events));
-                    added = true;
-                }
+                Ok((id, Ok(events))) if is_finished(&events) => done_rooms.push((id, events)),
                 Ok((_, Err(OsuError::RateLimited(_) | OsuError::Unauthorized))) => stop = true,
                 _ => {}
             }
@@ -422,7 +431,34 @@ impl Dashboard {
             }
         }
 
-        if added {
+        // One lookup per 50 maps for AR, CS, OD and HP, shared by every room read above.
+        let mut beatmap_ids: Vec<u64> = done_rooms.iter().flat_map(|(_, events)| events.playlist_items.iter().map(|item| item.beatmap_id)).filter(|id| *id != 0).collect();
+        beatmap_ids.sort_unstable();
+        beatmap_ids.dedup();
+        let mut stats: HashMap<u64, BeatmapStats> = HashMap::new();
+        let mut stats_complete = true;
+        for chunk in beatmap_ids.chunks(BEATMAPS_PER_LOOKUP) {
+            if stop {
+                stats_complete = false;
+                break;
+            }
+            match self.osu.beatmap_stats(&token, chunk).await {
+                Ok(list) => stats.extend(list.into_iter().map(|values| (values.id, values))),
+                Err(OsuError::RateLimited(_) | OsuError::Unauthorized) => {
+                    stop = true;
+                    stats_complete = false;
+                }
+                Err(_) => stats_complete = false,
+            }
+        }
+
+        let added = !done_rooms.is_empty();
+        for (id, events) in &done_rooms {
+            finished.insert(*id, ranked_card(&rules, user.id, *id, events, &stats));
+        }
+
+        // Cards missing map values stay in memory only, so the next session can fill them in.
+        if added && stats_complete {
             let stored = StoredCards { version: CARDS_VERSION, rules, cards: finished.clone() };
             if let Ok(bytes) = serde_json::to_vec(&stored) {
                 let _ = std::fs::write(self.data_dir.join(CARDS_FILE), bytes);
@@ -574,7 +610,7 @@ mod tests {
     }
 
     fn card(events: &RoomEvents, me: u64) -> Option<RankedCard> {
-        ranked_card(&RankedRules::default(), me, 1, events)
+        ranked_card(&RankedRules::default(), me, 1, events, &HashMap::new())
     }
 
     fn saved(dates: &[&str]) -> Vec<Value> {

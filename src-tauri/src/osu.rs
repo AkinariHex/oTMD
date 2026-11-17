@@ -63,6 +63,25 @@ pub struct RoomBeatmap {
     pub difficulty_rating: f64,
 }
 
+// AR, CS, OD and HP are not in room events, only in the beatmap lookup.
+#[derive(Clone, Copy, Deserialize)]
+pub struct BeatmapStats {
+    pub id: u64,
+    pub ar: f64,
+    pub cs: f64,
+    pub accuracy: f64,
+    pub drain: f64,
+    #[serde(default)]
+    pub bpm: Option<f64>,
+}
+
+#[derive(Deserialize)]
+struct BeatmapStatsList {
+    beatmaps: Vec<BeatmapStats>,
+}
+
+pub const BEATMAPS_PER_LOOKUP: usize = 50;
+
 #[derive(Deserialize)]
 pub struct RoomBeatmapset {
     pub id: u64,
@@ -213,6 +232,14 @@ impl OsuClient {
     pub async fn room_events(&self, token: &str, room: u64) -> Result<RoomEvents, OsuError> {
         let url = self.url(&["rooms", &room.to_string(), "events"])?;
         self.get(url, token, &[("limit", PAGE_SIZE)], false).await
+    }
+
+    // At most BEATMAPS_PER_LOOKUP ids per call; osu! ignores the rest.
+    pub async fn beatmap_stats(&self, token: &str, ids: &[u64]) -> Result<Vec<BeatmapStats>, OsuError> {
+        let values: Vec<String> = ids.iter().map(u64::to_string).collect();
+        let query: Vec<(&str, &str)> = values.iter().map(|id| ("ids[]", id.as_str())).collect();
+        let list: BeatmapStatsList = self.get(self.url(&["beatmaps"])?, token, &query, false).await?;
+        Ok(list.beatmaps)
     }
 
     pub async fn beatmap(&self, token: &str, id: u64) -> Result<BeatmapDetails, OsuError> {
