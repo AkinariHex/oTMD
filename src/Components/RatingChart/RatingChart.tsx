@@ -1,17 +1,11 @@
 import { useId } from "react";
-import { Tooltip } from "@/Components/ui/tooltip";
+import FloatingTip, { useFloatingTip } from "@/Components/FloatingTip/FloatingTip";
+import RankedResultCard, { RANKED_TIP_CLASS } from "@/Components/RankedResultCard/RankedResultCard";
 import type { RankedResult } from "@/lib/api";
+import { requestOpenRoom, useRankedRooms } from "@/lib/rankedRooms";
 import { cn } from "@/lib/utils";
 
-const numbers = new Intl.NumberFormat("en-US");
-const relative = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-const RESULT = { win: "Won", loss: "Lost", draw: "Draw" } as const;
 const DOT = { win: "bg-win", loss: "bg-loss", draw: "bg-ink-3" } as const;
-
-function ago(date: string): string {
-  const hours = Math.round((new Date(date).getTime() - Date.now()) / 3_600_000);
-  return Math.abs(hours) < 24 ? relative.format(hours, "hour") : relative.format(Math.round(hours / 24), "day");
-}
 
 interface RatingChartProps {
   history: RankedResult[];
@@ -27,6 +21,8 @@ interface RatingChartProps {
 // Rating after each recent match, oldest on the left. Dots carry the result colour.
 function RatingChart({ history, colour, className, pointsRight = 100, pointsBottom = 100, hoverFrom = 0 }: RatingChartProps) {
   const fillId = `rating-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const rooms = useRankedRooms();
+  const { tip, show, hide } = useFloatingTip<number>();
   const matches = [...history].reverse();
   if (matches.length < 2) return null;
 
@@ -39,7 +35,7 @@ function RatingChart({ history, colour, className, pointsRight = 100, pointsBott
   const column = pointsRight / (matches.length - 1);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", className)} onPointerLeave={hide}>
       <div className="chart-reveal absolute inset-0">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden="true">
           <defs>
@@ -59,23 +55,36 @@ function RatingChart({ history, colour, className, pointsRight = 100, pointsBott
           />
         ))}
       </div>
-      {matches.map(
-        (match, index) =>
-          xOf(index) >= hoverFrom && (
-            <Tooltip key={match.roomId} content={`${RESULT[match.result]}, ${ago(match.date)}, rating ${numbers.format(match.ratingAfter)}`}>
-              <span tabIndex={0} className="group absolute inset-y-0 -translate-x-1/2 outline-none" style={{ left: `${xOf(index)}%`, width: `${column}%` }}>
-                <span className="absolute inset-y-0 left-1/2 w-px bg-ink-3/40 opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
-                <span
-                  className={cn(
-                    "absolute left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 scale-50 rounded-full opacity-0 ring-2 ring-ink transition-[opacity,transform] duration-150 ease-out group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100",
-                    DOT[match.result]
-                  )}
-                  style={{ top: `${yOf(match.ratingAfter)}%` }}
-                />
-              </span>
-            </Tooltip>
-          )
-      )}
+      {matches.map((match, index) => {
+        if (xOf(index) < hoverFrom) return null;
+        const openable = rooms.has(match.roomId);
+        return (
+          <span
+            key={match.roomId}
+            tabIndex={0}
+            role={openable ? "button" : undefined}
+            onPointerEnter={(event) => show(event.currentTarget, index)}
+            onFocus={(event) => show(event.currentTarget, index)}
+            onBlur={hide}
+            onClick={openable ? () => requestOpenRoom(match.roomId) : undefined}
+            onKeyDown={(event) => openable && (event.key === "Enter" || event.key === " ") && requestOpenRoom(match.roomId)}
+            className={cn("group absolute inset-y-0 -translate-x-1/2 outline-none", openable && "cursor-pointer")}
+            style={{ left: `${xOf(index)}%`, width: `${column}%` }}
+          >
+            <span className="absolute inset-y-0 left-1/2 w-px bg-ink-3/40 opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 group-focus-visible:opacity-100" />
+            <span
+              className={cn(
+                "absolute left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 scale-50 rounded-full opacity-0 ring-2 ring-ink transition-[opacity,transform] duration-150 ease-out group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100",
+                DOT[match.result]
+              )}
+              style={{ top: `${yOf(match.ratingAfter)}%` }}
+            />
+          </span>
+        );
+      })}
+      <FloatingTip anchor={tip?.anchor ?? null} className={RANKED_TIP_CLASS}>
+        {tip && <RankedResultCard match={matches[tip.data]} previous={matches[tip.data - 1]?.ratingAfter} room={rooms.get(matches[tip.data].roomId)} />}
+      </FloatingTip>
     </div>
   );
 }

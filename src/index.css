@@ -235,6 +235,13 @@ input::-webkit-inner-spin-button {
   animation: tooltip-out 100ms ease-out forwards;
 }
 
+/* Only the first open animates; the same element then moves between targets instantly. */
+.floating-tip > div {
+  transform-origin: top center;
+  animation: tooltip-in 125ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.floating-tip[data-side="top"] > div { transform-origin: bottom center; }
+
 @keyframes tooltip-in {
   from {
     opacity: 0;

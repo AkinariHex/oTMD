@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import Avatar from "@/Components/Avatar/Avatar";
 import HealthBar from "@/Components/HealthBar/HealthBar";
 import type { RankedMatch, RankedMatchRound, SideIndex } from "@/lib/api";
@@ -33,6 +33,14 @@ function RoundSide({ match, round, index }: { match: RankedMatch; round: RankedM
 
 // The chevron points at the player who lost the health. It is out of flow so the multiplier stays centered.
 function RoundDamage({ round }: { round: RankedMatchRound }) {
+  if (round.skipped) {
+    return (
+      <span className={cn("relative flex flex-col items-center text-center text-xs text-ink-2", SHADOW)}>
+        Skipped
+        <span className="text-caption">not ready in time</span>
+      </span>
+    );
+  }
   if (round.winner === null) return <span className={cn("relative text-center text-xs text-ink-2", SHADOW)}>Tie</span>;
   const pointsLeft = round.winner === 1;
   const Chevron = pointsLeft ? ChevronLeft : ChevronRight;
@@ -71,6 +79,12 @@ function RoundRow({ match, round }: { match: RankedMatch; round: RankedMatchRoun
 function RankedRounds({ match }: { match: RankedMatch }) {
   return (
     <div className="divide-y divide-line">
+      {match.legacyRules && (
+        <p className="flex items-start gap-2 px-3 py-2 text-caption text-ink-3">
+          <Info aria-hidden="true" size={13} strokeWidth={1.75} className="mt-px shrink-0" />
+          Played before osu! changed the damage rules on May 18, 2026. Life is replayed with the rules of that time and can differ slightly, for example after a timeout.
+        </p>
+      )}
       {match.rounds.map((round) => (
         <RoundRow key={round.round} match={match} round={round} />
       ))}

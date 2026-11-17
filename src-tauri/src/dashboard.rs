@@ -24,8 +24,6 @@ const MAX_PARALLEL_ROOMS: usize = 4;
 // ponytail: the most osu! returns in one request; older rooms need its cursor if anyone plays more than this.
 const MAX_ROOMS: &str = "250";
 const DATE_PRECISION: usize = 19;
-// The current damage rules start here, so health cannot be worked out for older rooms.
-const RULES_SINCE: &str = "2026-05-18";
 
 #[derive(Clone, Copy, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -45,6 +43,8 @@ pub struct RankedSummary {
     first_placements: i64,
     provisional: bool,
     history: Vec<RankedResult>,
+    // Cards for the rooms in history, so the chart can name opponents without waiting for the feed.
+    rooms: Vec<RankedCard>,
 }
 
 #[derive(Clone, Serialize)]
@@ -68,6 +68,8 @@ struct RankedRound {
     damage: i64,
     multiplier: f64,
     life: [i64; 2],
+    // Nobody played it: a player was not ready in time. The 100K timeout damage is not in the room data.
+    skipped: bool,
 }
 
 // Players are always [me, opponent], so a side index means the same thing everywhere.
@@ -75,6 +77,8 @@ struct RankedRound {
 #[serde(rename_all = "camelCase")]
 pub struct RankedCard {
     room_id: u64,
+    // Played before the current damage rules: life is replayed with the frozen rules of that period.
+    legacy_rules: bool,
     date: String,
     winner: Option<usize>,
     max_life: i64,
@@ -188,7 +192,7 @@ fn score_of(item: &RoomItem, player: u64) -> i64 {
 }
 
 fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> Option<RankedCard> {
-    if !is_finished(events) || events.room.starts_at.as_str() < RULES_SINCE {
+    if !is_finished(events) {
         return None;
     }
 
@@ -207,7 +211,12 @@ fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> 
         return None;
     }
     let scores: Vec<Vec<(u64, i64)>> = items.iter().map(|item| item.scores.iter().map(|score| (score.user_id, score.total_score)).collect()).collect();
-    let played = ranked::play(rules, ids, &scores);
+    let legacy = ranked::legacy_rules(&events.room.starts_at);
+    let ruleset = items[0].ruleset_id;
+    let played = match &legacy {
+        Some(old) => ranked::play_legacy(old, ruleset, ids, &scores),
+        None => ranked::play(rules, ids, &scores),
+    };
     let side_of = |player: u64| usize::from(player != ids[0]);
 
     let rounds = items
@@ -228,6 +237,7 @@ fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> 
                 damage: result.damage,
                 multiplier: result.multiplier,
                 life: result.lives,
+                skipped: item.played_at.is_none(),
             }
         })
         .collect();
@@ -240,9 +250,10 @@ fn ranked_card(rules: &RankedRules, me: u64, room: u64, events: &RoomEvents) -> 
 
     Some(RankedCard {
         room_id: room,
+        legacy_rules: legacy.is_some(),
         date: events.room.ends_at.clone().unwrap_or_else(|| events.room.starts_at.clone()),
         winner,
-        max_life: rules.max_life,
+        max_life: if legacy.is_some() { ranked::LEGACY_MAX_LIFE } else { rules.max_life },
         players: [first, second].map(|user| RankedPlayer { id: user.id, username: user.username.clone(), rounds_won: played.rounds_won[&user.id] }),
         rounds,
     })
@@ -298,9 +309,12 @@ impl Dashboard {
             return Ok(None);
         };
         let profile = self.osu.ranked_profile(&token, user.id).await?;
+        let ids: Vec<u64> = profile.history.iter().filter_map(|entry| u64::try_from(entry.room_id).ok()).collect();
+        let rooms = self.ranked_cards(auth, &ids).await;
         let history = profile.history;
         Ok(profile.stats.map(|stats| RankedSummary {
             history,
+            rooms,
             rank: stats.rank,
             rating: stats.rating,
             plays: stats.plays,
@@ -332,21 +346,21 @@ impl Dashboard {
             return Some(rooms);
         }
         let mut rooms = self.osu.recent_ranked_rooms(&token, MAX_ROOMS).await.ok()?;
-        rooms.retain(|room| room.ends_at.is_some() && room.starts_at.as_deref().is_some_and(|start| start >= RULES_SINCE));
+        rooms.retain(|room| room.ends_at.is_some());
         rooms.sort_unstable_by_key(|room| Reverse(room.id));
         *cache = Some(Cached { key, at: Instant::now(), data: rooms.clone() });
         Some(rooms)
     }
 
     // A finished room never changes, so each one costs a single request for the whole session.
-    async fn ranked_cards(&self, auth: &AuthManager, rooms: &[RoomSummary]) -> Vec<RankedCard> {
+    async fn ranked_cards(&self, auth: &AuthManager, rooms: &[u64]) -> Vec<RankedCard> {
         let (Some(token), Some(user)) = (auth.access_token(), auth.user()) else {
             return Vec::new();
         };
         let mut finished = self.finished_rooms.lock().await;
 
         // A few at a time: a fresh page of 20 rooms must not hit osu! as one burst.
-        let missing: Vec<u64> = rooms.iter().map(|room| room.id).filter(|id| !finished.contains_key(id)).collect();
+        let missing: Vec<u64> = rooms.iter().copied().filter(|id| !finished.contains_key(id)).collect();
         let mut pending = missing.into_iter();
         let mut requests = JoinSet::new();
         let spawn = |requests: &mut JoinSet<_>, id: u64| {
@@ -372,7 +386,7 @@ impl Dashboard {
             }
         }
 
-        rooms.iter().filter_map(|room| finished.get(&room.id).cloned().flatten()).collect()
+        rooms.iter().filter_map(|id| finished.get(id).cloned().flatten()).collect()
     }
 
     // The flag is false when a source failed, so the page must not be cached.
@@ -399,7 +413,8 @@ impl Dashboard {
         let (from_saved, from_rooms) = plan_page(&saved, remaining);
         let saved_left = saved.len() > from_saved || saved_has_more;
         saved.truncate(from_saved);
-        let ranked_matches = self.ranked_cards(auth, &remaining[..from_rooms]).await;
+        let ids: Vec<u64> = remaining[..from_rooms].iter().map(|room| room.id).collect();
+        let ranked_matches = self.ranked_cards(auth, &ids).await;
 
         let next_saved = cursor.saved.filter(|_| site_answered && saved_left).map(|offset| offset + from_saved);
         let next_ranked = cursor.ranked.filter(|_| osu_answered).map(|offset| offset + from_rooms).filter(|&offset| offset < rooms.len());
@@ -567,7 +582,7 @@ mod tests {
 
         let mut older = events();
         older.room.starts_at = "2026-05-17T23:59:59Z".into();
-        assert!(card(&older, ME).is_none(), "older than the current damage rules");
+        assert!(card(&older, ME).unwrap().legacy_rules, "older than the current damage rules: replayed with the old ones");
 
         let mut live = events();
         live.room.active = true;

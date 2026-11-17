@@ -125,11 +125,20 @@ pub fn is_finished(events: &RoomEvents) -> bool {
 }
 
 // A score can land seconds after the map ends: a round counts once both are in or play has moved on.
+//
+// Each round adds one playlist item when its card is played, so items in id order are the rounds, like the server's
+// CurrentRound. A round skipped by the ready timeout keeps its item with no played_at and no scores: it stays in the list
+// because the server still raised the round multiplier for it. Beatmap 0 is the dummy item rooms stored until 2026-11-09.
 pub fn completed_rounds(events: &RoomEvents) -> Vec<&RoomItem> {
-    let mut played: Vec<&RoomItem> = events.playlist_items.iter().filter(|item| item.played_at.is_some()).collect();
-    played.sort_by(|first, second| first.played_at.cmp(&second.played_at));
+    let mut played: Vec<&RoomItem> = events.playlist_items.iter().filter(|item| item.beatmap_id != 0).collect();
+    played.sort_by_key(|item| item.id);
+    let created = played.len();
+    // Trailing items without played_at are the round in progress, or one the room ended before playing.
+    while played.last().is_some_and(|item| item.played_at.is_none()) {
+        played.pop();
+    }
 
-    let moved_on = is_finished(events) || events.playlist_items.iter().any(|item| item.played_at.is_none());
+    let moved_on = is_finished(events) || played.len() < created;
     let last = played.len().saturating_sub(1);
     played
         .into_iter()
@@ -665,6 +674,22 @@ mod tests {
         assert_eq!(result.lives.values().filter(|life| **life == 0).count(), 1);
     }
 
+    // Like the server: a timed-out round has an unplayed item and still moves the multiplier on.
+    #[test]
+    fn a_skipped_round_still_counts_and_the_dummy_item_does_not() {
+        let mut events: Value = serde_json::from_str(FIXTURE).unwrap();
+        let items = events["playlist_items"].as_array_mut().unwrap();
+        items.push(json!({ "id": 1, "beatmap_id": 0, "played_at": null, "ruleset_id": 0, "scores": [] }));
+        items.push(json!({ "id": 35701999, "beatmap_id": 77, "played_at": null, "ruleset_id": 0, "scores": [] }));
+        items.push(json!({ "id": 999999999, "beatmap_id": 78, "played_at": null, "ruleset_id": 0, "scores": [] }));
+        let events: RoomEvents = serde_json::from_value(events).unwrap();
+
+        let rounds = completed_rounds(&events);
+        let ids: Vec<u64> = rounds.iter().map(|item| item.id).collect();
+        assert_eq!(ids, [35701788, 35701999, 35702245, 35702616, 35703111, 35703620], "skipped round in place, dummy and trailing item left out");
+        assert!(rounds[1].played_at.is_none());
+    }
+
     #[tokio::test]
     async fn finds_the_room_follows_it_and_saves_once() {
         let mut harness = Harness::new().await;
@@ -757,7 +782,7 @@ mod tests {
         harness.poll().await;
         assert_eq!(harness.view()["round"], 1);
 
-        let next_map = json!({ "id": 99, "beatmap_id": 0, "played_at": null, "ruleset_id": 0, "scores": [] });
+        let next_map = json!({ "id": 999999999, "beatmap_id": 77, "played_at": null, "ruleset_id": 0, "scores": [] });
         waiting["playlist_items"].as_array_mut().unwrap().push(next_map);
         harness.set_events(waiting);
         harness.poll().await;

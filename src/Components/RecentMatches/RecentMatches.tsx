@@ -1,11 +1,12 @@
 import { LoaderCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type UIEvent } from "react";
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { toast } from "sonner";
 import MatchCard from "@/Components/MatchCard/MatchCard";
 import { Skeleton } from "@/Components/ui/skeleton";
 import * as api from "@/lib/api";
 import { buildFeed, type FeedItem } from "@/lib/matchFeed";
+import { addRankedRooms, onOpenRoom } from "@/lib/rankedRooms";
 import { useScrollThumb } from "@/lib/scrollThumb";
 
 const FIRST_PAGE: api.FeedCursor = { saved: 0, ranked: 0 };
@@ -14,6 +15,7 @@ const MAX_REQUESTS_PER_LOAD = 6;
 const PLACEHOLDER_CARDS = [0, 1, 2, 3];
 const OVERSCAN_PX = 300;
 const TOP_FADE_PX = 24;
+const MAX_PAGES_TO_FIND = 5;
 
 function MatchCardSkeleton() {
   return (
@@ -55,6 +57,8 @@ function RecentMatches() {
   const cursor = useRef<api.FeedCursor | null>(FIRST_PAGE);
   const busy = useRef(false);
   const seen = useRef(new Set<string>());
+  const loaded = useRef<FeedItem[]>([]);
+  const list = useRef<VirtuosoHandle>(null);
   const { thumb, showScrollThumb } = useScrollThumb();
 
   const loadNextPage = useCallback(async () => {
@@ -67,6 +71,7 @@ function RecentMatches() {
       for (let requests = 0; requests < MAX_REQUESTS_PER_LOAD && fresh.length < PAGE_SIZE && cursor.current; requests++) {
         const page: api.FeedPage = await api.getMatchFeed(cursor.current);
         cursor.current = page.next;
+        addRankedRooms(page.rankedMatches);
         for (const item of buildFeed(page.matches, page.rankedMatches)) {
           if (seen.current.has(item.id)) continue;
           seen.current.add(item.id);
@@ -75,7 +80,8 @@ function RecentMatches() {
       }
       if (fresh.length === 0) cursor.current = null;
       setReachedEnd(cursor.current === null);
-      setItems((current) => [...(current ?? []), ...fresh]);
+      loaded.current = [...loaded.current, ...fresh];
+      setItems(loaded.current);
     } catch {
       toast.error("Could not load your recent matches.");
       setItems((current) => current ?? []);
@@ -98,6 +104,30 @@ function RecentMatches() {
     [showScrollThumb]
   );
 
+  // The rating chart asks for a room; older ones may sit a few pages further down.
+  useEffect(
+    () =>
+      onOpenRoom(async (roomId) => {
+        const id = `room-${roomId}`;
+        const indexOf = () => loaded.current.findIndex((item) => item.id === id);
+        for (let pages = 0; indexOf() < 0 && pages < MAX_PAGES_TO_FIND; pages++) {
+          // A load already running (the first page, or a scroll) must finish before asking for more.
+          while (busy.current) await new Promise((resolve) => setTimeout(resolve, 100));
+          if (indexOf() >= 0 || !cursor.current) break;
+          await loadNextPage();
+        }
+        const index = indexOf();
+        if (index < 0) {
+          toast.error("Could not find this match in your recent matches.");
+          return;
+        }
+        setOpenMatch(id);
+        // Next frame, so a page loaded just now is already in the list.
+        requestAnimationFrame(() => list.current?.scrollToIndex({ index, align: "start", behavior: "smooth" }));
+      }),
+    [loadNextPage]
+  );
+
   const toggleMatch = useCallback((id: string) => setOpenMatch((current) => (current === id ? null : id)), []);
 
   const renderItem = useCallback(
@@ -118,6 +148,7 @@ function RecentMatches() {
         {items?.length === 0 && <p className="py-2 text-xs text-ink-3">Matches you export and ranked matches you play will appear here.</p>}
         {items !== null && items.length > 0 && (
           <Virtuoso
+            ref={list}
             data={items}
             context={{ loadingMore, reachedEnd }}
             components={VIRTUOSO_COMPONENTS}

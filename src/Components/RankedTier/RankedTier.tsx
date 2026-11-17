@@ -1,8 +1,9 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import RankedRecord from "@/Components/RankedRecord/RankedRecord";
 import RatingChart from "@/Components/RatingChart/RatingChart";
 import { Skeleton } from "@/Components/ui/skeleton";
 import type { DashboardData } from "@/lib/api";
+import { addRankedRooms } from "@/lib/rankedRooms";
 
 const BADGES = Object.fromEntries(
   Object.entries(import.meta.glob<string>("@/Images/ranked-tiers/*.png", { eager: true, import: "default" })).map(([path, url]) => [path.split("/").pop()!.replace(".png", ""), url]),
@@ -44,6 +45,7 @@ PREVIEW.push({ rating: 1000, rank: -1, provisional: true });
 
 export default function RankedTier({ ranked, loading }: { ranked: Ranked | null; loading: boolean }) {
   const [preview, setPreview] = useState(-1);
+  useEffect(() => addRankedRooms(ranked?.rooms ?? []), [ranked]);
   const shown = preview >= 0 ? { ...ranked, ...PREVIEW[preview] } : ranked;
   const placed = shown?.rating != null && !shown.provisional && shown.rank != null && shown.rank !== -1;
   const tier = placed ? tierOf(shown.rating!) : null;
@@ -64,7 +66,7 @@ export default function RankedTier({ ranked, loading }: { ranked: Ranked | null;
   }
 
   return (
-    <section data-rank={tier?.id} className="ranked-card relative col-span-3 overflow-hidden rounded-lg ring-1 ring-line">
+    <section data-rank={tier?.id} data-tip-boundary className="ranked-card relative col-span-3 overflow-hidden rounded-lg ring-1 ring-line">
       <RatingChart
         history={history}
         colour={tier ? "var(--rk-b)" : "var(--accent)"}
@@ -75,17 +77,18 @@ export default function RankedTier({ ranked, loading }: { ranked: Ranked | null;
       />
 
       <div className="pointer-events-none relative flex h-full items-center p-4">
-        <div className="flex items-stretch gap-4">
-          {/* Stretches to the height of the text beside it; width follows the badge ratio. */}
+        <div className="flex items-center gap-4">
+          {/* Fixed box, as tall as the three text lines beside it (4.5rem of type plus the 2px gap):
+              the image is absolute, so no badge or placeholder can change its size and push the text. */}
           <div
-            className="pointer-events-auto relative aspect-[160/134] shrink-0"
+            className="pointer-events-auto relative aspect-[160/134] h-[calc(4.5rem*var(--text-scale)+2px)] shrink-0"
             onClick={import.meta.env.DEV ? () => setPreview((index) => (index + 1 < PREVIEW.length ? index + 1 : -1)) : undefined}
           >
             {tier &&
               MOTES.slice(0, MOTE_COUNT[tier.id] ?? 0).map((mote, index) => (
                 <span key={index} aria-hidden="true" className="ranked-mote" style={{ left: mote.left, animationDelay: mote.delay, "--drift": mote.drift } as CSSProperties} />
               ))}
-            <img src={tier?.image ?? badge("Placeholder")} alt={tier?.title ?? "Unranked"} width={160} height={134} className="relative size-full object-contain" />
+            <img src={tier?.image ?? badge("Placeholder")} alt={tier?.title ?? "Unranked"} width={160} height={134} className="absolute inset-0 size-full object-contain" />
             {tier && GLINT.has(tier.id) && (
               // The badge itself is the mask, so the light only crosses the medal.
               <span className="ranked-glint" aria-hidden="true" style={{ maskImage: `url(${tier.image})` }}>

@@ -34,6 +34,7 @@ function savedItem(match: SavedMatch): SavedFeedItem {
 }
 
 function rankedItem(match: RankedMatch): RankedFeedItem {
+  const played = match.rounds.filter((round) => !round.skipped).length;
   const [me, opponent] = match.players;
   const side = (player: typeof me): MatchSide => ({ name: player.username, score: player.roundsWon, players: [] });
   return {
@@ -41,7 +42,7 @@ function rankedItem(match: RankedMatch): RankedFeedItem {
     id: `room-${match.roomId}`,
     title: "Ranked Play",
     acronym: "Ranked",
-    stage: `${match.rounds.length} ${match.rounds.length === 1 ? "map" : "maps"}`,
+    stage: `${played} ${played === 1 ? "map" : "maps"}`,
     date: match.date,
     banner: null,
     won: match.winner === null ? null : match.winner === 0,

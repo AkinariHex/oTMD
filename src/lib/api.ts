@@ -219,6 +219,8 @@ export interface RankedMatchRound {
   damage: number;
   multiplier: number;
   life: [number, number];
+  // A player was not ready in time, so the map was never played. It still raised the round multiplier.
+  skipped: boolean;
 }
 
 export interface RankedMatchPlayer {
@@ -229,6 +231,8 @@ export interface RankedMatchPlayer {
 
 export interface RankedMatch {
   roomId: number;
+  // Played before the current damage rules; life is replayed with the rules of that period.
+  legacyRules: boolean;
   date: string;
   winner: SideIndex | null;
   maxLife: number;
@@ -247,7 +251,7 @@ export interface RankedResult {
 export interface DashboardData {
   siteStatus: "ok" | "noKey" | "invalidKey" | "unavailable";
   stats: DashboardStats | null;
-  ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number; provisional: boolean; history: RankedResult[] } | null;
+  ranked: { rank: number | null; rating: number | null; plays: number; firstPlacements: number; provisional: boolean; history: RankedResult[]; rooms: RankedMatch[] } | null;
   supporter: { donations: number; total: number; lastDonatedAt: string } | null;
 }
 

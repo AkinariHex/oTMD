@@ -95,6 +95,110 @@ pub fn play(rules: &RankedRules, players: [u64; 2], rounds: &[Vec<(u64, i64)>]) 
     PlayedMatch { lives, rounds_won, rounds: results, overflow }
 }
 
+// Rules before upstream cbb4d38, frozen here: those rooms are finished and will never be scored differently.
+// Before then there was no base damage and no personal multiplier, only a per-round multiplier.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Curve {
+    // 1, 1, 2, 2, 5, 5, 10, 10, then 100.
+    Table,
+    // 1 for the first two rounds, then start, start + step, ...
+    Linear { start: f64, step: f64 },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum LastStand {
+    Never,
+    // A fatal hit leaves 1 life unless the player is already at 1.
+    AboveOne,
+    // Only a hit taken at full life leaves 1 life (same as today).
+    FullLife,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LegacyRules {
+    osu: Curve,
+    // taiko, catch and mania had their own curve for a while.
+    other_modes: Curve,
+    last_stand: LastStand,
+}
+
+pub const LEGACY_MAX_LIFE: i64 = 1_000_000;
+const TABLE: [f64; 10] = [1.0, 1.0, 2.0, 2.0, 5.0, 5.0, 10.0, 10.0, 100.0, 100.0];
+const OSU_LINEAR: Curve = Curve::Linear { start: 2.0, step: 0.5 };
+const OTHER_LINEAR: Curve = Curve::Linear { start: 2.5, step: 1.0 };
+
+// Starts are the first osu-server-spectator tag holding each change: merge dates are not deploy dates,
+// and production deploy records stop after 2026-04-21, so the tag time is the closest public proxy.
+const ERAS: [(&str, LegacyRules); 5] = [
+    ("", LegacyRules { osu: Curve::Table, other_modes: Curve::Table, last_stand: LastStand::Never }),
+    ("2026-03-25T07:31", LegacyRules { osu: OSU_LINEAR, other_modes: OSU_LINEAR, last_stand: LastStand::Never }),
+    ("2026-05-05T08:44", LegacyRules { osu: OSU_LINEAR, other_modes: OTHER_LINEAR, last_stand: LastStand::Never }),
+    ("2026-05-13T04:17", LegacyRules { osu: OSU_LINEAR, other_modes: OTHER_LINEAR, last_stand: LastStand::AboveOne }),
+    ("2026-05-14T17:00", LegacyRules { osu: OSU_LINEAR, other_modes: OTHER_LINEAR, last_stand: LastStand::FullLife }),
+];
+
+// Rooms starting from here use RankedRules (base damage and personal multipliers).
+pub const CURRENT_RULES_SINCE: &str = "2026-05-18T07:41";
+
+// None when the room is under the current rules.
+pub fn legacy_rules(started_at: &str) -> Option<LegacyRules> {
+    if started_at >= CURRENT_RULES_SINCE {
+        return None;
+    }
+    ERAS.iter().rev().find(|(since, _)| started_at >= *since).map(|(_, rules)| *rules)
+}
+
+fn round_multiplier(curve: Curve, round: usize) -> f64 {
+    match curve {
+        Curve::Table => TABLE[round.saturating_sub(1).min(TABLE.len() - 1)],
+        Curve::Linear { start, step } if round > 2 => start + (round - 3) as f64 * step,
+        Curve::Linear { .. } => 1.0,
+    }
+}
+
+// Mirrors the old ResultsStage: the loser takes ceil(gap x round multiplier), ties hurt nobody.
+// ponytail: a round skipped by a timeout still advanced the server round counter but has no scores, so later multipliers can be one step low.
+pub fn play_legacy(rules: &LegacyRules, ruleset: u32, players: [u64; 2], rounds: &[Vec<(u64, i64)>]) -> PlayedMatch {
+    let curve = if ruleset == 0 { rules.osu } else { rules.other_modes };
+    let mut lives: HashMap<u64, i64> = players.iter().map(|player| (*player, LEGACY_MAX_LIFE)).collect();
+    let mut rounds_won: HashMap<u64, u32> = players.iter().map(|player| (*player, 0)).collect();
+    let mut overflow: HashMap<u64, i64> = players.iter().map(|player| (*player, 0)).collect();
+    let mut results = Vec::with_capacity(rounds.len());
+
+    for (index, round) in rounds.iter().enumerate() {
+        let multiplier = round_multiplier(curve, index + 1);
+        let (first, second) = (score_of(round, players[0]), score_of(round, players[1]));
+        if first == second {
+            let snapshot = players.map(|player| lives[&player]);
+            results.push(RoundResult { winner: None, loser: None, damage: 0, multiplier, global: multiplier, lives: snapshot });
+            continue;
+        }
+
+        let (winner, loser, difference) = if first > second {
+            (players[0], players[1], first - second)
+        } else {
+            (players[1], players[0], second - first)
+        };
+        let damage = (difference as f64 * multiplier).ceil() as i64;
+        let life = lives[&loser];
+        let floor = match rules.last_stand {
+            LastStand::Never => 0,
+            LastStand::AboveOne => i64::from(life > 1),
+            LastStand::FullLife => i64::from(life == LEGACY_MAX_LIFE),
+        };
+        let remaining = life - damage;
+        lives.insert(loser, remaining.max(floor));
+        if remaining < 0 && floor == 0 {
+            overflow.insert(loser, remaining);
+        }
+        *rounds_won.entry(winner).or_default() += 1;
+        let snapshot = players.map(|player| lives[&player]);
+        results.push(RoundResult { winner: Some(winner), loser: Some(loser), damage, multiplier, global: multiplier, lives: snapshot });
+    }
+
+    PlayedMatch { lives, rounds_won, rounds: results, overflow }
+}
+
 pub struct RuleSources<'a> {
     pub user_info: &'a str,
     pub room_state: &'a str,
@@ -287,5 +391,50 @@ pub mod tests {
         let fractional = RESULTS.replace("= 50_000", "= 50.5");
         assert_eq!(parse_with(&fractional, WARMUP, CONTROLLER, USER_INFO), None);
         assert_eq!(parse_with("", "", "", ""), None);
+    }
+
+    #[test]
+    fn eras_follow_the_room_start() {
+        assert_eq!(legacy_rules("2026-02-10T12:00:00Z").unwrap().osu, Curve::Table);
+        assert_eq!(legacy_rules("2026-04-01T12:00:00Z").unwrap().other_modes, OSU_LINEAR);
+        assert_eq!(legacy_rules("2026-05-06T12:00:00Z").unwrap().other_modes, OTHER_LINEAR);
+        assert_eq!(legacy_rules("2026-05-13T12:00:00Z").unwrap().last_stand, LastStand::AboveOne);
+        assert_eq!(legacy_rules("2026-05-16T12:00:00Z").unwrap().last_stand, LastStand::FullLife);
+        assert!(legacy_rules("2026-05-18T07:41:00Z").is_none());
+        assert!(legacy_rules("2026-05-18T07:40:59Z").is_some());
+    }
+
+    #[test]
+    fn round_multipliers_match_each_curve() {
+        let table: Vec<f64> = (1..=11).map(|round| round_multiplier(Curve::Table, round)).collect();
+        assert_eq!(table, [1.0, 1.0, 2.0, 2.0, 5.0, 5.0, 10.0, 10.0, 100.0, 100.0, 100.0]);
+        let osu: Vec<f64> = (1..=5).map(|round| round_multiplier(OSU_LINEAR, round)).collect();
+        assert_eq!(osu, [1.0, 1.0, 2.0, 2.5, 3.0]);
+        let other: Vec<f64> = (1..=5).map(|round| round_multiplier(OTHER_LINEAR, round)).collect();
+        assert_eq!(other, [1.0, 1.0, 2.5, 3.5, 4.5]);
+    }
+
+    #[test]
+    fn legacy_damage_has_no_base_and_rounds_up() {
+        let rules = legacy_rules("2026-04-01T00:00:00Z").unwrap();
+        let rounds = [round(300_000, 100_000), round(0, 1), round(500_001, 0)];
+        let result = play_legacy(&rules, 0, PLAYERS, &rounds);
+        assert_eq!(result.rounds[0].damage, 200_000);
+        assert_eq!(result.rounds[1].damage, 1);
+        // Round 3 multiplier 2: ceil(500,001 x 2) kills from 800,000, no last stand yet.
+        assert_eq!(life(&result, BLUE), 0);
+        assert_eq!(result.overflow[&BLUE], 800_000 - 1_000_002);
+    }
+
+    #[test]
+    fn legacy_last_stand_changed_twice() {
+        let fatal = [round(0, 1_000_000), round(0, 1_000_000)];
+        let above_one = play_legacy(&legacy_rules("2026-05-13T12:00:00Z").unwrap(), 0, PLAYERS, &fatal);
+        assert_eq!(above_one.rounds.iter().map(|round| round.lives[0]).collect::<Vec<_>>(), [1, 0]);
+        let full_life_rules = legacy_rules("2026-05-16T12:00:00Z").unwrap();
+        let from_full = play_legacy(&full_life_rules, 0, PLAYERS, &[round(0, 1_000_000)]);
+        assert_eq!(from_full.lives[&RED], 1, "fatal hit at full life");
+        let after_a_hit = play_legacy(&full_life_rules, 0, PLAYERS, &[round(400_000, 0), round(1_000_000, 0)]);
+        assert_eq!(after_a_hit.lives[&BLUE], 0, "below full life, no second chance");
     }
 }
