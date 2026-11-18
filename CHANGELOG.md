@@ -1,29 +1,44 @@
 ## v3.0.0-beta.1
 
+oTMD has been rewritten from the ground up. This is the first beta of 3.0, so things may still break here and there. If something feels off, let me know on GitHub.
+
 ### App
 
-- Rebuilt from scratch on Tauri: much smaller download, lower memory use, and nothing runs while the app sits in the tray.
-- Log in with your osu! account (no more API key); the session refreshes itself and never interrupts a stream.
-- New design, with sidebar or tabs layout.
-- Your display settings follow your osu! account across PCs.
-- Portable version: unzip and run, all data stays next to the app.
+- The app now runs on Tauri instead of Electron. The download is a fraction of the old size and it uses far less memory.
+- When you send it to the tray, the window is closed for real and the app drops to low priority. Only the overlay server keeps running, so OBS still gets live data while the rest of your PC stays free for osu!.
+- You log in with your osu! account now, no more creating and pasting an osu! API key. The session renews itself in the background, so it will never log you out in the middle of a stream.
+- A completely new look. You can choose between a sidebar or tabs at the top, whichever fits your screen better.
+- Your display settings are saved to your profile on [otmd.app](https://otmd.app) and follow you to any PC you log in from.
+- There is a portable version too. Unzip it anywhere and run it, everything it saves stays in a folder next to the exe.
+- Updates are never forced on you. When a new version is out you get a small notice and an "Update" button in the sidebar, and you decide when to install it.
+- This changelog is now part of the app, so it always matches the version you have installed and opens even without internet.
+- New Legal page with licences and credits.
 
 ### Dashboard
 
-- Saved matches, win rate, top tournaments and your recent ranked rooms in one place.
+- Your home page now shows your saved matches, your win rate, your Ranked Play tier with a chart of your last results, and your recent matches with the players you met the most, all in one place.
+
+### Match
+
+- Choose where the tournament name comes from: read it automatically from the lobby name (for example `OWC: (Team A) vs (Team B)`), pick it from the list of known tournaments, or write your own.
+- Can't find your tournament in the list? Propose it straight from the app and a moderator will add it with the right mod multipliers.
+- Mod multipliers have been updated, and live scores now show up on the overlay.
 
 ### Ranked
 
-- Live overlay for osu!lazer Ranked Play, with life points, rounds and rating changes.
+- A new live overlay for osu!lazer Ranked Play. It shows the match as it happens, with life points, rounds and how much rating you win or lose.
+- Your Ranked Play tier, wins and losses and rating changes are on the Dashboard, next to your saved matches.
 
 ### Broadcast
 
-- Stream someone else's tournament: up to 8 matches in a single overlay, added by MP link.
+- Made for people who stream other players' tournaments. Paste the MP links and follow up to 8 matches at once in a single overlay.
 
 ### Overlay
 
-- Same URL as before (**<http://localhost:21086/visualizer>**), with new maps, ranked and broadcast pages.
-- Reconnects on its own if the app restarts.
+- The match overlay has a brand new design.
+- The OBS URL is the same as before (**<http://localhost:21086/visualizer>**), so your existing scenes keep working. Maps, Ranked and Broadcast get their own pages next to it.
+- Connect OBS once in Settings and you can add any overlay to a scene with one click, without touching OBS.
+- If the app restarts, the overlay reconnects by itself. No need to refresh the browser source.
 
 ## v2.0.0
 
@@ -31,9 +46,9 @@
 
 - New UI.
 - New settings file.
-- New Login system.\n
+- New Login system.
   ![Login System](https://akinariosu.s-ul.eu/cB0twF37)
-- New Design when the app is updating.\n
+- New Design when the app is updating.
   ![Updating app](https://akinariosu.s-ul.eu/Wv3Z53E1)
 
 ### Account Tab
@@ -64,8 +79,8 @@
 - Improved significantly the design of the displayer.
 - Long names of players or teams now use a slide animation to show them correctly.
 - Support for Teams images. You can put the images of teams into **teams** folder at: 'AppData/Roaming/otmd/teams'.
-  The name of the image should be exactly the name of the team. (Ex. Team name: Vitun Vite / Image name: Vitun Vite.png)\n
-  ![Folder Image](https://akinariosu.s-ul.eu/5bguE7xn)\n
+  The name of the image should be exactly the name of the team. (Ex. Team name: Vitun Vite / Image name: Vitun Vite.png)
+  ![Folder Image](https://akinariosu.s-ul.eu/5bguE7xn)
   ![Teams Images](https://akinariosu.s-ul.eu/dZDnLS5a)
 
 ### Known bugs

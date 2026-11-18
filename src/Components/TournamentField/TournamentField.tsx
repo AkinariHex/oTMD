@@ -43,7 +43,9 @@ function TournamentField({ value, onChange }: TournamentFieldProps) {
         <ProposeTournament />
       </div>
       <Segmented label="Tournament source" value={value.TournamentMode} onChange={(mode) => onChange({ TournamentMode: mode as TournamentSettings["TournamentMode"] })} options={MODES} />
-      {value.TournamentMode === "auto" && <p className="text-xs text-ink-3">Read from the lobby name, e.g. "OWC: (Team A) vs (Team B)".</p>}
+      {value.TournamentMode === "auto" && <p className="text-xs text-ink-3">
+          Read from the lobby name, for example <code className="whitespace-nowrap rounded bg-white/8 px-1 py-px font-mono text-ink">OWC: (Team A) vs (Team B)</code>
+        </p>}
       {picking &&
         (tournaments === null ? (
           <p className="text-xs text-ink-3">Loading tournaments</p>

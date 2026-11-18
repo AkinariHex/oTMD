@@ -1,7 +1,8 @@
-import { type UIEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/Components/PageHeader/PageHeader";
+import ScrollPage from "@/Components/ScrollPage/ScrollPage";
 import SettingRow from "@/Components/SettingRow/SettingRow";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
@@ -31,7 +32,6 @@ const DEFAULT_FIXED_TEXT_SIZE = 100;
 let lastKeyCheck: { apikey: string; valid: boolean } | null = null;
 let lastObsCheck: { target: string; error: string | null } | null = null;
 const OBS_CHECK_DELAY_MS = 600;
-const SCROLLBAR_HIDE_MS = 800;
 
 const LAYOUTS: { id: api.Layout; name: string; hint: string }[] = [
   {
@@ -96,7 +96,6 @@ function Settings() {
   const [testingObs, setTestingObs] = useState(false);
   // null while unknown, "" when connected, otherwise the reason it failed.
   const [obsError, setObsError] = useState<string | null>(null);
-  const scrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const obsTarget = settings ? JSON.stringify(settings.Obs) : null;
 
   const checkObs = async (target: string) => {
@@ -123,13 +122,6 @@ function Settings() {
     const timer = setTimeout(() => void checkObs(obsTarget), OBS_CHECK_DELAY_MS);
     return () => clearTimeout(timer);
   }, [obsTarget]);
-
-  const showScrollbar = (event: UIEvent<HTMLDivElement>) => {
-    const element = event.currentTarget;
-    element.dataset.scrolling = "";
-    clearTimeout(scrollTimer.current);
-    scrollTimer.current = setTimeout(() => delete element.dataset.scrolling, SCROLLBAR_HIDE_MS);
-  };
 
   const checkKey = async (apikey: string) => {
     setChecking(true);
@@ -176,7 +168,7 @@ function Settings() {
   const { Obs: obs } = settings;
 
   return (
-    <div data-fills-page onScroll={showScrollbar} className="auto-scrollbar -m-5 h-[calc(100%+2.5rem)] overflow-y-auto p-5">
+    <ScrollPage>
       <div className="mx-auto flex max-w-[680px] flex-col gap-3 pb-1">
         <PageHeader title="Settings" />
         <section className="flex flex-col gap-2">
@@ -328,7 +320,7 @@ function Settings() {
           </div>
         </div>
       </div>
-    </div>
+    </ScrollPage>
   );
 }
 

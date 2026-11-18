@@ -1,6 +1,6 @@
-import ReactMarkdown from "react-markdown";
+import Markdown from "@/Components/Markdown/Markdown";
 import PageHeader from "@/Components/PageHeader/PageHeader";
-import * as api from "@/lib/api";
+import ScrollPage from "@/Components/ScrollPage/ScrollPage";
 
 const NOTICE = `
 ### Not affiliated with osu!
@@ -21,22 +21,12 @@ The source code of osu! Tourney Match Displayer is released under [GPL-3.0](http
 
 function Legal() {
   return (
-    <div className="mx-auto flex max-w-[680px] flex-col gap-2">
-      <PageHeader title="Legal" />
-      <div className="markdown">
-        <ReactMarkdown
-          components={{
-            a: ({ href, children }) => (
-              <button type="button" className="font-medium text-accent" onClick={() => href && void api.openExternal(href)}>
-                {children}
-              </button>
-            ),
-          }}
-        >
-          {NOTICE}
-        </ReactMarkdown>
+    <ScrollPage>
+      <div className="mx-auto flex max-w-[680px] flex-col gap-2">
+        <PageHeader title="Legal" />
+        <Markdown>{NOTICE}</Markdown>
       </div>
-    </div>
+    </ScrollPage>
   );
 }
 
