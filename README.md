@@ -37,4 +37,14 @@ Feel free to contact us:
 
 ## License
 
-Check the license [here](https://github.com/AkinariHex/oTMD/blob/main/LICENSE)
+The source code is released under GPL-3.0. Check the license [here](https://github.com/AkinariHex/oTMD/blob/master/LICENSE).
+
+### Third-party assets
+
+`src/Images/ranked-tiers/` contains the Ranked Play tier icons, © ppy Pty Ltd, from [osu-web](https://github.com/ppy/osu-web). They are licensed under [AGPL-3.0](https://github.com/ppy/osu-web/blob/master/LICENCE), keep their original licence and are not covered by this project's GPL-3.0 licence.
+
+Beatmap, player and match data come from the [osu! API](https://osu.ppy.sh/docs/) and stay subject to the [osu! terms of service](https://osu.ppy.sh/legal/Terms).
+
+## Disclaimer
+
+osu! Tourney Match Displayer is an unofficial, community-made tool. It is not affiliated with, endorsed, sponsored or approved by ppy Pty Ltd or the osu! team. "osu!" and "ppy" are trademarks of ppy Pty Ltd, used here only to describe what this tool works with. The osu! logo is not used, and the osu! name is written following the [osu! brand identity guidelines](https://osu.ppy.sh/wiki/en/Brand_identity_guidelines).

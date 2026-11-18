@@ -11,6 +11,7 @@ import Ranked from "@/Pages/Ranked/Ranked";
 import Settings from "@/Pages/Settings/Settings";
 import Profile from "@/Pages/Profile/Profile";
 import Changelog from "@/Pages/Changelog/Changelog";
+import Legal from "@/Pages/Legal/Legal";
 import * as api from "@/lib/api";
 import { EASE_OUT } from "@/lib/motion";
 import { applyPreferences, useLayout } from "@/lib/preferences";
@@ -87,6 +88,7 @@ function AppShell() {
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile user={user} />} />
           <Route path="changelog" element={<Changelog />} />
+          <Route path="legal" element={<Legal />} />
         </Routes>
       </motion.div>
     </Layout>

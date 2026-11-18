@@ -1,4 +1,4 @@
-import { CircleDot, FileText, type LucideIcon, RadioTower, Settings, SlidersHorizontal, Swords } from "lucide-react";
+import { CircleDot, FileText, type LucideIcon, RadioTower, Scale, Settings, SlidersHorizontal, Swords } from "lucide-react";
 
 export interface NavItem {
   to: string;
@@ -14,6 +14,7 @@ export const NAV: NavItem[] = [
   { to: "/app/overlay", label: "Overlay", icon: SlidersHorizontal, group: "Stream" },
   { to: "/app/settings", label: "Settings", icon: Settings, group: "App" },
   { to: "/app/changelog", label: "Changelog", icon: FileText, group: "App" },
+  { to: "/app/legal", label: "Legal", icon: Scale, group: "App" },
 ];
 
 export const NAV_GROUPS = [...new Set(NAV.map((item) => item.group))];
