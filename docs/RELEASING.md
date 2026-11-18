@@ -56,6 +56,19 @@ or make a test exe without signing with `npx tauri build --no-bundle`.
    npx tauri build --config src-tauri/tauri.beta.conf.json
    ```
 
+### npm shortcuts
+
+With the two variables set in a PowerShell (step 3), from the repo:
+
+```powershell
+npm run build:windows   # NSIS installer + portable zip
+npm run build:linux     # AppImage + deb through WSL (Ubuntu), after the one-time setup below
+npm run build:all       # both
+```
+
+A version with a `-` (like `3.0.0-beta.1`) builds on the beta channel by itself. `build:linux` passes the key to WSL
+through `WSLENV`, so there is no need to set it again in Ubuntu. The manual steps below do the same thing.
+
 ### Windows
 
 Output in `src-tauri/target/release/bundle/nsis/`: `*_x64-setup.exe` and `*_x64-setup.exe.sig`.

@@ -3,6 +3,11 @@
 # Needs TAURI_SIGNING_PRIVATE_KEY (path or key text) and TAURI_SIGNING_PRIVATE_KEY_PASSWORD set. See docs/RELEASING.md.
 set -euo pipefail
 
+# Started from Windows (npm run build:linux) this is not a login shell, so load the Linux node and cargo by hand.
+# Without them WSL would find the Windows node on PATH, which cannot build here.
+[ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh"
+[ -s "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 work="$HOME/otmd-build"
 config=()

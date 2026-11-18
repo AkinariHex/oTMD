@@ -28,7 +28,10 @@
     "preview": "vite preview",
     "test": "node --test tests/lobby.test.ts",
     "tauri": "tauri",
-    "release:manifest": "node scripts/release-manifest.mjs"
+    "release:manifest": "node scripts/release-manifest.mjs",
+    "build:windows": "node scripts/build-release.mjs windows",
+    "build:linux": "node scripts/build-release.mjs linux",
+    "build:all": "node scripts/build-release.mjs windows linux"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
